@@ -74,19 +74,25 @@ h5, h6, p, span, button, input, select, textarea, label {
    ========================================================================== */
 .hero-section {
   color: var(--color-text-header) !important;
-  font-family: "Manrope", var(--font-sans, sans-serif) !important;
+  font-family: 'Manrope', sans-serif !important;
 }
 
-.hero-section h1,
-.hero-section h2,
-.hero-section h3,
-.hero-section [role="heading"],
-#clean-room-hero-section h1,
-#clean-room-hero-section h2,
-#clean-room-hero-section h3 {
-  font-family: "Manrope", var(--font-display, sans-serif) !important;
-  color: var(--color-text-header) !important;
+html body .hero-section h1,
+html body .hero-section h2,
+html body .hero-section h3,
+html body .hero-section h4,
+html body .hero-section h5,
+html body .hero-section h6,
+html body .hero-section [role="heading"],
+html body #clean-room-hero-section h1,
+html body #clean-room-hero-section h2,
+html body #clean-room-hero-section h3,
+html body #clean-room-hero-section h4,
+html body #clean-room-hero-section h5,
+html body #clean-room-hero-section h6 {
+  font-family: 'Manrope', sans-serif !important;
   font-weight: 800 !important;
+  color: var(--color-text-header) !important;
   letter-spacing: -0.03em !important;
 }
 
@@ -276,6 +282,21 @@ h5, h6, p, span, button, input, select, textarea, label {
   h3 {
     font-size: clamp(1.15rem, 4vw, 1.35rem) !important;
   }
+
+  .grid-auto-fit-cards {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .grid-auto-fit-dealers {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .bazar-grid-12 {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 1rem !important;
+  }
 }
 
 @media (pointer: coarse), (max-width: 768px) {
@@ -309,6 +330,13 @@ h5, h6, p, span, button, input, select, textarea, label {
   }
 }
 
+@media (max-width: 1024px) {
+  .bazar-grid-12 {
+    grid-template-columns: repeat(8, minmax(0, 1fr)) !important;
+    gap: 1.25rem !important;
+  }
+}
+
 @media (min-width: 1025px) {
   .grid-desktop-3 {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
@@ -336,24 +364,10 @@ h5, h6, p, span, button, input, select, textarea, label {
   gap: 1.25rem;
 }
 
-@media (max-width: 640px) {
-  .grid-auto-fit-cards {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-}
-
 .grid-auto-fit-dealers {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
   gap: 1.5rem;
-}
-
-@media (max-width: 640px) {
-  .grid-auto-fit-dealers {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
 }
 
 /* ==========================================================================
@@ -413,20 +427,6 @@ h5, h6, p, span, button, input, select, textarea, label {
   grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: 1.5rem;
   width: 100%;
-}
-
-@media (max-width: 1024px) {
-  .bazar-grid-12 {
-    grid-template-columns: repeat(8, minmax(0, 1fr));
-    gap: 1.25rem;
-  }
-}
-
-@media (max-width: 640px) {
-  .bazar-grid-12 {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1rem;
-  }
 }
 
 /* Global viewport optimizations - eliminate horizontal shift */
