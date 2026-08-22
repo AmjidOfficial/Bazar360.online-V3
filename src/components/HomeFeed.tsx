@@ -111,15 +111,17 @@ export function HomeFeed({
       className="min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-main)] overflow-x-hidden font-sans pb-24"
     >
       {/* 1. Hero & Fast Search Engine */}
-      <AutoChoiceHero 
-        lang={lang} 
-        onSearch={(query) => {
-          if (setSearchQuery) setSearchQuery(query);
-        }} 
-        setTab={setTab} 
-        listings={listings}
-        onSelectListing={onSelectListing}
-      />
+      <div className="w-full text-[var(--color-text-header)]">
+        <AutoChoiceHero 
+          lang={lang} 
+          onSearch={(query) => {
+            if (setSearchQuery) setSearchQuery(query);
+          }} 
+          setTab={setTab} 
+          listings={listings}
+          onSelectListing={onSelectListing}
+        />
+      </div>
 
       {/* 2. Top Brands Rail */}
       <TopBrandsRail
