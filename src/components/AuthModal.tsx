@@ -52,6 +52,16 @@ export const getFriendlyAuthErrorMessage = (errorMsg: string, lang: 'en' | 'ur' 
       ? 'نیٹ ورک کا مسئلہ۔ براہ کرم اپنا انٹرنیٹ کنکشن چیک کریں۔' 
       : 'Network error. Please check your internet connection.';
   }
+  if (msg.includes('popup-closed-by-user') || msg.includes('popup_closed_by_user')) {
+    return isUrdu 
+      ? 'سائن ان پاپ اپ مکمل ہونے سے پہلے بند کر دیا گیا تھا۔ براہ کرم دوبارہ کوشش کریں یا نیچے ڈیمو پروفائلز استعمال کریں۔' 
+      : 'The sign-in popup was closed before completion. Please try again or use one of our secure demo profiles below.';
+  }
+  if (msg.includes('cancelled-popup-request') || msg.includes('cancelled_popup_request') || msg.includes('pending promise') || msg.includes('internal assertion failed') || msg.includes('assertion failed')) {
+    return isUrdu 
+      ? 'براؤزر کی سیکیورٹی یا منقطع کنکشن کی وجہ سے پاپ اپ بند ہو گیا۔ براہ کرم دوبارہ کوشش کریں یا نیچے ڈیمو پروفائلز استعمال کریں۔' 
+      : 'Browser security or an interrupted connection blocked the login. Please try again or choose one of our quick-entry demo profiles below.';
+  }
   
   const match = errorMsg.match(/Firebase:\s*Error\s*\((.*?)\)\.?/);
   if (match && match[1]) {
