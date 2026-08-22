@@ -1,4 +1,3 @@
-import { NO_IMAGE_SVG } from "../types";
 import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -29,11 +28,11 @@ export function getContactDataForListing(car: CarListing, dealer?: Dealer) {
     (car.sellerType as string) === 'individual' || 
     dealer?.id === 'private' || 
     !car.dealerId ||
-    Boolean(car.sellerPhone && car.sellerName && car.sellerName !== 'Bazar360');
+    Boolean(car.sellerPhone && car.sellerName && car.sellerName !== 'Auto Choice');
 
   const resolvedSellerName = isIndividualSeller 
     ? (car.sellerName || car.createdBy || 'Individual User') 
-    : (dealer?.name || 'Bazar360 Showroom');
+    : (dealer?.name || 'Auto Choice Showroom');
   const resolvedSellerLocation = car.location || car.registrationCity || (isIndividualSeller ? 'Pakistan' : dealer?.location) || 'Peshawar, Pakistan';
   const resolvedSellerPhone = isIndividualSeller 
     ? (car.sellerPhone || car.phone || 'Contact Seller') 
@@ -82,7 +81,7 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
   useEffect(() => {
     setActiveMedia({
       type: 'image',
-      url: car.imageUrl || (car.images && car.images[0]) || NO_IMAGE_SVG
+      url: car.imageUrl || (car.images && car.images[0]) || 'https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&q=80'
     });
   }, [car]);
 
@@ -95,7 +94,7 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
     if (car.imageUrl) {
       return [car.imageUrl];
     }
-    return [NO_IMAGE_SVG];
+    return ['https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&q=80'];
   }, [car.images, car.imageUrl]);
 
   const openLightbox = (index: number) => {
@@ -178,7 +177,7 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
         availability: 'https://schema.org/InStock',
         seller: {
           '@type': 'AutoDealer',
-          name: dealer?.name || 'Bazar360 Bazar360',
+          name: dealer?.name || 'Auto Choice Bazar360',
           telephone: dealer?.phone || '+923149198403'
         }
       },
@@ -263,16 +262,16 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
       startY += 10;
       const dealerInfo = isPrivateSeller ? [
         ['Seller Category:', 'Individual User / External Seller'],
-        ['Ad Owner Name:', resolvedSellerName],
+        ['Listing Owner:', resolvedSellerName],
         ['Owner Phone:', resolvedSellerPhone],
         ['Owner WhatsApp:', resolvedSellerWhatsApp ? `+${formattedWhatsapp}` : 'N/A'],
         ['Listing URL:', `https://bazar360.online/listings/${car.id}`]
       ] : [
-        ['Showroom Name:', dealer?.name || 'Bazar360 - The Right Choice'],
+        ['Showroom Name:', dealer?.name || 'Auto Choice - The Right Choice'],
         ['Representatives:', 'Malak Mazhar & Muhammad Amjid'],
         ['Phone Numbers:', '+92 315 9085086 / +92 314 9198403'],
         ['Official Email:', dealer?.email || 'support@bazar360.online'],
-        ['Showroom URL:', `https://bazar360.online/dealers/${dealer?.id || ''}`]
+        ['Showroom URL:', `https://bazar360.online/dealers/${dealer?.id || 'auto-choice-peshawar'}`]
       ];
       
       dealerInfo.forEach(([label, value]) => {
@@ -312,9 +311,9 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
       className="bg-[var(--color-bg-primary)] min-h-screen text-[var(--color-text-main)] font-sans pb-24 fixed inset-0 z-[100] overflow-y-auto"
     >
       <Helmet>
-        <title>{`${car.title} (${car.year}) | ${dealer?.name || 'Bazar360'} - Bazar360`}</title>
+        <title>{`${car.title} (${car.year}) | ${dealer?.name || 'Auto Choice'} - Bazar360`}</title>
         <meta name="description" content={car.description || `Buy ${car.title} (${car.year}) for PKR ${car.price} at ${dealer?.name || 'Bazar360'}. Verified inspection and authentic showroom listing.`} />
-        <meta property="og:title" content={`${car.title} - ${dealer?.name || 'Bazar360 Bazar360'}`} />
+        <meta property="og:title" content={`${car.title} - ${dealer?.name || 'Auto Choice Bazar360'}`} />
         <meta property="og:description" content={`Verified ${car.year} ${car.make} ${car.model} in ${dealer?.location || 'Pakistan'}. Price: PKR ${car.price.toLocaleString()}`} />
         <meta property="og:image" content={imagesList[0]} />
         <meta property="og:url" content={window.location.href} />
@@ -428,7 +427,7 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
               />
             ) : (
               <img 
-                src={activeMedia?.url || NO_IMAGE_SVG} 
+                src={activeMedia?.url || 'https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&q=80'} 
                 alt={car.title}
                 onClick={() => openLightbox(imagesList.indexOf(activeMedia?.url || ''))}
                 className="w-full h-full object-cover object-center cursor-zoom-in hover:scale-[1.01] transition-transform duration-500"
@@ -708,7 +707,7 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
                 {isPrivateSeller ? (
                   <div className="space-y-1">
                     <span className="inline-block bg-sky-500/10 text-sky-500 dark:text-sky-400 text-[10px] font-mono font-black uppercase tracking-wider px-2.5 py-1 rounded-full border border-sky-500/20">
-                      Individual Seller Ad
+                      Individual Seller Listing
                     </span>
                     <h3 className="text-lg font-black text-[#26344F] dark:text-[var(--color-text-header)] uppercase tracking-tight">{resolvedSellerName}</h3>
                     <p className="text-xs text-[var(--color-text-muted)] flex items-center justify-center gap-1">
@@ -718,7 +717,7 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
                 ) : (
                   <div className="space-y-1">
                     <span className="inline-block bg-[var(--color-accent-main)]/10 text-[var(--color-accent-main)] text-[10px] font-mono font-black uppercase tracking-wider px-2.5 py-1 rounded-full border border-[var(--color-accent-main)]/20">
-                      Bazar360 Certified Showroom
+                      Auto Choice Certified Showroom
                     </span>
                     <h3 className="text-lg font-black text-[#26344F] dark:text-[var(--color-text-header)] uppercase tracking-tight">{resolvedSellerName}</h3>
                     <p className="text-xs text-[var(--color-text-muted)] flex items-center justify-center gap-1">
@@ -729,7 +728,7 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
 
                 <div className="pt-3 flex flex-col items-center justify-center gap-2">
                   <p className="text-[11px] font-black text-[var(--color-text-muted)] uppercase tracking-wider">
-                    {isPrivateSeller ? 'Direct Ad Owner Contact:' : 'Showroom Main Phone:'}
+                    {isPrivateSeller ? 'Direct Seller Contact:' : 'Showroom Main Phone:'}
                   </p>
                   <a 
                     href={`tel:${resolvedSellerPhone}`}
@@ -775,7 +774,7 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
                 )}
               </div>
 
-              {/* High-Converting Bazar360 360° Vehicle Inspection CTA */}
+              {/* High-Converting Auto Choice 360° Vehicle Inspection CTA */}
               <div className="pt-4 border-t border-[var(--color-border-main)] space-y-3">
                 <div className="p-4 rounded-2xl bg-gradient-to-br from-orange-500/10 via-orange-500/5 to-transparent border border-orange-500/30 space-y-3 text-left">
                   <div className="flex items-center gap-2 text-orange-400">
@@ -783,7 +782,7 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
                     <span className="text-xs font-mono font-black uppercase tracking-wider">360° Digital Inspection</span>
                   </div>
                   <p className="text-[11px] text-[var(--color-text-muted)] leading-relaxed">
-                    Get an official Bazar360 200+ point diagnostic check with UV light paint spectrum analysis for this vehicle before purchase.
+                    Get an official Auto Choice 200+ point diagnostic check with UV light paint spectrum analysis for this vehicle before purchase.
                   </p>
                   <button
                     onClick={() => {
@@ -878,7 +877,7 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
                   </li>
                   <li className="flex items-start gap-2.5 text-xs text-[var(--color-text-muted)] leading-relaxed">
                     <CheckCircle2 size={15} className="text-[var(--color-accent-main)] shrink-0 mt-0.5" />
-                    Bazar360 Inspection Support Available
+                    Auto Choice Inspection Support Available
                   </li>
                 </ul>
               </div>
@@ -944,7 +943,7 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
                 >
                   <div className="relative aspect-16/10 rounded-xl overflow-hidden bg-black mb-3">
                     <img
-                      src={simCar.imageUrl || (simCar.images && simCar.images[0]) || NO_IMAGE_SVG}
+                      src={simCar.imageUrl || (simCar.images && simCar.images[0]) || 'https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&q=80'}
                       alt={simCar.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />

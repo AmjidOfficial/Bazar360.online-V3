@@ -247,8 +247,8 @@ export async function uploadToCloudinary(
     try {
       return await attemptUpload(attempt);
     } catch (err: any) {
-      lastError = err instanceof Error ? err : new Error(typeof err === 'string' ? err : 'Cloudinary direct upload attempt failed');
-      console.warn(`[Cloudinary] Client upload attempt ${attempt} failed:`, lastError.message);
+      lastError = err;
+      console.warn(`[Cloudinary] Client upload attempt ${attempt} failed:`, err.message || err);
       if (attempt < maxRetries) {
         const delay = Math.pow(2, attempt) * 1000; // 2s, 4s, etc.
         await new Promise((resolve) => setTimeout(resolve, delay));
@@ -261,30 +261,19 @@ export async function uploadToCloudinary(
   try {
     return await uploadViaServerProxy(uploadFile, { folder, resourceType: resolvedType, tags });
   } catch (proxyErr: any) {
-    const errorMsg = proxyErr instanceof Error ? proxyErr.message : (typeof proxyErr === 'string' ? proxyErr : 'Server proxy upload failed');
-    console.error('[Cloudinary] Server proxy upload fallback also failed:', errorMsg);
-    throw lastError || (proxyErr instanceof Error ? proxyErr : new Error(errorMsg));
+    console.error('[Cloudinary] Server proxy upload fallback also failed:', proxyErr);
+    throw lastError || proxyErr || new Error('Cloudinary upload failed after multiple retries.');
   }
 }
 
 /**
- * Helper to convert File object to Base64 data string safely
+ * Helper to convert File object to Base64 data string
  */
-export function fileToBase64(file: File | Blob): Promise<string> {
+export function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
-    if (!file) {
-      return resolve('');
-    }
     const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        resolve(reader.result);
-      } else {
-        resolve('');
-      }
-    };
-    reader.onerror = () => reject(new Error('Failed to read image file data as Base64'));
-    reader.onabort = () => reject(new Error('Image file reading was aborted'));
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (e) => reject(e);
     reader.readAsDataURL(file);
   });
 }
@@ -296,45 +285,34 @@ async function uploadViaServerProxy(
   file: File, 
   options: { folder?: string; resourceType?: string; tags?: string }
 ): Promise<CloudinaryUploadResult> {
-  let base64 = '';
-  try {
-    base64 = await fileToBase64(file);
-  } catch (b64Err: any) {
-    throw new Error(b64Err?.message || 'Failed to encode image data for server proxy upload.');
-  }
-
-  let response: Response;
-  try {
-    response = await fetch('/api/cloudinary/upload', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        fileData: base64,
-        folder: options.folder || 'bazar360/uploads',
-        resourceType: options.resourceType || 'image',
-        tags: options.tags
-      })
-    });
-  } catch (netErr: any) {
-    throw new Error(netErr?.message || 'Network connection failed while contacting server upload proxy.');
-  }
+  const base64 = await fileToBase64(file);
+  const response = await fetch('/api/cloudinary/upload', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      fileData: base64,
+      folder: options.folder || 'bazar360/uploads',
+      resourceType: options.resourceType || 'image',
+      tags: options.tags
+    })
+  });
 
   if (!response.ok) {
     const errJson = await response.json().catch(() => ({}));
     throw new Error(errJson.error || `Server proxy upload failed with status ${response.status}`);
   }
 
-  const result = await response.json().catch(() => ({}));
-  if (!result || (!result.secure_url && !result.url)) {
-    throw new Error(result?.error || 'Server proxy response missing secure_url');
+  const result = await response.json();
+  if (!result.secure_url) {
+    throw new Error('Server proxy response missing secure_url');
   }
   return {
-    url: result.url || result.secure_url,
-    secure_url: result.secure_url || result.url,
-    public_id: result.public_id || `upload_${Date.now()}`,
-    format: result.format || 'jpg',
-    resource_type: result.resource_type || (options.resourceType as any) || 'image',
-    bytes: result.bytes || file.size || 0
+    url: result.url,
+    secure_url: result.secure_url,
+    public_id: result.public_id,
+    format: result.format,
+    resource_type: result.resource_type,
+    bytes: result.bytes
   };
 }
 

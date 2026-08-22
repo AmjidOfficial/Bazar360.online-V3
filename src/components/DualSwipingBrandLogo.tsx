@@ -20,7 +20,7 @@ export function DualSwipingBrandLogo({
   const [activeBrandIndex, setActiveBrandIndex] = useState<number>(0);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [customBazar360Logo, setCustomBazar360Logo] = useState<string>('/bazar360_official_logo.jpg');
-  const [customAutoChoiceLogo, setCustomAutoChoiceLogo] = useState<string>('');
+  const [customAutoChoiceLogo, setCustomAutoChoiceLogo] = useState<string>('/auto_choice_logo_dark.jpg');
   const [imageFailed, setImageFailed] = useState<Record<string, boolean>>({});
 
   // Realtime Firestore listener for custom Cloudinary uploaded logos
@@ -56,7 +56,7 @@ export function DualSwipingBrandLogo({
     },
     {
       id: 'autochoice',
-      name: 'Bazar360',
+      name: 'Auto Choice',
       tagline: 'The Right Choice',
       subtext: 'Peshawar Certified Showroom',
       logoSrc: customAutoChoiceLogo,
@@ -95,7 +95,7 @@ export function DualSwipingBrandLogo({
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onClick={handleToggle}
-      title="Click or swipe to switch between Bazar360 & Bazar360 branding"
+      title="Click or swipe to switch between Bazar360 & Auto Choice branding"
     >
       {/* Floating Animated Dual Logo Avatar Container */}
       <div className="relative flex items-center justify-center shrink-0">

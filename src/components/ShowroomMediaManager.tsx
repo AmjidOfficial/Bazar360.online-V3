@@ -37,14 +37,63 @@ const PRESET_BACKGROUNDS = [
   },
   {
     id: 'auto-choice-floor',
-    name: 'Bazar360 Showroom Floor',
+    name: 'Auto Choice Showroom Floor',
     url: '/src/assets/images/auto_choice_showroom_1783593399914.jpg',
     tag: 'Flagship Showroom'
+  },
+  {
+    id: 'luxury-hall',
+    name: 'Luxury Supercar Exhibition Hall',
+    url: 'https://images.unsplash.com/photo-1562575214-da9fcf59b907?auto=format&fit=crop&w=1600&q=80',
+    tag: 'Modern Interior'
+  },
+  {
+    id: 'obsidian-fleet',
+    name: 'Obsidian Night Sports Fleet',
+    url: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=1600&q=80',
+    tag: 'Exotic Night'
+  },
+  {
+    id: 'german-motors',
+    name: 'German Import Vehicles Lineup',
+    url: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=1600&q=80',
+    tag: 'Luxury German'
+  },
+  {
+    id: 'sunset-coast',
+    name: 'Golden Sunset Car Village',
+    url: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1600&q=80',
+    tag: 'Golden Hour'
   }
 ];
 
 // Preset Logo Badges / Icons for Showrooms
-const PRESET_LOGOS: { id: string; name: string; url: string; tag: string }[] = [];
+const PRESET_LOGOS = [
+  {
+    id: 'auto-choice-badge',
+    name: 'Auto Choice Corporate Shield',
+    url: '/auto_choice_logo_dark.jpg',
+    tag: 'Official'
+  },
+  {
+    id: 'gold-crown',
+    name: 'Gold Crown Motors',
+    url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=300&q=80',
+    tag: 'Luxury'
+  },
+  {
+    id: 'hyper-cyan',
+    name: 'Hyper Velocity Badge',
+    url: 'https://images.unsplash.com/photo-1614680376593-902f749f7cfc?auto=format&fit=crop&w=300&q=80',
+    tag: 'Sport'
+  },
+  {
+    id: 'emerald-seal',
+    name: 'Emerald Certified Seal',
+    url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=300&q=80',
+    tag: 'Verified'
+  }
+];
 
 export const ShowroomMediaManager: React.FC<ShowroomMediaManagerProps> = ({
   dealer,

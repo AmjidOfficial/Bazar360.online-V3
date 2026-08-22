@@ -180,7 +180,7 @@ export function RoleTailoredSettings({
                 value={formData.showroomName}
                 onChange={(e) => setFormData({ ...formData, showroomName: e.target.value })}
                 className="w-full bg-bg-primary border border-[var(--color-border-main)] rounded-xl px-3 py-2 text-xs text-[var(--color-text-main)]"
-                placeholder="e.g. Bazar360 Showroom Peshawar"
+                placeholder="e.g. Auto Choice Showroom Peshawar"
               />
             </div>
 

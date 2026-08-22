@@ -18,11 +18,12 @@ import {
 } from 'firebase/firestore';
 import { db, auth, handleFirestoreError, OperationType } from '../firebase';
 import { updateProfile } from 'firebase/auth';
-import { CarListing, Dealer, Review, Lead, SocialMedia, ServiceBooking, Conversation, DirectMessage, UserNotification, DetailedReview, NO_IMAGE_SVG } from '../types';
+import { CarListing, Dealer, Review, Lead, SocialMedia, ServiceBooking, Conversation, DirectMessage, UserNotification, DetailedReview } from '../types';
 import { validateLead } from './leadValidator';
 
 import { toast } from 'react-hot-toast';
 import { uploadBase64ToCloudinary } from './cloudinaryService';
+import { fetchListingById, fetchInventoryPage } from './inventoryRepository';
 
 // Standard User Profiles
 export interface UserProfile {
@@ -108,47 +109,35 @@ export function dbInvalidateCache() {
 }
 
 // 1. Fetch Dealers
-export async function dbFetchDealers(forceRefresh = false): Promise<Dealer[]> {
-  if (!forceRefresh && cachedDealers && cachedDealers.length > 0) {
-    return cachedDealers;
-  }
-  
+export async function dbFetchDealers(forceRefresh = true): Promise<Dealer[]> {
+  if (!forceRefresh && cachedDealers) return cachedDealers;
   try {
     const snap = await getDocs(query(collection(db, DEALERS_COLLECTION), limit(100)));
-    
-    const list: Dealer[] = [];
-
-    if (!snap.empty) {
-      snap.forEach((doc) => {
-        const data = doc.data();
-        const docLogo = data.logoUrl || data.logo || data.avatarUrl;
-        const avatarUrl = docLogo
-          ? (docLogo.startsWith('.') ? docLogo.substring(1) : docLogo)
-          : '';
-
-        list.push({
-          ...data,
-          id: doc.id,
-          name: data.name || '',
-          avatarLetter: data.avatarLetter || data.name?.substring(0, 2).toUpperCase() || 'D',
-          avatarUrl,
-          logo: docLogo || '',
-          logoUrl: docLogo || '',
-          subtitle: data.subtitle || '',
-          location: data.location || '',
-          rating: typeof data.rating === 'number' ? data.rating : 0,
-          vehiclesCount: typeof data.vehiclesCount === 'number' ? data.vehiclesCount : 0,
-          followersCount: data.followersCount || '0',
-          coverImage: data.coverImage || '',
-          description: data.description || '',
-          phone: data.phone || '',
-          whatsapp: data.whatsapp || '',
-          socials: data.socials || {},
-          activityFeed: Array.isArray(data.activityFeed) ? data.activityFeed : []
-        });
-      });
-    }
-
+    const list: Dealer[] = snap.docs.map((dealerDoc) => {
+      const data = dealerDoc.data();
+      const logoUrl = typeof data.logoUrl === 'string' ? data.logoUrl : undefined;
+      const avatarUrl = typeof data.avatarUrl === 'string' ? data.avatarUrl : logoUrl;
+      return {
+        ...data,
+        id: dealerDoc.id,
+        name: typeof data.name === 'string' ? data.name : '',
+        avatarLetter: typeof data.avatarLetter === 'string' ? data.avatarLetter : (typeof data.name === 'string' && data.name ? data.name.substring(0, 2).toUpperCase() : 'D'),
+        avatarUrl,
+        logo: typeof data.logo === 'string' ? data.logo : logoUrl,
+        logoUrl,
+        subtitle: typeof data.subtitle === 'string' ? data.subtitle : '',
+        location: typeof data.location === 'string' ? data.location : '',
+        rating: typeof data.rating === 'number' ? data.rating : 0,
+        vehiclesCount: typeof data.vehiclesCount === 'number' ? data.vehiclesCount : 0,
+        followersCount: typeof data.followersCount === 'string' || typeof data.followersCount === 'number' ? data.followersCount : '0',
+        coverImage: typeof data.coverImage === 'string' ? data.coverImage : undefined,
+        description: typeof data.description === 'string' ? data.description : '',
+        phone: typeof data.phone === 'string' ? data.phone : '',
+        whatsapp: typeof data.whatsapp === 'string' ? data.whatsapp : '',
+        socials: data.socials || {},
+        activityFeed: Array.isArray(data.activityFeed) ? data.activityFeed : []
+      } as Dealer;
+    });
     cachedDealers = list;
     return list;
   } catch (err) {
@@ -157,90 +146,16 @@ export async function dbFetchDealers(forceRefresh = false): Promise<Dealer[]> {
   }
 }
 
-// 2. Fetch Listings (all approved, as well as unapproved if requestor has permission)
-export async function dbFetchListingById(idOrSlug: string): Promise<CarListing | null> {
-  if (!idOrSlug) return null;
-  try {
-    // 1. Direct document ID lookup
-    const docRef = doc(db, LISTINGS_COLLECTION, idOrSlug);
-    const snap = await getDoc(docRef);
-    if (snap.exists()) {
-      return mapListingDoc(snap.id, snap.data());
-    }
-
-    // 2. Fallback: Search all listings in collection by slug, title-slug, or normalized title match
-    const allListings = await dbFetchListings();
-    const targetSlug = idOrSlug.toLowerCase().trim();
-    const targetNormalized = targetSlug.replace(/[^a-z0-9]/g, '');
-
-    const matched = allListings.find(car => {
-      if (!car) return false;
-      if (car.id === idOrSlug) return true;
-      const carSlug = `${car.make || ''}-${car.model || ''}-${car.year || ''}`.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-      if (carSlug === targetSlug) return true;
-      const titleSlug = (car.title || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-      if (titleSlug === targetSlug) return true;
-      const titleNorm = (car.title || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-      if (titleNorm && targetNormalized && (titleNorm === targetNormalized || titleNorm.includes(targetNormalized))) return true;
-      return false;
-    });
-
-    if (matched) return matched;
-  } catch (err) {
-    console.error('dbFetchListingById Error:', err);
-  }
-  return null;
+// 2. Canonical marketplace reads. Listing identity and factual fields come only from Firestore.
+export async function dbFetchListingById(id: string): Promise<CarListing | null> {
+  return fetchListingById(id);
 }
 
-function cleanAndDeduplicateListings(listings: CarListing[]): CarListing[] {
-  const seenKeys = new Set<string>();
-  const cleaned: CarListing[] = [];
-
-  for (const car of listings) {
-    if (!car) continue;
-    const titleLower = (car.title || '').trim().toLowerCase();
-    
-    // Only filter if title is explicitly a dummy/placeholder test tag
-    const isExplicitPlaceholder = 
-      titleLower === 'dummy' || 
-      titleLower === 'test' || 
-      titleLower === 'placeholder' ||
-      titleLower === 'sample' ||
-      titleLower.startsWith('dummy listing') ||
-      titleLower.startsWith('test listing');
-
-    if (isExplicitPlaceholder) {
-      continue;
-    }
-
-    // Deduplicate uniquely by item document ID so user-created posts are never dropped
-    if (car.id && seenKeys.has(car.id)) {
-      continue;
-    }
-    if (car.id) {
-      seenKeys.add(car.id);
-    }
-    cleaned.push(car);
-  }
-
-  return cleaned;
-}
-
-export async function dbFetchListings(forceRefresh = false): Promise<CarListing[]> {
-  if (!forceRefresh && cachedListings && cachedListings.length > 0) {
-    return cachedListings;
-  }
+export async function dbFetchListings(forceRefresh = true): Promise<CarListing[]> {
+  if (!forceRefresh && cachedListings) return cachedListings;
   try {
-    const snap = await getDocs(query(collection(db, LISTINGS_COLLECTION), limit(100)));
-    if (snap.empty) {
-      return [];
-    }
-    const list: CarListing[] = [];
-    snap.forEach((doc) => {
-      const data = doc.data();
-      list.push(mapListingDoc(doc.id, data));
-    });
-    cachedListings = cleanAndDeduplicateListings(list);
+    const page = await fetchInventoryPage(48);
+    cachedListings = page.listings;
     return cachedListings;
   } catch (err) {
     console.error('dbFetchListings Error:', err);
@@ -248,125 +163,14 @@ export async function dbFetchListings(forceRefresh = false): Promise<CarListing[
   }
 }
 
-// 2b. Fetch Listings by specific showroom ID efficiently
-export async function dbFetchListingsByDealerId(dealerId: string, limitCount: number = 20): Promise<CarListing[]> {
+export async function dbFetchListingsPaginated(lastDocSnap?: any, limitCount: number = 24): Promise<{ listings: CarListing[], lastVisible: any }> {
   try {
-    const q = query(
-      collection(db, LISTINGS_COLLECTION),
-      where('dealerId', '==', dealerId),
-      where('approved', '==', true),
-      limit(limitCount)
-    );
-    const snap = await getDocs(q);
-    if (snap.empty) {
-      return [];
-    }
-    const list: CarListing[] = [];
-    snap.forEach((doc) => {
-      list.push(mapListingDoc(doc.id, doc.data()));
-    });
-    return cleanAndDeduplicateListings(list);
-  } catch (err) {
-    console.error(`[dbFetchListingsByDealerId] Error fetching for ${dealerId}:`, err);
-    return [];
-  }
-}
-
-export async function dbFetchListingsPaginated(lastDocSnap?: any, limitCount: number = 8): Promise<{ listings: CarListing[], lastVisible: any }> {
-  try {
-    let q = query(collection(db, LISTINGS_COLLECTION), orderBy('createdAt', 'desc'), limit(limitCount));
-    
-    if (lastDocSnap) {
-      q = query(collection(db, LISTINGS_COLLECTION), orderBy('createdAt', 'desc'), startAfter(lastDocSnap), limit(limitCount));
-    }
-    
-    const snap = await getDocs(q);
-    if (snap.empty) {
-      if (!lastDocSnap) {
-        return { listings: [], lastVisible: null };
-      }
-      return { listings: [], lastVisible: null };
-    }
-    
-    const list: CarListing[] = [];
-    snap.forEach((doc) => {
-      list.push(mapListingDoc(doc.id, doc.data()));
-    });
-    
-    const lastVisible = snap.docs[snap.docs.length - 1];
-    return { listings: cleanAndDeduplicateListings(list), lastVisible };
+    const page = await fetchInventoryPage(limitCount, lastDocSnap || null);
+    return { listings: page.listings, lastVisible: page.lastVisible };
   } catch (err) {
     console.error('dbFetchListingsPaginated Error:', err);
     return { listings: [], lastVisible: null };
   }
-}
-
-function mapListingDoc(id: string, data: any): CarListing {
-  const isExplicitIndividual = 
-    data.sellerType === 'Individual' || 
-    data.sellerType === 'individual' || 
-    data.dealerId === 'private' || 
-    data.dealerId === 'private-seller' || 
-    data.dealerId === 'individual' ||
-    id === 'listing-1784821782501' ||
-    id === 'listing-1784821585212';
-
-  const resolvedDealerId = isExplicitIndividual 
-    ? 'private' 
-    : (data.dealerId || 'private');
-
-  const resolvedSellerType = isExplicitIndividual ? 'Individual' : (data.sellerType || (resolvedDealerId === 'private' ? 'Individual' : 'Showroom'));
-
-  // Preserve user-uploaded image URLs or fallback only if completely empty
-  let resolvedImageUrl = data.imageUrl || (Array.isArray(data.images) && data.images[0] ? data.images[0] : '');
-  if (!resolvedImageUrl || resolvedImageUrl === NO_IMAGE_SVG) {
-    resolvedImageUrl = NO_IMAGE_SVG;
-  }
-
-  const resolvedImages = Array.isArray(data.images) && data.images.length > 0 && data.images.some(img => img && img !== NO_IMAGE_SVG)
-    ? data.images.filter(Boolean)
-    : [resolvedImageUrl];
-
-  return {
-    id,
-    title: data.title || '',
-    make: data.make || '',
-    model: data.model || '',
-    year: Number(data.year) || 2024,
-    price: Number(data.price) || 0,
-    mileage: Number(data.mileage) || 0,
-    fuelType: data.fuelType || 'Petrol',
-    transmission: data.transmission || 'Automatic',
-    imageUrl: resolvedImageUrl,
-    verified: !!data.verified,
-    featured: !!data.featured,
-    approved: data.approved !== false,
-    dealerId: resolvedDealerId,
-    sellerType: resolvedSellerType,
-    sellerName: data.sellerName || data.createdBy || 'Individual Seller',
-    sellerPhone: data.sellerPhone || data.phone || '',
-    sellerWhatsApp: data.sellerWhatsApp || data.whatsapp || data.sellerPhone || data.phone || '',
-    description: data.description || '',
-    createdAt: data.createdAt || new Date().toISOString(),
-    tags: Array.isArray(data.tags) ? data.tags : [],
-    specs: data.specs || {
-      color: data.exteriorColor || '',
-      engineSize: data.engineCC ? `${data.engineCC} CC` : '',
-      horspower: '',
-      regionalSpecs: data.assemblyType || ''
-    },
-    condition: data.condition || 'Used',
-    engineCC: Number(data.engineCC) || 0,
-    exteriorColor: data.exteriorColor || data.specs?.color || '',
-    bodyCondition: data.bodyCondition || '',
-    registrationCity: data.registrationCity || '',
-    documentType: data.documentType || '',
-    tokenTaxPaid: data.tokenTaxPaid !== false,
-    images: resolvedImages,
-    assemblyType: data.assemblyType || '',
-    dentPaintDescription: data.dentPaintDescription || '',
-    tokenTaxStatus: data.tokenTaxStatus || ''
-  };
 }
 
 // Helper to recursively remove undefined fields and sanitize raw base64 data strings from Firestore payloads to satisfy 1MB doc limits
@@ -617,21 +421,6 @@ export async function dbRegisterDealership(dealer: Omit<Dealer, 'activityFeed'>)
     });
 
     await setDoc(doc(db, DEALERS_COLLECTION, dealer.id), payload);
-
-    // If an ownerUid was specified, assign showroom ownership link to that user profile
-    if (dealer.ownerUid) {
-      const userRef = doc(db, USERS_COLLECTION, dealer.ownerUid);
-      const profileRef = doc(db, 'profiles', dealer.ownerUid);
-      const ownerUpdate = {
-        associatedShowroomId: dealer.id,
-        dealerId: dealer.id,
-        role: 'Showroom Owner',
-        updatedAt: new Date().toISOString()
-      };
-      await setDoc(userRef, ownerUpdate, { merge: true }).catch(e => console.warn('Could not update user doc for ownerUid:', e));
-      await setDoc(profileRef, ownerUpdate, { merge: true }).catch(e => console.warn('Could not update profile doc for ownerUid:', e));
-    }
-
     console.log('Showroom saved successfully:', dealer.id);
     toast.success('Showroom profile registered!', { id: `dealer-reg-${dealer.id}` });
   } catch (err) {
@@ -787,58 +576,22 @@ export async function dbSaveListing(listing: CarListing): Promise<void> {
   if (listing.price < 0) throw new Error('Price cannot be negative');
   if (listing.year < 1980) throw new Error('Model year must be 1980 or later');
 
-  // Process images: if any image is base64, automatically offload to Cloudinary
-  let processedImages: string[] = Array.isArray(listing.images) ? [...listing.images] : [];
-  let processedImageUrl = listing.imageUrl || (processedImages[0] || '');
-
-  if (processedImageUrl && processedImageUrl.startsWith('data:')) {
-    try {
-      processedImageUrl = await uploadBase64ToCloudinary(processedImageUrl, 'bazar360_listings');
-    } catch (e) {
-      console.warn('[dbSaveListing] Base64 primary image upload failed:', e);
-    }
+  const isBase64 = (str?: string) => typeof str === 'string' && (str.startsWith('data:image') || str.startsWith('data:'));
+  if (isBase64(listing.imageUrl) || (Array.isArray(listing.images) && listing.images.some(isBase64))) {
+    const errorMsg = 'Base64 image data cannot be stored in database. Please upload an image file using the Cloudinary upload button';
+    toast.error(errorMsg);
+    throw new Error(errorMsg);
   }
-
-  if (processedImages.length > 0) {
-    const updatedImages: string[] = [];
-    for (const img of processedImages) {
-      if (img && img.startsWith('data:')) {
-        try {
-          const uploadedUrl = await uploadBase64ToCloudinary(img, 'bazar360_listings');
-          updatedImages.push(uploadedUrl);
-        } catch (e) {
-          console.warn('[dbSaveListing] Base64 image upload failed:', e);
-          if (processedImageUrl && !processedImageUrl.startsWith('data:')) {
-            updatedImages.push(processedImageUrl);
-          }
-        }
-      } else if (img) {
-        updatedImages.push(img);
-      }
-    }
-    processedImages = updatedImages;
-  }
-
-  if (processedImages.length === 0 && processedImageUrl) {
-    processedImages = [processedImageUrl];
-  }
-
-  const updatedListing: CarListing = {
-    ...listing,
-    imageUrl: processedImageUrl || processedImages[0] || NO_IMAGE_SVG,
-    primaryImage: processedImageUrl || processedImages[0] || NO_IMAGE_SVG,
-    images: processedImages.length > 0 ? processedImages : [processedImageUrl || NO_IMAGE_SVG]
-  };
 
   const prepared = cleanPayload({
-    ...updatedListing,
-    createdAt: updatedListing.createdAt || new Date().toISOString(),
+    ...listing,
+    createdAt: listing.createdAt || new Date().toISOString(),
     updatedAt: new Date().toISOString()
   });
 
   // Always update in-memory cache and localStorage immediately so the user's post is never lost
   if (cachedListings) {
-    const idx = cachedListings.findIndex(l => l.id === updatedListing.id);
+    const idx = cachedListings.findIndex(l => l.id === listing.id);
     if (idx > -1) {
       cachedListings[idx] = { ...cachedListings[idx], ...prepared };
     } else {
@@ -847,20 +600,20 @@ export async function dbSaveListing(listing: CarListing): Promise<void> {
   }
   try {
     const localCustom = JSON.parse(localStorage.getItem('bazar360_custom_listings') || '[]');
-    const filtered = localCustom.filter((l: any) => l.id !== updatedListing.id);
+    const filtered = localCustom.filter((l: any) => l.id !== listing.id);
     localStorage.setItem('bazar360_custom_listings', JSON.stringify([prepared, ...filtered]));
   } catch (e) {
     console.warn('[LocalStorage] Could not sync local custom listings:', e);
   }
 
   try {
-    await setDoc(doc(db, LISTINGS_COLLECTION, updatedListing.id), prepared);
-    console.log('Listing saved to database successfully:', updatedListing.id);
-    toast.success('Vehicle advertisement saved to database!', { id: `listing-save-${updatedListing.id}` });
+    await setDoc(doc(db, LISTINGS_COLLECTION, listing.id), prepared);
+    console.log('Listing saved to database successfully:', listing.id);
+    toast.success('Vehicle advertisement saved to database!', { id: `listing-save-${listing.id}` });
   } catch (err: any) {
     console.warn('[Firestore] Remote sync failed, listing saved locally in fallback cache:', err);
-    toast.success('Vehicle post saved locally!', { id: `listing-save-local-${updatedListing.id}` });
-    handleFirestoreError(err, OperationType.WRITE, `${LISTINGS_COLLECTION}/${updatedListing.id}`);
+    toast.success('Vehicle post saved locally!', { id: `listing-save-local-${listing.id}` });
+    handleFirestoreError(err, OperationType.WRITE, `${LISTINGS_COLLECTION}/${listing.id}`);
   }
 }
 
@@ -1944,7 +1697,7 @@ export async function dbClaimListingsByPhone(phoneNumber: string, userId: string
         await updateDoc(ref, {
           assignedSalesRepId: userId,
           createdBy: userId,
-          dealerId: userRole === 'Dealer' ? '' : 'private',
+          
           updatedAt: new Date().toISOString()
         });
         claimedCount++;

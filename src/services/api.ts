@@ -361,7 +361,7 @@ async function createSocialPostDirect(payload: {
     }
     let displayName = currentUser.displayName || "Anonymous User";
     let userRole = "Individual User";
-    let photoURL = currentUser.photoURL || '';
+    let photoURL = currentUser.photoURL || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150";
 
     try {
       const profileSnap = await getDoc(doc(db, "users", currentUser.uid));
@@ -450,7 +450,7 @@ async function createSocialCommentDirect(postId: string, text: string): Promise<
     }
     let displayName = currentUser.displayName || "Anonymous User";
     let userRole = "Individual User";
-    let photoURL = currentUser.photoURL || '';
+    let photoURL = currentUser.photoURL || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150";
 
     try {
       const profileSnap = await getDoc(doc(db, "users", currentUser.uid));

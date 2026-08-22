@@ -52,7 +52,7 @@ export default function UnifiedSwipingPillarsCard({ setTab, className = '' }: Un
     },
     {
       id: 'auto-choice-hub',
-      title: 'Bazar360 Hub',
+      title: 'Auto Choice Hub',
       subtitle: 'Flagship Showrooms Network',
       tag: 'Verified Showrooms',
       icon: Store,

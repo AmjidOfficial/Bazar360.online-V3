@@ -295,6 +295,13 @@ const CATEGORY_STYLES: Record<string, { label: string; labelUr: string; color: s
   }
 };
 
+const SAMPLE_BANNERS = [
+  'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80',
+  'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1200&q=80',
+  'https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&w=1200&q=80',
+  'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1200&q=80'
+];
+
 export function ShowroomAnnouncementsFeed({
   dealer,
   listings,
@@ -816,6 +823,20 @@ export function ShowroomAnnouncementsFeed({
                     placeholder="https://..."
                     className="w-full px-4 py-2.5 rounded-xl bg-[var(--color-bg-primary)] border border-[var(--color-border-main)] text-xs text-[var(--color-text-main)] focus:outline-none focus:border-orange-500"
                   />
+                  {/* Sample presets */}
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="text-[10px] text-[var(--color-text-muted)]">Presets:</span>
+                    {SAMPLE_BANNERS.map((url, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => setNewImageUrl(url)}
+                        className="w-8 h-8 rounded-lg overflow-hidden border border-white/20 cursor-pointer hover:scale-110 transition-transform"
+                      >
+                        <img src={url} className="w-full h-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Link Stock Car */}

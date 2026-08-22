@@ -30,7 +30,7 @@ export const VehicleValidationSchema = z.object({
     regionalSpecs: z.string().max(50)
   }),
 
-  // Bazar360 Exclusive specs
+  // Auto Choice Exclusive specs
   condition: z.enum(['New', 'Used']),
   engineCC: z.number().int().positive('Engine capacity must be a positive integer'),
   exteriorColor: z.string().max(50),

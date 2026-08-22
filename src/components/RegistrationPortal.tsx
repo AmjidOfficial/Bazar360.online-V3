@@ -82,6 +82,29 @@ interface RegistrationPortalProps {
   onClose?: () => void;
 }
 
+// Live presets for visitor tracking simulation
+interface SimVisitorLog {
+  id: string;
+  name: string;
+  phone: string;
+  ip_address: string;
+  device_type: string;
+  browser: string;
+  city: string;
+  visit_count: number;
+  last_visit: string;
+  score: number;
+  category: 'Cold' | 'Warm' | 'Hot' | 'VIP';
+}
+
+const SIMULATED_VISITORS: SimVisitorLog[] = [
+  { id: 'v-01', name: 'Malak Mazhar', phone: '03159085086', ip_address: '182.180.45.12', device_type: 'Mobile', browser: 'Chrome Mobile', city: 'Peshawar', visit_count: 14, last_visit: '2 mins ago', score: 92, category: 'VIP' },
+  { id: 'v-02', name: 'Zia-ur-Rehman', phone: '03149198403', ip_address: '111.88.234.90', device_type: 'Mobile', browser: 'Safari', city: 'Peshawar', visit_count: 5, last_visit: '15 mins ago', score: 78, category: 'Hot' },
+  { id: 'v-03', name: 'Amjid Khan', phone: '03125678901', ip_address: '202.163.120.4', device_type: 'Desktop', browser: 'Chrome', city: 'Islamabad', visit_count: 2, last_visit: '1 hour ago', score: 45, category: 'Warm' },
+  { id: 'v-04', name: 'Sajid Afridi', phone: '03339123456', ip_address: '175.107.12.87', device_type: 'Mobile', browser: 'Samsung Internet', city: 'Rawalpindi', visit_count: 1, last_visit: 'Yesterday', score: 20, category: 'Cold' },
+  { id: 'v-05', name: 'Imran Peshawar', phone: '03157771234', ip_address: '182.176.99.112', device_type: 'Desktop', browser: 'Edge', city: 'Peshawar', visit_count: 19, last_visit: '4 mins ago', score: 98, category: 'VIP' }
+];
+
 export default function RegistrationPortal({ 
   currentUser, 
   setCurrentUser, 
@@ -156,7 +179,7 @@ export default function RegistrationPortal({
   const [showroomExperience, setShowroomExperience] = useState<number>(5);
   const [showroomEmployees, setShowroomEmployees] = useState<number>(3);
   const [showroomWhatsapp, setShowroomWhatsapp] = useState<string>('');
-  const [showroomLogo, setShowroomLogo] = useState<string>('');
+  const [showroomLogo, setShowroomLogo] = useState<string>('https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&w=120&q=80');
 
   // Individual profile state
   const [individualAddress, setIndividualAddress] = useState<string>('');
@@ -268,8 +291,8 @@ export default function RegistrationPortal({
           const dealerId = dealerDoc.id;
           const dealerData = dealerDoc.data();
           
-          const isDuplicate = dealerId !== '' && 
-                              (dealerId === '' || 
+          const isDuplicate = dealerId !== 'auto-choice-peshawar' && 
+                              (dealerId === 'auto-choice' || 
                                (dealerData.name && dealerData.name.toLowerCase().includes('auto choice')));
           
           if (isDuplicate) {
@@ -281,10 +304,10 @@ export default function RegistrationPortal({
         const listingsSnap = await getDocs(query(collection(db, 'listings'), limit(100)));
         for (const listingDoc of listingsSnap.docs) {
           const listingData = listingDoc.data();
-          if (listingData.dealerId === '' || (listingData.dealerId && listingData.dealerId.includes('') && listingData.dealerId !== '')) {
+          if (listingData.dealerId === 'auto-choice' || (listingData.dealerId && listingData.dealerId.includes('auto-choice') && listingData.dealerId !== 'auto-choice-peshawar')) {
             console.log(`Silent redirecting listing ${listingDoc.id} to flagship auto-choice-peshawar`);
             await updateDoc(doc(db, 'listings', listingDoc.id), {
-              dealerId: ''
+              dealerId: 'auto-choice-peshawar'
             });
           }
         }
@@ -724,7 +747,7 @@ export default function RegistrationPortal({
       state: extraFields.province || regProvince || 'Khyber Pakhtunkhwa',
       country: extraFields.country || regCountry || 'Pakistan',
       preferredLanguage: 'en',
-      profilePhoto: extraFields.profilePhoto || regProfilePhoto || '',
+      profilePhoto: extraFields.profilePhoto || regProfilePhoto || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80',
       cnic: '',
       whatsappNumber: extraFields.phoneNumber || regPhone || '',
       acceptedTerms: true,
@@ -1213,16 +1236,15 @@ export default function RegistrationPortal({
         const dealerId = `showroom-${user.uid}`;
         newShowroom = {
           id: dealerId,
-          ownerUid: user.uid,
           name: computedDisplayName,
           avatarLetter: regFirstName.trim().substring(0, 1).toUpperCase() + regLastName.trim().substring(0, 1).toUpperCase(),
-          avatarUrl: regProfilePhoto.trim() || '',
+          avatarUrl: regProfilePhoto.trim() || 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&w=120&q=80',
           subtitle: showroomSlogan || 'Verified Premium Dealership',
           location: showroomLocation || regCity,
-          rating: 0,
+          rating: 5.0,
           vehiclesCount: 0,
           followersCount: '0',
-          coverImage: '',
+          coverImage: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=1200&q=80',
           description: `${computedDisplayName} provides premium automotive listings. Commercial entity owned by ${showroomOwnerName || computedDisplayName}.`,
           phone: regPhone.trim(),
           whatsapp: regPhone.trim(),
@@ -1254,7 +1276,7 @@ export default function RegistrationPortal({
         state: regProvince,
         country: regCountry,
         preferredLanguage: 'en',
-        profilePhoto: regProfilePhoto.trim() || '',
+        profilePhoto: regProfilePhoto.trim() || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80',
         cnic: '',
         whatsappNumber: regPhone.trim(),
         acceptedTerms: true,
@@ -1361,7 +1383,7 @@ export default function RegistrationPortal({
     const updated: UserProfile = {
       ...currentUser,
       role: role,
-      displayName: role === 'Admin' ? 'Muhammad Amjid (Founder)' : role === 'Dealer' ? 'Bazar360 (Showroom Flagship)' : currentUser.displayName
+      displayName: role === 'Admin' ? 'Muhammad Amjid (Founder)' : role === 'Dealer' ? 'Auto Choice (Showroom Flagship)' : currentUser.displayName
     };
     setCurrentUser(updated);
     setSuccessMessage(`✓ Simulator Swapped Profile Privilege to "${role}"`);
@@ -1380,7 +1402,7 @@ export default function RegistrationPortal({
       return;
     }
 
-    const finalImg = newImageUrl || '';
+    const finalImg = newImageUrl || 'https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&q=80&w=600';
     const isDealerAccount = currentUser?.role === 'Dealer' || 
                             currentUser?.displayName?.includes('Ghani') || 
                             currentUser?.displayName?.includes('Mazhar') || 
@@ -1401,7 +1423,7 @@ export default function RegistrationPortal({
       imageUrl: finalImg,
       verified: true,
       featured: false,
-      dealerId: isDealerAccount ? '' : 'private',
+      dealerId: isDealerAccount ? 'auto-choice-peshawar' : 'private',
       assignedSalesRepId: currentUser?.uid || 'guest-seller',
       createdBy: currentUser?.uid || 'guest-seller',
       phone: currentUser?.phoneNumber || guestPhone || '',
@@ -1587,8 +1609,8 @@ export default function RegistrationPortal({
         const dealerId = dealerDoc.id;
         const dealerData = dealerDoc.data();
         
-        const isDuplicate = dealerId !== '' && 
-                            (dealerId === '' || 
+        const isDuplicate = dealerId !== 'auto-choice-peshawar' && 
+                            (dealerId === 'auto-choice' || 
                              (dealerData.name && dealerData.name.toLowerCase().includes('auto choice')));
         
         if (isDuplicate) {
@@ -1603,17 +1625,17 @@ export default function RegistrationPortal({
       
       for (const listingDoc of listingsSnap.docs) {
         const listingData = listingDoc.data();
-        if (listingData.dealerId === '' || (listingData.dealerId && listingData.dealerId.includes('') && listingData.dealerId !== '')) {
+        if (listingData.dealerId === 'auto-choice' || (listingData.dealerId && listingData.dealerId.includes('auto-choice') && listingData.dealerId !== 'auto-choice-peshawar')) {
           console.log(`Redirecting listing ${listingDoc.id} to flagship auto-choice-peshawar`);
           await updateDoc(doc(db, 'listings', listingDoc.id), {
-            dealerId: ''
+            dealerId: 'auto-choice-peshawar'
           });
           listingUpdateCount++;
         }
       }
       
       setShowroomDuplicates(false);
-      alert(`Showroom profiles compiled and merged successfully under ID "auto-choice-peshawar"! Consolidated ${mergeCount} duplicate profile(s) and redirected ${listingUpdateCount} listing(s) directly to the flagship Bazar360 Peshawar.`);
+      alert(`Showroom profiles compiled and merged successfully under ID "auto-choice-peshawar"! Consolidated ${mergeCount} duplicate profile(s) and redirected ${listingUpdateCount} listing(s) directly to the flagship Auto Choice Peshawar.`);
     } catch (error) {
       console.error('Failed to merge showrooms in database:', error);
       setShowroomDuplicates(false);
@@ -1692,7 +1714,7 @@ export default function RegistrationPortal({
                 setCurrentUser({
                   uid: 'usr-auto-choice-pesh',
                   email: 'peshawar@autochoice.online',
-                  displayName: 'Bazar360 Peshawar (Flagship)',
+                  displayName: 'Auto Choice Peshawar (Flagship)',
                   phoneNumber: '03159085086',
                   phoneVerified: true,
                   city: 'Peshawar',
@@ -1702,17 +1724,17 @@ export default function RegistrationPortal({
                   createdAt: new Date().toISOString(),
                   lastLogin: new Date().toISOString(),
                   updatedAt: new Date().toISOString(),
-                  salesPodId: ''
+                  salesPodId: 'auto-choice-peshawar'
                 });
                 setSuccessMessage('✓ Logged into Peshawar Flagship Hub: AUTO CHOICE');
               }}
               className={`py-2 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all border col-span-2 sm:col-span-1 cursor-pointer ${
-                currentUser?.displayName?.includes('Bazar360')
+                currentUser?.displayName?.includes('Auto Choice')
                   ? 'bg-amber-500 border-amber-500 text-stone-950 shadow-md'
                   : 'bg-amber-500/10 border-amber-500/20 text-amber-400 hover:bg-amber-500/20'
               }`}
             >
-              ★ Bazar360 Flagship
+              ★ Auto Choice Flagship
             </button>
           </div>
         </div>
@@ -1735,8 +1757,8 @@ export default function RegistrationPortal({
           style={{
             backgroundImage: `url(${
               glassTheme === 'light'
-                ? ''
-                : ''
+                ? 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80'
+                : 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=1200&q=80'
             })`
           }}
         >
@@ -2185,7 +2207,7 @@ export default function RegistrationPortal({
                     </label>
                     <input
                       type="url"
-                      placeholder=''
+                      placeholder="https://images.unsplash.com/..."
                       value={regProfilePhoto}
                       onChange={e => setRegProfilePhoto(e.target.value)}
                       className="w-full bg-[var(--color-bg-secondary)] border border-white/10 rounded-xl p-2.5 text-xs text-[var(--color-text-header)] placeholder-slate-500 focus:outline-none focus:border-orange-500"
@@ -2424,15 +2446,15 @@ export default function RegistrationPortal({
                 {/* Grid */}
                 <div className="grid grid-cols-3 gap-2 pt-2">
                   {[
-                    { idx: 0, name: "Toyota Fortuner (Hybrid)", isCorrect: true, url: '' },
-                    { idx: 1, name: "Suzuki Alto (Hatchback)", isCorrect: false, url: '' },
-                    { idx: 2, name: "Honda Civic Sedan", isCorrect: false, url: '' },
-                    { idx: 3, name: "Porsche Cayenne (SUV)", isCorrect: true, url: '' },
-                    { idx: 4, name: "Vespa Scooter", isCorrect: false, url: '' },
-                    { idx: 5, name: "Hyundai Tucson (SUV)", isCorrect: true, url: '' },
-                    { idx: 6, name: "Yamaha Bike", isCorrect: false, url: '' },
-                    { idx: 7, name: "Range Rover Sport (SUV)", isCorrect: true, url: '' },
-                    { idx: 8, name: "BMW Sedan", isCorrect: false, url: '' }
+                    { idx: 0, name: "Toyota Fortuner (Hybrid)", isCorrect: true, url: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=150&q=80" },
+                    { idx: 1, name: "Suzuki Alto (Hatchback)", isCorrect: false, url: "https://images.unsplash.com/photo-1625211910240-df6a445e5210?auto=format&fit=crop&w=150&q=80" },
+                    { idx: 2, name: "Honda Civic Sedan", isCorrect: false, url: "https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&w=150&q=80" },
+                    { idx: 3, name: "Porsche Cayenne (SUV)", isCorrect: true, url: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=150&q=80" },
+                    { idx: 4, name: "Vespa Scooter", isCorrect: false, url: "https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=150&q=80" },
+                    { idx: 5, name: "Hyundai Tucson (SUV)", isCorrect: true, url: "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=150&q=80" },
+                    { idx: 6, name: "Yamaha Bike", isCorrect: false, url: "https://images.unsplash.com/photo-1449426468159-d96dbf08f19f?auto=format&fit=crop&w=150&q=80" },
+                    { idx: 7, name: "Range Rover Sport (SUV)", isCorrect: true, url: "https://images.unsplash.com/photo-1606016159991-dfe4f2746ad5?auto=format&fit=crop&w=150&q=80" },
+                    { idx: 8, name: "BMW Sedan", isCorrect: false, url: "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=150&q=80" }
                   ].map((img, i) => {
                     const isSelected = window.recaptchaVerifier && Array.isArray(window.recaptchaVerifier) ? window.recaptchaVerifier.includes(i) : false;
                     return (
@@ -3092,8 +3114,8 @@ export default function RegistrationPortal({
                         if (!currentUser) return false;
                         if (currentUser.role === 'Admin') return true;
                         if (currentUser.role === 'Dealer') {
-                          if (currentUser.displayName?.includes('Bazar360') || currentUser.displayName?.includes('Ghani Khan') || currentUser.displayName?.includes('Mazhar') || currentUser.displayName?.includes('Malak') || currentUser.email === 'khattakghani94@gmail.com' || currentUser.email === 'mazharsouls@gmail.com') {
-                            return v.dealerId === '' || v.createdBy === currentUser.uid;
+                          if (currentUser.displayName?.includes('Auto Choice') || currentUser.displayName?.includes('Ghani Khan') || currentUser.displayName?.includes('Mazhar') || currentUser.displayName?.includes('Malak') || currentUser.email === 'khattakghani94@gmail.com' || currentUser.email === 'mazharsouls@gmail.com') {
+                            return v.dealerId === 'auto-choice-peshawar' || v.createdBy === currentUser.uid;
                           }
                           return v.createdBy === currentUser.uid || v.dealerId === currentUser.uid;
                         }
@@ -3105,8 +3127,8 @@ export default function RegistrationPortal({
                               if (!currentUser) return false;
                               if (currentUser.role === 'Admin') return true;
                               if (currentUser.role === 'Dealer') {
-                                if (currentUser.displayName?.includes('Bazar360') || currentUser.displayName?.includes('Ghani Khan') || currentUser.displayName?.includes('Mazhar') || currentUser.displayName?.includes('Malak') || currentUser.email === 'khattakghani94@gmail.com' || currentUser.email === 'mazharsouls@gmail.com') {
-                                  return v.dealerId === '' || v.createdBy === currentUser.uid;
+                                if (currentUser.displayName?.includes('Auto Choice') || currentUser.displayName?.includes('Ghani Khan') || currentUser.displayName?.includes('Mazhar') || currentUser.displayName?.includes('Malak') || currentUser.email === 'khattakghani94@gmail.com' || currentUser.email === 'mazharsouls@gmail.com') {
+                                  return v.dealerId === 'auto-choice-peshawar' || v.createdBy === currentUser.uid;
                                 }
                                 return v.createdBy === currentUser.uid || v.dealerId === currentUser.uid;
                               }
@@ -3804,7 +3826,7 @@ export default function RegistrationPortal({
                     <label className="text-[10px] font-mono uppercase text-text-muted block mb-1">Vehicle Image / Media URL (Optional)</label>
                     <input
                       type="url"
-                      placeholder="e.g. https://res.cloudinary.com/.../car.jpg"
+                      placeholder="e.g. https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=600"
                       value={newImageUrl}
                       onChange={e => setNewImageUrl(e.target.value)}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-800 focus:outline-none focus:border-sky-500 font-mono text-[11px]"
@@ -3857,14 +3879,14 @@ export default function RegistrationPortal({
 
                   <div className="space-y-4">
                     {allVehicles.filter(car => {
-                      const isDealerAC = currentUser.displayName?.includes('Bazar360') || 
+                      const isDealerAC = currentUser.displayName?.includes('Auto Choice') || 
                                          currentUser.displayName?.includes('Ghani Khan') || 
                                          currentUser.displayName?.includes('Mazhar') || 
                                          currentUser.displayName?.includes('Malak') || 
                                          currentUser.email === 'khattakghani94@gmail.com' ||
                                          currentUser.email === 'mazharsouls@gmail.com';
                       if (isDealerAC) {
-                        return car.dealerId === '' || car.createdBy === currentUser.uid || car.assignedSalesRepId === currentUser.uid;
+                        return car.dealerId === 'auto-choice-peshawar' || car.createdBy === currentUser.uid || car.assignedSalesRepId === currentUser.uid;
                       }
                       return car.createdBy === currentUser.uid || car.assignedSalesRepId === currentUser.uid;
                     }).map(car => (
@@ -3986,14 +4008,14 @@ export default function RegistrationPortal({
                     ))}
 
                     {allVehicles.filter(car => {
-                      const isDealerAC = currentUser.displayName?.includes('Bazar360') || 
+                      const isDealerAC = currentUser.displayName?.includes('Auto Choice') || 
                                          currentUser.displayName?.includes('Ghani Khan') || 
                                          currentUser.displayName?.includes('Mazhar') || 
                                          currentUser.displayName?.includes('Malak') || 
                                          currentUser.email === 'khattakghani94@gmail.com' ||
                                          currentUser.email === 'mazharsouls@gmail.com';
                       if (isDealerAC) {
-                        return car.dealerId === '' || car.createdBy === currentUser.uid || car.assignedSalesRepId === currentUser.uid;
+                        return car.dealerId === 'auto-choice-peshawar' || car.createdBy === currentUser.uid || car.assignedSalesRepId === currentUser.uid;
                       }
                       return car.createdBy === currentUser.uid || car.assignedSalesRepId === currentUser.uid;
                     }).length === 0 && (
@@ -4014,7 +4036,7 @@ export default function RegistrationPortal({
           {/* ========================================== */}
           {/* 3. VERIFIED SHOWROOM OWNER DASHBOARD */}
           {/* ========================================== */}
-          {currentUser.role === 'Dealer' && !currentUser.displayName?.includes('Bazar360') && (
+          {currentUser.role === 'Dealer' && !currentUser.displayName?.includes('Auto Choice') && (
             <div className="space-y-6 text-left animate-fade-in">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
@@ -4036,67 +4058,60 @@ export default function RegistrationPortal({
                   </div>
                 </div>
 
-// Showroom Visitor Intelligence Engine
+                {/* Showroom Visitor Intelligence Engine */}
                 <div className="lg:col-span-2 bg-white border border-slate-200 rounded-3xl p-6 flex flex-col justify-between">
                   <div>
                     <div className="flex justify-between items-center border-b border-slate-100 pb-4 mb-4">
                       <h3 className="text-base font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
-                        <Users size={18} className="text-sky-500" /> Visitor & Lead Intelligence Stream
+                        <Users size={18} className="text-sky-500" /> Visitor Intelligence Stream (Showroom Specific)
                       </h3>
-                      <span className="bg-sky-100 text-sky-700 text-[9px] font-mono font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                        Real-time Live
+                      <span className="bg-sky-100 text-sky-700 text-[9px] font-mono font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider animate-pulse">
+                        Active Tracker Live
                       </span>
                     </div>
 
                     <div className="overflow-x-auto">
-                      {leads && leads.length > 0 ? (
-                        <table className="w-full text-left text-xs">
-                          <thead>
-                            <tr className="border-b border-slate-100 text-text-muted font-mono text-[9px] uppercase tracking-wider">
-                              <th className="pb-2">Lead Name / Contact</th>
-                              <th className="pb-2">City / Location</th>
-                              <th className="pb-2">Vehicle / Interest</th>
-                              <th className="pb-2">Status</th>
-                              <th className="pb-2">Date</th>
+                      <table className="w-full text-left text-xs">
+                        <thead>
+                          <tr className="border-b border-slate-100 text-text-muted font-mono text-[9px] uppercase tracking-wider">
+                            <th className="pb-2">Visitor ID/Name</th>
+                            <th className="pb-2">City / Location</th>
+                            <th className="pb-2">Device metrics</th>
+                            <th className="pb-2">Visits Count</th>
+                            <th className="pb-2">Score</th>
+                            <th className="pb-2">Lead Category</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {SIMULATED_VISITORS.map(v => (
+                            <tr key={v.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                              <td className="py-2.5 font-bold">
+                                <div>{v.name}</div>
+                                <div className="text-[9px] text-text-muted font-mono">{v.phone}</div>
+                              </td>
+                              <td className="py-2.5 font-medium">{v.city}</td>
+                              <td className="py-2.5 text-[10px] text-text-muted font-mono">{v.device_type} • {v.browser}</td>
+                              <td className="py-2.5 font-mono text-center">{v.visit_count}</td>
+                              <td className="py-2.5 font-mono font-bold text-sky-600">{v.score}</td>
+                              <td className="py-2.5">
+                                <span className={`px-2 py-0.5 rounded text-[9px] font-mono font-black uppercase border ${
+                                  v.category === 'VIP' ? 'bg-purple-50 border-purple-200 text-purple-700' :
+                                  v.category === 'Hot' ? 'bg-rose-50 border-rose-200 text-rose-700' :
+                                  v.category === 'Warm' ? 'bg-amber-50 border-amber-200 text-amber-700' :
+                                  'bg-slate-100 border-slate-200 text-slate-600'
+                                }`}>
+                                  {v.category}
+                                </span>
+                              </td>
                             </tr>
-                          </thead>
-                          <tbody>
-                            {leads.map((ld: any) => (
-                              <tr key={ld.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                                <td className="py-2.5 font-bold">
-                                  <div>{ld.name || 'Anonymous User'}</div>
-                                  <div className="text-[9px] text-text-muted font-mono">{ld.phone || ld.email || 'No phone provided'}</div>
-                                </td>
-                                <td className="py-2.5 font-medium">{ld.city || 'Pakistan'}</td>
-                                <td className="py-2.5 text-[10px] text-text-muted font-mono">{ld.vehicleTitle || ld.notes || 'General Inquiry'}</td>
-                                <td className="py-2.5 font-mono">
-                                  <span className={`px-2 py-0.5 rounded text-[9px] font-mono font-black uppercase border ${
-                                    ld.status === 'Completed' || ld.status === 'Won' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' :
-                                    ld.status === 'In Progress' || ld.status === 'Contacted' ? 'bg-amber-50 border-amber-200 text-amber-700' :
-                                    'bg-sky-50 border-sky-200 text-sky-700'
-                                  }`}>
-                                    {ld.status || 'New'}
-                                  </span>
-                                </td>
-                                <td className="py-2.5 text-[10px] text-text-muted font-mono">
-                                  {ld.createdAt ? new Date(ld.createdAt).toLocaleDateString() : 'Recent'}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      ) : (
-                        <div className="py-8 text-center text-text-muted text-xs">
-                          <Users size={28} className="mx-auto mb-2 opacity-30 text-slate-400" />
-                          <p className="font-semibold text-slate-700">No customer lead interactions recorded yet</p>
-                          <p className="text-[10px] text-text-muted mt-1">Real buyer inquiries and phone call clicks will automatically stream into this dashboard.</p>
-                        </div>
-                      )}
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
 
                   <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 mt-4 text-[10px] text-text-muted leading-normal font-mono uppercase tracking-wide">
-                    📊 Bazar360 AI evaluates customer contact channels and inquiry logs directly from the Firestore database.
+                    📊 Bazar360 AI evaluates visit duration, favorites saved, and phone clicks to generate exact lead temperatures.
                   </div>
                 </div>
               </div>
@@ -4106,7 +4121,7 @@ export default function RegistrationPortal({
           {/* ========================================== */}
           {/* 4. AUTO CHOICE FLAGSHIP EXCLUSIVE WORKSPACE */}
           {/* ========================================== */}
-          {currentUser.role === 'Dealer' && currentUser.displayName?.includes('Bazar360') && (
+          {currentUser.role === 'Dealer' && currentUser.displayName?.includes('Auto Choice') && (
             <div className="space-y-6 text-left animate-fade-in">
               <div className="bg-amber-500 border border-amber-400 text-slate-900 rounded-3xl p-6 shadow-md flex justify-between items-center flex-wrap gap-4">
                 <div className="space-y-1">
@@ -4137,7 +4152,7 @@ export default function RegistrationPortal({
                       <AlertTriangle size={16} className="text-amber-600" /> DUPLICATE SHOWROOM ENTRIES DETECTED
                     </h4>
                     <p className="text-xs text-amber-800 max-w-2xl">
-                      We detected a duplicate system listing for <strong className="font-extrabold text-amber-950">"Bazar360"</strong> and <strong className="font-extrabold text-amber-950">"Bazar360 Peshawar"</strong>. Merge them now to consolidate views and preserve all activity logs.
+                      We detected a duplicate system listing for <strong className="font-extrabold text-amber-950">"Auto Choice"</strong> and <strong className="font-extrabold text-amber-950">"Auto Choice Peshawar"</strong>. Merge them now to consolidate views and preserve all activity logs.
                     </p>
                   </div>
                   <button

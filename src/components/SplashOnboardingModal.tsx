@@ -19,21 +19,21 @@ export function SplashOnboardingModal({ isOpen, onClose, lang, listings = [], on
       title: "Drive Your Dream",
       subtitle: "Verified & Secure",
       desc: "Beautiful cars. Verified spaces. Better drive.",
-      image: '',
+      image: "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1200&q=80",
       tag: "Bazar360 Certified"
     },
     {
-      title: "Bazar360 Fleet",
+      title: "Auto Choice Fleet",
       subtitle: "Direct Showrooms",
       desc: "Immaculate SUVs, Hybrid Sedans & Sports collection.",
-      image: '',
+      image: "https://images.unsplash.com/photo-1542362567-b07eac79094d?auto=format&fit=crop&w=1200&q=80",
       tag: "Top Rated 4.9★"
     },
     {
       title: "Instant Selling",
       subtitle: "Fast & Transparent",
       desc: "Sell your car directly to verified buyers nationwide.",
-      image: '',
+      image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80",
       tag: "Zero Brokerage"
     }
   ];
@@ -109,7 +109,7 @@ export function SplashOnboardingModal({ isOpen, onClose, lang, listings = [], on
             {/* Dual Brand Logos Header matching Prompt */}
             <div className="space-y-0.5">
               <h1 className="text-2xl font-black font-display tracking-tight text-[var(--color-text-header)] flex items-center justify-center gap-2">
-                <span>Bazar360</span>
+                <span>Auto Choice</span>
               </h1>
               <p className="text-[10px] font-mono tracking-widest text-[var(--color-accent-main)] uppercase font-semibold">
                 Powered by Bazar360.online

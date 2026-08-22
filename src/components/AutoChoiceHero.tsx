@@ -1,4 +1,3 @@
-import { NO_IMAGE_SVG } from "../types";
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -20,7 +19,7 @@ import {
 } from 'lucide-react';
 import { CarListing } from '../types';
 
-interface MarketplaceHeroProps {
+interface AutoChoiceHeroProps {
   lang: 'en' | 'ur';
   onSearch: (query: string) => void;
   setTab: (tab: string) => void;
@@ -40,7 +39,7 @@ function formatPakPrice(price: number): string {
   return `PKR ${price.toLocaleString()}`;
 }
 
-export default function MarketplaceHero({ lang, onSearch, setTab, listings = [], onSelectListing }: MarketplaceHeroProps) {
+export default function AutoChoiceHero({ lang, onSearch, setTab, listings = [], onSelectListing }: AutoChoiceHeroProps) {
   const isUrdu = lang === 'ur';
   const [searchInput, setSearchInput] = useState('');
   const [selectedMake, setSelectedMake] = useState('');
@@ -104,7 +103,7 @@ export default function MarketplaceHero({ lang, onSearch, setTab, listings = [],
   };
 
   return (
-    <div className="relative w-full bg-[#0B192C] text-white overflow-hidden pt-24 pb-12 lg:pt-32 lg:pb-20 border-b border-[#1E293B]">
+    <div className="hero-section relative w-full bg-[#0B192C] text-white overflow-hidden pt-24 pb-12 lg:pt-32 lg:pb-20 border-b border-[#1E293B]">
       
       {/* Subtle Automotive Orange Ambient Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-tr from-[#F97316]/10 via-[#0F172A]/30 to-transparent rounded-full blur-[100px] pointer-events-none" />
@@ -376,7 +375,7 @@ export default function MarketplaceHero({ lang, onSearch, setTab, listings = [],
                     <AnimatePresence mode="wait">
                       <motion.img
                         key={activeHeroCar.id || selectedHeroIndex}
-                        src={activeHeroCar.images?.[0] || activeHeroCar.imageUrl || NO_IMAGE_SVG}
+                        src={activeHeroCar.images?.[0] || activeHeroCar.imageUrl || "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=1200"}
                         alt={activeHeroCar.title || `${activeHeroCar.make} ${activeHeroCar.model}`}
                         initial={{ opacity: 0, scale: 1.03 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -464,7 +463,7 @@ export default function MarketplaceHero({ lang, onSearch, setTab, listings = [],
                       <div className="flex items-center gap-1.5 shrink-0 text-[11px] font-semibold text-white/80 bg-[#1E293B] px-2.5 py-0.5 rounded-lg border border-white/10">
                         <Building2 size={12} className="text-[#22C55E]" />
                         <span className="truncate max-w-[130px]">
-                          {activeHeroCar.sellerName || 'Bazar360'}
+                          {activeHeroCar.sellerName || 'Auto Choice'}
                         </span>
                       </div>
                     </div>
@@ -562,7 +561,7 @@ export default function MarketplaceHero({ lang, onSearch, setTab, listings = [],
                             }`}
                           >
                             <img
-                              src={car.images?.[0] || car.imageUrl || NO_IMAGE_SVG}
+                              src={car.images?.[0] || car.imageUrl || 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=300'}
                               alt={car.make || 'Car'}
                               className="w-9 h-9 rounded-lg object-cover"
                             />

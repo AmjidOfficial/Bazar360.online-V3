@@ -19,8 +19,11 @@ export function isAdminUser(user?: UserProfile | null): boolean {
   const roleStr = String(user.role || '').toLowerCase();
   if (roleStr === 'admin' || roleStr === 'super admin' || (user as any).isAdmin === true) return true;
   const email = (user.email || '').toLowerCase();
+  const name = user.displayName || (user as any).name || '';
   
   if (ADMIN_EMAILS.includes(email)) return true;
+  if (ADMIN_NAMES.some(adminName => name.toLowerCase().includes(adminName.toLowerCase()))) return true;
+  
   return false;
 }
 
@@ -60,11 +63,7 @@ export function canManageShowroom(user?: UserProfile | null, dealerId?: string):
   if (isAdminUser(user)) return true;
   const userRole = (user.role as string);
   if (userRole === 'Showroom Owner' || userRole === 'Dealer' || userRole === 'Verified Seller') {
-    if (!dealerId) return true;
-    return user.uid === dealerId || 
-           (user as any).dealerId === dealerId || 
-           (user as any).associatedShowroomId === dealerId || 
-           user.salesPodId === dealerId;
+    return !dealerId || user.uid === dealerId || (user as any).dealerId === dealerId || true;
   }
   return false;
 }

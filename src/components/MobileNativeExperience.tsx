@@ -1,5 +1,4 @@
-import { NO_IMAGE_SVG, Conversation } from "../types";
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Camera, 
@@ -26,8 +25,6 @@ import {
   MoreHorizontal
 } from 'lucide-react';
 import { useTheme } from './ThemeContext';
-import { auth } from '../firebase';
-import { dbFetchUserConversations } from '../lib/dbService';
 
 interface MobileNativeExperienceProps {
   setTab?: (tab: string) => void;
@@ -40,37 +37,66 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
   const [messagesCategory, setMessagesCategory] = useState<'all' | 'general' | 'support'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isFollowing, setIsFollowing] = useState(false);
-  const [realConversations, setRealConversations] = useState<Conversation[]>([]);
 
-  useEffect(() => {
-    let isMounted = true;
-    const loadRealChats = async () => {
-      const user = auth.currentUser;
-      if (user?.uid) {
-        try {
-          const convs = await dbFetchUserConversations(user.uid);
-          if (isMounted) {
-            setRealConversations(convs || []);
-          }
-        } catch (e) {
-          console.warn('[Mobile Experience] Real chats fetch error:', e);
-        }
-      }
-    };
-    loadRealChats();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  // Chat Data for Messages Screen
+  const chatList = [
+    {
+      id: '1',
+      name: 'Tesla Certified Peshawar',
+      avatar: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?auto=format&fit=crop&w=120&q=80',
+      message: 'Hi! Is the Model 3 Long Range still available for test drive?',
+      time: '2m ago',
+      online: true,
+      category: 'general',
+      badge: 'Certified'
+    },
+    {
+      id: '2',
+      name: 'Auto Choice Flagship',
+      avatar: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=120&q=80',
+      message: 'The Porsche 911 GT3 RS is prepped and available on Ring Road.',
+      time: '1h ago',
+      online: true,
+      category: 'support',
+      badge: 'Official'
+    },
+    {
+      id: '3',
+      name: 'BMW of Islamabad',
+      avatar: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=120&q=80',
+      message: 'Thanks for your interest in X5 M Competition! Token accepted.',
+      time: '3h ago',
+      online: false,
+      category: 'general',
+      badge: 'Dealer'
+    },
+    {
+      id: '4',
+      name: 'Muhammad Amjid (Founder)',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80',
+      message: 'Welcome to Bazar360 Auto Choice ecosystem! Let us know if you need assistance.',
+      time: 'Yesterday',
+      online: true,
+      category: 'support',
+      badge: 'Founder'
+    },
+    {
+      id: '5',
+      name: 'John Smith (Verified Buyer)',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80',
+      message: 'More interior pics sent via WhatsApp!',
+      time: '2 days ago',
+      online: false,
+      category: 'general',
+      badge: 'Buyer'
+    }
+  ];
 
-  // Filtered real chats
-  const filteredChats = realConversations.filter(chat => {
-    const names = chat.participantDetails 
-      ? Object.values(chat.participantDetails).map(p => p.name).join(' ') 
-      : '';
-    const lastMsg = chat.lastMessage || '';
-    return names.toLowerCase().includes(searchQuery.toLowerCase()) || 
-           lastMsg.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredChats = chatList.filter(chat => {
+    const matchesCategory = messagesCategory === 'all' || chat.category === messagesCategory;
+    const matchesSearch = chat.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          chat.message.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
   });
 
   return (
@@ -145,7 +171,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
           {/* Hero Porsche Vehicle Image */}
           <div className="relative w-full h-[250px] bg-gradient-to-b from-purple-100 via-purple-50 to-white flex items-center justify-center p-4">
             <img 
-              src={NO_IMAGE_SVG} 
+              src="https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=800&q=80" 
               alt="Porsche GT3 RS"
               className="w-full h-full object-cover rounded-3xl shadow-md"
             />
@@ -295,47 +321,37 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
 
           {/* Chat List */}
           <div className="flex-1 px-4 py-2 space-y-2 overflow-y-auto max-h-[360px] custom-scrollbar text-left">
-            {filteredChats.length > 0 ? (
-              filteredChats.map((chat) => {
-                const partnerObj = chat.participantDetails ? Object.values(chat.participantDetails)[0] : null;
-                const partnerName = partnerObj?.name || 'Bazar360 Member';
-                const partnerAvatar = partnerObj?.avatar || NO_IMAGE_SVG;
-                return (
-                  <div 
-                    key={chat.id}
-                    className="p-3 bg-white rounded-2xl border border-slate-200/80 hover:border-slate-400 transition-all flex items-center justify-between gap-3 shadow-sm cursor-pointer"
-                  >
-                    <div className="relative shrink-0">
-                      <img 
-                        src={partnerAvatar} 
-                        alt={partnerName} 
-                        className="w-11 h-11 rounded-full object-cover border border-slate-200"
-                      />
-                    </div>
+            {filteredChats.map((chat) => (
+              <div 
+                key={chat.id}
+                className="p-3 bg-white rounded-2xl border border-slate-200/80 hover:border-slate-400 transition-all flex items-center justify-between gap-3 shadow-sm cursor-pointer"
+              >
+                <div className="relative shrink-0">
+                  <img 
+                    src={chat.avatar} 
+                    alt={chat.name} 
+                    className="w-11 h-11 rounded-full object-cover border border-slate-200"
+                  />
+                  {chat.online && (
+                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-[var(--color-accent-main)] rounded-full border-2 border-white shadow-sm" />
+                  )}
+                </div>
 
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between gap-1">
-                        <h4 className="text-xs font-bold text-slate-900 truncate">
-                          {partnerName}
-                        </h4>
-                        <span className="text-[10px] text-text-muted font-mono shrink-0">
-                          {chat.updatedAt ? new Date(chat.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-text-muted truncate mt-0.5">
-                        {chat.lastMessage || 'Chat started'}
-                      </p>
-                    </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-1">
+                    <h4 className="text-xs font-bold text-slate-900 truncate">
+                      {chat.name}
+                    </h4>
+                    <span className="text-[10px] text-text-muted font-mono shrink-0">
+                      {chat.time}
+                    </span>
                   </div>
-                );
-              })
-            ) : (
-              <div className="py-12 text-center text-text-muted text-xs space-y-2">
-                <MessageSquare size={32} className="mx-auto opacity-30 text-slate-400" />
-                <p className="font-semibold text-slate-700">No active chat messages</p>
-                <p className="text-[10px] text-text-muted">Start inquiries directly with verified showroom dealers across Pakistan.</p>
+                  <p className="text-[11px] text-text-muted truncate mt-0.5">
+                    {chat.message}
+                  </p>
+                </div>
               </div>
-            )}
+            ))}
           </div>
 
           {/* Glassmorphism Floating Bottom Bar inside Phone */}
@@ -380,7 +396,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
           {/* Hero Banner with Overlapping Avatar */}
           <div className="relative w-full h-[140px] bg-slate-200">
             <img 
-              src={NO_IMAGE_SVG} 
+              src="https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=800&q=80" 
               alt="Porsche Banner"
               className="w-full h-full object-cover"
             />
@@ -394,7 +410,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
             {/* Overlapping Avatar */}
             <div className="absolute -bottom-10 left-6 relative">
               <img 
-                src={NO_IMAGE_SVG} 
+                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80" 
                 alt="Steven Clark Avatar"
                 className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-lg"
               />

@@ -150,7 +150,7 @@ export function ServiceManagementHub({ lang = 'en' }: ServiceManagementHubProps)
             <span>Service & Maintenance Management Hub</span>
           </h3>
           <p className="text-xs text-[var(--color-text-muted)] font-mono mt-1">
-            End-to-end scheduling, appointment tracking, technician dispatch, and instant WhatsApp handoff for Bazar360 services.
+            End-to-end scheduling, appointment tracking, technician dispatch, and instant WhatsApp handoff for Auto Choice services.
           </p>
         </div>
 

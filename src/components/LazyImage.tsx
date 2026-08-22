@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { NO_IMAGE_SVG } from '../types';
 
 interface LazyImageProps {
   src: string;
@@ -44,7 +43,7 @@ export function LazyImage({
       )}
       
       <img
-        src={src || NO_IMAGE_SVG}
+        src={src}
         alt={alt}
         width={width}
         height={height}

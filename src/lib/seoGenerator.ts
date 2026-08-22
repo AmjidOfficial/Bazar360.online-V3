@@ -16,7 +16,7 @@ if (getApps().length === 0) {
 const db: Firestore = getFirestore(app);
 
 function ensureAbsoluteUrl(url: string | undefined): string {
-  if (!url) return '';
+  if (!url) return 'https://bazar360.online/auto_choice_logo_dark.jpg';
   if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
     return url;
   }

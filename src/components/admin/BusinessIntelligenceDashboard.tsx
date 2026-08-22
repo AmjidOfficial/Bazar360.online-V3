@@ -240,7 +240,7 @@ export function BusinessIntelligenceDashboard({ lang = 'en' }: BIDashboardProps)
           <div className="space-y-3">
             <div className="p-3 bg-[var(--color-bg-secondary)]/40 border border-white/5 rounded-xl flex items-center justify-between">
               <div>
-                <h5 className="text-xs font-black text-[var(--color-text-header)] uppercase">Bazar360 Technical Team</h5>
+                <h5 className="text-xs font-black text-[var(--color-text-header)] uppercase">Auto Choice Technical Team</h5>
                 <p className="text-[9px] text-text-muted font-mono">200+ Point Inspection & Verification Unit</p>
               </div>
               <div className="text-right font-mono">

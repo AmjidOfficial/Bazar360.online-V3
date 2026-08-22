@@ -70,7 +70,7 @@ export default function AdminPostingForm({
   
   // Images list
   const [images, setImages] = useState<string[]>([
-    ''
+    'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800'
   ]);
   const [newImageUrl, setNewImageUrl] = useState('');
 
@@ -101,9 +101,9 @@ export default function AdminPostingForm({
 
   const handleGenerateDemoImages = () => {
     const demos = [
-      '',
-      '',
-      ''
+      'https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=800'
     ];
     setImages(demos);
     console.log('Injected premium demonstration images');
@@ -147,7 +147,7 @@ export default function AdminPostingForm({
         mileage: Number(mileage),
         fuelType,
         transmission,
-        imageUrl: images[0] || '',
+        imageUrl: images[0] || 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800',
         verified: true, // Admin posted is pre-verified!
         featured: true, // Admin posted gets featured placement!
         approved: true, // Admin posted is pre-approved!
@@ -168,7 +168,7 @@ export default function AdminPostingForm({
         registrationCity,
         documentType,
         tokenTaxPaid,
-        images: images.length > 0 ? images : [''],
+        images: images.length > 0 ? images : ['https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800'],
         assemblyType,
         isSold: false,
         isPaused: false,
@@ -203,7 +203,7 @@ export default function AdminPostingForm({
       setDescription('');
       setSelectedShowroom(null);
       setSearchTerm('');
-      setImages(['']);
+      setImages(['https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800']);
     } catch (err: any) {
       console.error('Error posting vehicle:', err);
       toast.error(err.message || 'Error occurred while saving listing.');
@@ -305,7 +305,7 @@ export default function AdminPostingForm({
                     <Search className="absolute left-3 top-2.5 text-[var(--color-text-muted)]" size={14} />
                     <input
                       type="text"
-                      placeholder="Type showroom name or location (e.g. Bazar360)..."
+                      placeholder="Type showroom name or location (e.g. Auto Choice)..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="w-full bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] pl-9 pr-4 py-2 rounded-xl text-xs focus:border-orange-500 outline-none text-[var(--color-text-main)]"
@@ -618,7 +618,7 @@ export default function AdminPostingForm({
                       className="w-full h-16 object-cover rounded-lg"
                       onError={(e) => {
                         // fallback broken image
-                        (e.target as HTMLImageElement).src = '';
+                        (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800';
                       }}
                     />
                     <div className="flex items-center justify-between text-[8px] text-[var(--color-text-muted)] pr-1">

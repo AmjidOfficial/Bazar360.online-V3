@@ -1,4 +1,3 @@
-import { NO_IMAGE_SVG } from "../types";
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   ShieldAlert, 
@@ -23,8 +22,7 @@ import {
   ShieldCheck,
   Image as ImageIcon,
   Cloud,
-  Wrench,
-  Plus
+  Wrench
 } from 'lucide-react';
 import { onSnapshot, collection } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -39,7 +37,6 @@ import { AdminBrandingManager } from './AdminBrandingManager';
 import { AdminLeadsView } from './admin/AdminLeadsView';
 import { CRMServiceHub } from './admin/CRMServiceHub';
 import { EnterpriseCRMAdmin } from './admin/EnterpriseCRMAdmin';
-import { AdminCreateShowroomModal } from './admin/AdminCreateShowroomModal';
 import { ServiceManagementHub } from './admin/ServiceManagementHub';
 import { CentralNotificationService } from './admin/CentralNotificationService';
 import { BusinessIntelligenceDashboard } from './admin/BusinessIntelligenceDashboard';
@@ -87,7 +84,6 @@ export default function AdminDashboard({
   const [activeTab, setActiveTab] = useState<'listings' | 'approval_queue' | 'showrooms' | 'developer_logs' | 'branding' | 'leads' | 'crm_service_hub' | 'enterprise_crm' | 'service_management' | 'bi_analytics' | 'data_health'>('listings');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedListingIds, setSelectedListingIds] = useState<string[]>([]);
-  const [isCreateShowroomOpen, setIsCreateShowroomOpen] = useState(false);
 
   // Real-time Firestore Listener for New Unapproved Ads
   const isInitialListenerRun = useRef(true);
@@ -464,31 +460,22 @@ export default function AdminDashboard({
             )}
 
             {activeTab === 'showrooms' && (
-              <>
-                <button
-                  onClick={() => setIsCreateShowroomOpen(true)}
-                  className="px-3 py-2 bg-orange-500 hover:bg-orange-600 text-slate-950 font-black rounded-xl text-xs font-mono uppercase flex items-center gap-1.5 cursor-pointer shadow-md"
-                >
-                  <Plus size={14} />
-                  <span>Create Showroom</span>
-                </button>
-                <button
-                  onClick={() => {
-                    if (!isAdminUser(currentUser)) {
-                      toast.error('Restricted: Only designated Administrators can delete showrooms.');
-                      return;
-                    }
-                    if (window.confirm('⚠️ WARNING: Delete ALL registered showrooms?')) {
-                      onDeleteAllDealers?.();
-                      console.log('All showrooms cleared.');
-                    }
-                  }}
-                  className="px-3 py-2 bg-rose-950 hover:bg-rose-900 border border-rose-800 text-rose-300 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Trash2 size={13} />
-                  <span>Delete All Showrooms</span>
-                </button>
-              </>
+              <button
+                onClick={() => {
+                  if (!isAdminUser(currentUser)) {
+                    toast.error('Restricted: Only designated Administrators can delete showrooms.');
+                    return;
+                  }
+                  if (window.confirm('⚠️ WARNING: Delete ALL registered showrooms?')) {
+                    onDeleteAllDealers?.();
+                    console.log('All showrooms cleared.');
+                  }
+                }}
+                className="px-3 py-2 bg-rose-950 hover:bg-rose-900 border border-rose-800 text-rose-300 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 cursor-pointer"
+              >
+                <Trash2 size={13} />
+                <span>Delete All Showrooms</span>
+              </button>
             )}
 
             <button
@@ -568,7 +555,7 @@ export default function AdminDashboard({
                       <div key={car.id} className="bg-bg-primary border border-border-main hover:border-amber-500/40 rounded-2xl p-5 space-y-4 shadow-xl transition-all relative overflow-hidden group text-left">
                         <div className="flex flex-col sm:flex-row gap-4">
                           <img
-                            src={car.imageUrl || NO_IMAGE_SVG}
+                            src={car.imageUrl}
                             alt={car.title}
                             className="w-full sm:w-36 h-28 object-cover rounded-xl border border-border-main shrink-0"
                             referrerPolicy="no-referrer"
@@ -592,8 +579,8 @@ export default function AdminDashboard({
                               <div><span className="text-text-muted">Make:</span> {car.make}</div>
                               <div><span className="text-text-muted">Model:</span> {car.model}</div>
                               <div><span className="text-text-muted">Year:</span> {car.year}</div>
-                              <div><span className="text-text-muted">City:</span> {car.registrationCity || 'Peshawar'}</div>
-                              <div><span className="text-text-muted">Engine:</span> {car.engineCC ? `${car.engineCC} CC` : 'Standard'}</div>
+                              <div><span className="text-text-muted">City:</span> {car.registrationCity || 'Not provided'}</div>
+                              <div><span className="text-text-muted">Engine:</span> {car.engineCC ? `${car.engineCC} CC` : 'Not provided'}</div>
                               <div><span className="text-text-muted">Seller Type:</span> {car.sellerType || 'Individual'}</div>
                             </div>
                           </div>
@@ -758,7 +745,7 @@ export default function AdminDashboard({
                         <td className="p-4">
                           <div className="flex items-center gap-3">
                             <img 
-                              src={car.imageUrl || NO_IMAGE_SVG} 
+                              src={car.imageUrl} 
                               alt={car.title}
                               className="w-12 h-8 object-cover rounded-lg border border-border-main shrink-0"
                               referrerPolicy="no-referrer"
@@ -912,15 +899,6 @@ export default function AdminDashboard({
           )}
         </div>
       </div>
-
-      <AdminCreateShowroomModal
-        isOpen={isCreateShowroomOpen}
-        onClose={() => setIsCreateShowroomOpen(false)}
-        onShowroomCreated={() => {
-          // Invalidate cache or refresh dealers
-          toast.success('Refreshing showrooms list...');
-        }}
-      />
     </div>
   );
 }

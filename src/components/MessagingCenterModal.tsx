@@ -25,8 +25,7 @@ import {
 import {
   Conversation,
   DirectMessage,
-  UserProfile,
-  NO_IMAGE_SVG
+  UserProfile
 } from '../types';
 import {
   dbFetchUserConversations,
@@ -457,7 +456,7 @@ export default function MessagingCenterModal({
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="w-12 h-10 rounded-lg overflow-hidden bg-bg-secondary shrink-0 border border-white/10">
                           <img
-                            src={relatedListing?.image || activeConv?.relatedListingImage || NO_IMAGE_SVG}
+                            src={relatedListing?.image || activeConv?.relatedListingImage || '/src/assets/images/bab_e_khyber_sunset_1783593379683.jpg'}
                             alt="Vehicle"
                             className="w-full h-full object-cover"
                           />

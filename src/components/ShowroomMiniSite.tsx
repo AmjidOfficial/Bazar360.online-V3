@@ -44,7 +44,6 @@ import { ShowroomShareQR } from './ShowroomShareQR';
 
 // Performance optimization: Lazy load non-critical sections to reduce initial bundle evaluation
 const InventoryGrid = React.lazy(() => import('./InventoryGrid').then(module => ({ default: module.InventoryGrid })));
-const ShowroomFilterableInventory = React.lazy(() => import('./ShowroomFilterableInventory').then(module => ({ default: module.ShowroomFilterableInventory })));
 const ContactSection = React.lazy(() => import('./ContactSection').then(module => ({ default: module.ContactSection })));
 const MediaGallery = React.lazy(() => import('./MediaGallery').then(module => ({ default: module.MediaGallery })));
 
@@ -138,19 +137,16 @@ export default function ShowroomMiniSite({
 
   const isOwner = useMemo(() => {
     if (!currentUser) return false;
-    return currentUser.uid === dealer.ownerUid || 
-           currentUser.associatedShowroomId === dealer.id ||
-           currentUser.dealerId === dealer.id ||
-           currentUser.salesPodId === dealer.id ||
-           currentUser.role === 'Admin' || 
-           currentUser.role === 'Super Admin';
+    return currentUser.uid === dealer.ownerUid || currentUser.role === 'Admin' || currentUser.role === 'Super Admin';
   }, [currentUser, dealer]);
 
   const handleShareShowroom = async () => {
     const shareUrl = `${window.location.origin}/dealers/${dealer.id}`;
-    const mapLink = `https://maps.google.com/?q=${encodeURIComponent(dealer.location || dealer.name)}`;
+    const mapLink = dealer.id === 'auto-choice-peshawar' 
+      ? "https://maps.google.com/?q=Auto+choice+Alamas+Car+Village+Ring+Road+Peshawar"
+      : `https://maps.google.com/?q=${encodeURIComponent(dealer.location || 'Peshawar')}`;
       
-    const shareText = `🚗 ${dealer.name.toUpperCase()} 🚗\n✨ "${dealer.subtitle || 'Elite Automotive Dealership'}"\n📍 Location: ${dealer.location}\n🗺️ Google Maps: ${mapLink}\n📞 Contact/WhatsApp: ${dealer.whatsapp || dealer.phone || 'Not Provided'}\n🌐 Browse Real-Time Inventory: ${shareUrl}`;
+    const shareText = `🚗 ${dealer.name.toUpperCase()} 🚗\n✨ "${dealer.subtitle || 'Elite Automotive Dealership'}"\n📍 Location: ${dealer.location}\n🗺️ Google Maps: ${mapLink}\n📞 Contact/WhatsApp: ${dealer.whatsapp || '0315-9085086'}\n👥 Showroom Lead: Malak Mazhar\n🌐 Browse Real-Time Inventory: ${shareUrl}`;
 
     if (navigator.share) {
       try {
@@ -485,7 +481,7 @@ export default function ShowroomMiniSite({
                               </a>
 
                               <a
-                                href={dealer.id === '' 
+                                href={dealer.id === 'auto-choice-peshawar' 
                                   ? "https://maps.google.com/?q=Auto+choice+Alamas+Car+Village+Ring+Road+Peshawar"
                                   : `https://maps.google.com/?q=${encodeURIComponent(dealer.location || dealer.name)}`}
                                 target="_blank"
@@ -686,13 +682,27 @@ export default function ShowroomMiniSite({
                         </div>
                       </div>
 
-                      <div className="bg-bg-primary rounded-2xl h-48 border border-[var(--color-border-main)] relative overflow-hidden flex items-center justify-center font-mono text-[var(--color-text-muted)]">
-                        <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.03)_1.2px,transparent_1.2px)] [background-size:12px_12px] opacity-60"></div>
-                        <div className="z-10 text-center space-y-1">
-                          <span className="text-[10px] uppercase font-black text-orange-500 block">GPS Pin Verified</span>
-                          <span className="text-xs text-[var(--color-text-main)] block">{dealer.location || 'Peshawar'}</span>
+                      {dealer.id === 'auto-choice-peshawar' ? (
+                        <div className="w-full h-48 rounded-2xl border border-[var(--color-border-main)] overflow-hidden bg-bg-primary relative">
+                          <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3308.9780193666907!2d71.48557838117156!3d33.967404453093664!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38d917f3bfdc9deb%3A0xfc1d94addfbea0d5!2sAuto%20choice!5e0!3m2!1sen!2s!4v1781725478050!5m2!1sen!2s"
+                            width="100%"
+                            height="100%"
+                            style={{ border: 0 }}
+                            allowFullScreen={true}
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                          />
                         </div>
-                      </div>
+                      ) : (
+                        <div className="bg-bg-primary rounded-2xl h-48 border border-[var(--color-border-main)] relative overflow-hidden flex items-center justify-center font-mono text-[var(--color-text-muted)]">
+                          <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.03)_1.2px,transparent_1.2px)] [background-size:12px_12px] opacity-60"></div>
+                          <div className="z-10 text-center space-y-1">
+                            <span className="text-[10px] uppercase font-black text-orange-500 block">GPS Pin Verified</span>
+                            <span className="text-xs text-[var(--color-text-main)] block">{dealer.location || 'Peshawar'}</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Operational Hour Card */}
@@ -809,16 +819,14 @@ export default function ShowroomMiniSite({
                             level="H"
                             includeMargin={true}
                             className="w-44 h-44 rounded-lg object-contain bg-white p-2.5 border border-white/5 shadow-2xl transition-transform duration-300 hover:scale-105"
-                            {...((dealer.logoUrl || dealer.logo) ? {
-                              imageSettings: {
-                                src: dealer.logoUrl || dealer.logo || "",
-                                x: undefined,
-                                y: undefined,
-                                height: 36,
-                                width: 36,
-                                excavate: true,
-                              }
-                            } : {})}
+                            imageSettings={{
+                              src: dealer.logoUrl || dealer.logo || "/auto_choice_logo_dark.jpg",
+                              x: undefined,
+                              y: undefined,
+                              height: 36,
+                              width: 36,
+                              excavate: true,
+                            }}
                           />
                         </div>
 
@@ -1001,9 +1009,10 @@ export default function ShowroomMiniSite({
                     </p>
                   </div>
                   <React.Suspense fallback={<ShowroomInventorySkeleton />}>
-                    <ShowroomFilterableInventory 
-                      inventory={listings} 
-                      onSelectListing={(car) => onSelectListing(car as CarListing)} 
+                    <InventoryGrid 
+                      listings={listings} 
+                      dealer={dealer} 
+                      onSelectListing={(id) => onSelectListing(listings.find(l => l.id === id)!)} 
                     />
                   </React.Suspense>
                 </div>

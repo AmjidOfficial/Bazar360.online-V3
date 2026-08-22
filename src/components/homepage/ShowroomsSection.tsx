@@ -52,7 +52,7 @@ export const ShowroomsSection: React.FC<ShowroomsSectionProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {dealers.slice(0, 6).map((dealer) => {
             const logo = dealer.logoUrl || dealer.logo || dealer.profilePictureUrl || dealer.avatarUrl;
-            const cover = dealer.coverImage || '';
+            const cover = dealer.coverImage || 'https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&q=80&w=800';
 
             return (
               <div

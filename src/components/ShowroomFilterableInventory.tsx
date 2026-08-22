@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { SlidersHorizontal, X, RotateCcw, ArrowUpDown, Filter, Check } from 'lucide-react';
 import { AnimatedVehicleCard } from './AnimatedVehicleCard';
@@ -24,10 +24,9 @@ interface Vehicle {
 
 interface ShowroomFilterableInventoryProps {
   inventory: Vehicle[];
-  onSelectListing?: (car: Vehicle) => void;
 }
 
-export function ShowroomFilterableInventory({ inventory, onSelectListing }: ShowroomFilterableInventoryProps) {
+export function ShowroomFilterableInventory({ inventory }: ShowroomFilterableInventoryProps) {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [sortBy, setSortBy] = useState<'default' | 'price-asc' | 'price-desc' | 'year-desc' | 'year-asc'>('default');
   const [transmission, setTransmission] = useState<string>('all');
@@ -35,7 +34,6 @@ export function ShowroomFilterableInventory({ inventory, onSelectListing }: Show
   const [maxYear, setMaxYear] = useState<string>('');
   const [minPriceLakh, setMinPriceLakh] = useState<string>('');
   const [maxPriceLakh, setMaxPriceLakh] = useState<string>('');
-  const [visibleCount, setVisibleCount] = useState(20);
 
   // Extract available years for filter options
   const availableYears = useMemo(() => {
@@ -113,17 +111,6 @@ export function ShowroomFilterableInventory({ inventory, onSelectListing }: Show
     return result;
   }, [inventory, transmission, minYear, maxYear, minPriceLakh, maxPriceLakh, sortBy]);
 
-  // Reset visible count when filters change
-  useEffect(() => {
-    setVisibleCount(20);
-  }, [transmission, minYear, maxYear, minPriceLakh, maxPriceLakh, sortBy]);
-
-  const displayedInventory = useMemo(() => {
-    return filteredAndSortedInventory.slice(0, visibleCount);
-  }, [filteredAndSortedInventory, visibleCount]);
-
-  const hasMore = visibleCount < filteredAndSortedInventory.length;
-
   const resetFilters = () => {
     setSortBy('default');
     setTransmission('all');
@@ -147,7 +134,7 @@ export function ShowroomFilterableInventory({ inventory, onSelectListing }: Show
         <div className="flex items-center gap-3">
           {/* Active Count Badge */}
           <span className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] text-[var(--color-accent-main)] px-3.5 py-1.5 rounded-full text-xs font-mono font-bold tracking-wider shrink-0 shadow-sm">
-            {displayedInventory.length} / {filteredAndSortedInventory.length} UNITS
+            {filteredAndSortedInventory.length} / {inventory.length} UNITS
           </span>
 
           {/* Mobile & Desktop Slide-Out Filter Button */}
@@ -230,7 +217,7 @@ export function ShowroomFilterableInventory({ inventory, onSelectListing }: Show
       ) : (
         <motion.div
           id="showroom-inventory-grid"
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           variants={{
             hidden: { opacity: 0 },
             show: {
@@ -244,14 +231,13 @@ export function ShowroomFilterableInventory({ inventory, onSelectListing }: Show
           initial="hidden"
           animate="show"
         >
-          {displayedInventory.map((car: Vehicle, idx: number) => {
+          {filteredAndSortedInventory.map((car: Vehicle, idx: number) => {
             const rawP = getCarPrice(car);
             return (
               <AnimatedVehicleCard
                 key={car.id}
                 index={idx}
-                onClick={() => onSelectListing?.(car)}
-                className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] rounded-2xl overflow-hidden hover:border-[var(--color-brand-orange)]/40 hover:shadow-lg transition-all duration-300 group flex flex-col h-full shadow-sm cursor-pointer"
+                className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] rounded-2xl overflow-hidden hover:border-[var(--color-brand-orange)]/40 hover:shadow-lg transition-all duration-300 group flex flex-col h-full shadow-sm"
               >
                 <div className="w-full aspect-[16/10] sm:aspect-[16/9] md:aspect-[16/10] bg-[var(--color-bg-tertiary)] relative overflow-hidden shrink-0">
                   {car.imageUrl || (car.images && car.images[0]) ? (
@@ -310,17 +296,6 @@ export function ShowroomFilterableInventory({ inventory, onSelectListing }: Show
             );
           })}
         </motion.div>
-      )}
-
-      {hasMore && (
-        <div className="text-center pt-8">
-          <button
-            onClick={() => setVisibleCount(prev => prev + 20)}
-            className="px-8 py-3 bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] hover:border-[var(--color-brand-orange)] text-[var(--color-text-main)] font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-sm hover:shadow-md"
-          >
-            Load More Vehicles
-          </button>
-        </div>
       )}
 
       {/* Slide-Out Mobile & Desktop Filter Menu Drawer */}

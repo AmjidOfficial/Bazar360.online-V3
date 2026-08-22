@@ -45,7 +45,7 @@ export function useSEO({
       }
     } else if (view === 'search') {
       const queryText = searchQuery ? ` for "${searchQuery}"` : '';
-      title = `Search Verified Cars & Showrooms${queryText} | Bazar360 Bazar360`;
+      title = `Search Verified Cars & Showrooms${queryText} | Bazar360 Auto Choice`;
       description = `Browse verified automotive inventory${queryText} across Pakistan with multi-point inspection reports, transparent pricing, and secure direct dealer communication on Bazar360.`;
     } else if (view === 'services') {
       title = `Specialized Auto Inspection & Maintenance Services | Bazar360`;

@@ -16,11 +16,6 @@ export const getFriendlyAuthErrorMessage = (errorMsg: string, lang: 'en' | 'ur' 
   const isUrdu = lang === 'ur';
   const msg = errorMsg.toLowerCase();
   
-  if (msg.includes('auth/popup-blocked') || msg.includes('popup-blocked')) {
-    return isUrdu 
-      ? 'براؤزر نے پاپ اپ کو مسدود کر دیا ہے۔ براہ کرم ای میل اور پاس ورڈ کے ذریعے سائن ان کریں یا نئی ٹیب میں کھولیں۔' 
-      : 'Browser popup was blocked in the preview sandbox. Please sign in using Email & Password or open the app in a new tab.';
-  }
   if (msg.includes('auth/invalid-credential') || msg.includes('invalid-credential') || msg.includes('wrong-password') || msg.includes('user-not-found')) {
     return isUrdu 
       ? 'غلط ای میل یا پاس ورڈ۔ براہ کرم دوبارہ کوشش کریں۔' 
@@ -470,7 +465,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, lang }: AuthModa
 
             {/* Bottom footnote */}
             <div className="relative z-10 text-[9px] font-mono text-text-muted text-center">
-              © 2026 Bazar360 Sector & Bazar360. All Rights Reserved.
+              © 2026 Auto Choice Sector & Bazar360. All Rights Reserved.
             </div>
           </div>
 

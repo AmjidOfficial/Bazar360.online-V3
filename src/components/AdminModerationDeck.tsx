@@ -91,14 +91,14 @@ export default function AdminModerationDeck({
         mileage: Number(mileage),
         fuelType: 'Petrol',
         transmission: 'Automatic',
-        imageUrl: '',
+        imageUrl: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80',
         verified: true,
         featured: true,
         dealerId: postMode === 'showroom' ? selectedDealerId : 'admin-private',
         description: 'Posted by BAZAR360 Admin',
         createdAt: new Date().toISOString(),
         tags: [],
-        specs: {},
+        specs: { color: 'Black', engineSize: '1.8L', horsepower: '140' },
         ownerId: currentUser?.uid || 'admin',
         approved: true
       };

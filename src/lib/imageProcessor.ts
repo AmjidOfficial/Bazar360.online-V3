@@ -1,5 +1,5 @@
 /**
- * Image Processor Utility for Bazar360 / Bazar360
+ * Image Processor Utility for Bazar360 / Auto Choice
  * Encapsulates client-side canvas resizing, compression, size validation, and payload protection.
  */
 

@@ -140,33 +140,17 @@ export const ProfilePhotoUpload: React.FC<ProfilePhotoUploadProps> = ({
             throw new Error('Unable to upload image. Storage service did not return a valid URL.');
           }
         } catch (cloudinaryErr: any) {
-          const cloudMsg = cloudinaryErr instanceof Error ? cloudinaryErr.message : String(cloudinaryErr);
-          console.warn('[ProfilePhotoUpload] Direct Cloudinary & server proxy upload failed, converting image to optimized base64 fallback:', cloudMsg);
+          console.warn('[ProfilePhotoUpload] Direct Cloudinary & server proxy upload failed, converting image to optimized base64 fallback:', cloudinaryErr);
           
           // Tertiary Resilient Fallback: Compress image locally to lightweight 400px JPEG base64 string
-          try {
-            const compressedFile = await compressImage(file, 400, 0.8);
-            const base64Data = await fileToBase64(compressedFile);
-            if (base64Data) {
-              secureDownloadUrl = base64Data;
-            } else {
-              throw new Error('Failed to encode image to base64');
-            }
-          } catch (compressErr) {
-            const rawBase64 = await fileToBase64(file);
-            secureDownloadUrl = rawBase64;
-          }
+          const compressedFile = await compressImage(file, 400, 0.8);
+          const base64Data = await fileToBase64(compressedFile);
+          secureDownloadUrl = base64Data;
         }
       }
 
-      if (!secureDownloadUrl) {
-        throw new Error('Could not process photo for upload. Please choose another image file.');
-      }
-
       setUploadProgress(100);
-      try {
-        URL.revokeObjectURL(tempUrl);
-      } catch {}
+      URL.revokeObjectURL(tempUrl);
       setPreviewUrl(secureDownloadUrl);
 
       // Update Firestore Profile document
@@ -189,12 +173,9 @@ export const ProfilePhotoUpload: React.FC<ProfilePhotoUploadProps> = ({
         onUpdateUser(updatedUser);
       }
 
-      toast.success('Profile photo updated successfully!');
-
     } catch (err: any) {
-      const errMsg = err instanceof Error ? err.message : (typeof err === 'string' ? err : 'Unable to upload photo. Please try again.');
-      console.error('[ProfilePhotoUpload] Final Error:', errMsg);
-      toast.error('Failed to upload photo: ' + errMsg);
+      console.error('[ProfilePhotoUpload] Final Error:', err);
+      toast.error('Failed to upload photo: ' + (err.message || 'Unknown error'));
       setPreviewUrl(null); // Reset preview on failure
     } finally {
       setIsUploading(false);

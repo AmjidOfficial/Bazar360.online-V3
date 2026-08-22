@@ -1,5 +1,5 @@
 import React from 'react';
-import { CarListing, NO_IMAGE_SVG } from '../../types';
+import { CarListing } from '../../types';
 import { EmptyState } from './EmptyState';
 import { Eye, MapPin, Gauge } from 'lucide-react';
 import { useCurrencyMode } from '../../lib/currency';
@@ -50,7 +50,7 @@ export const RecentlyViewed: React.FC<RecentlyViewedProps> = ({
           >
             <div className="w-24 h-20 rounded-xl bg-bg-secondary overflow-hidden shrink-0 relative">
               <img
-                src={car.imageUrl || NO_IMAGE_SVG}
+                src={car.imageUrl || 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=400'}
                 alt={`${car.make} ${car.model}`}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 referrerPolicy="no-referrer"

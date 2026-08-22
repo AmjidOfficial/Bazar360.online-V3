@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { CarListing, Dealer } from '../types';
 import { VehicleCard } from './VehicleCard';
-import MarketplaceHero from './MarketplaceHero';
+import AutoChoiceHero from './AutoChoiceHero';
 import { TopBrandsRail } from './homepage/TopBrandsRail';
 import { ShowroomsSection } from './homepage/ShowroomsSection';
 import { ServicesSection } from './homepage/ServicesSection';
@@ -111,7 +111,7 @@ export function HomeFeed({
       className="min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-main)] overflow-x-hidden font-sans pb-24"
     >
       {/* 1. Hero & Fast Search Engine */}
-      <MarketplaceHero 
+      <AutoChoiceHero 
         lang={lang} 
         onSearch={(query) => {
           if (setSearchQuery) setSearchQuery(query);
