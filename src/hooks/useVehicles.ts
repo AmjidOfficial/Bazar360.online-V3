@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { CarListing } from '../types';
-import { fetchPublishedInventory } from '../lib/inventoryRepository';
+import { dbFetchListings } from '../lib/dbService';
 
 interface VehicleFilters {
   make?: string;
@@ -9,9 +9,8 @@ interface VehicleFilters {
 }
 
 /**
- * Buyer-facing inventory hook.
- * Uses the canonical real-data repository instead of the legacy 100-record
- * fetch/deduplication path.
+ * 1. Reusable Client Hook for Vehicle inventory
+ * Fetches active (approved) listings from Firestore with dynamic reactive filters.
  */
 export function useVehicles(filters?: VehicleFilters) {
   const [vehicles, setVehicles] = useState<CarListing[]>([]);
@@ -20,46 +19,54 @@ export function useVehicles(filters?: VehicleFilters) {
 
   useEffect(() => {
     let active = true;
-
+    
     async function fetchInventory() {
       setLoading(true);
       try {
-        const page = await fetchPublishedInventory();
-        let filtered = page.listings;
-
+        const listings = await dbFetchListings();
+        
+        // Filter out unapproved and match criteria
+        let filtered = listings.filter(v => v.approved !== false);
+        
         if (filters?.make) {
           const brandMatch = filters.make.toLowerCase().trim();
-          filtered = filtered.filter(v => (v.make || '').toLowerCase().includes(brandMatch));
+          filtered = filtered.filter(v => v.make.toLowerCase().includes(brandMatch));
         }
-
+        
         if (filters?.model) {
           const modelMatch = filters.model.toLowerCase().trim();
-          filtered = filtered.filter(v => (v.model || '').toLowerCase().includes(modelMatch));
+          filtered = filtered.filter(v => v.model.toLowerCase().includes(modelMatch));
         }
-
+        
         if (filters?.city) {
           const cityMatch = filters.city.toLowerCase().trim();
           filtered = filtered.filter(v => {
-            const loc = (v.registrationCity || v.location || v.region || '').toLowerCase();
+            const loc = (v.registrationCity || v.region || '').toLowerCase();
             return loc.includes(cityMatch);
           });
         }
+        
+        // Sort by newest first by default
+        filtered = filtered.sort((a, b) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime());
 
         if (active) {
           setVehicles(filtered);
           setError(null);
         }
-      } catch (err: unknown) {
+      } catch (err: any) {
         console.error('[useVehicles Hook] Sourcing error:', err);
         if (active) {
           setError(err instanceof Error ? err : new Error(String(err)));
         }
       } finally {
-        if (active) setLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       }
     }
 
     fetchInventory();
+    
     return () => {
       active = false;
     };

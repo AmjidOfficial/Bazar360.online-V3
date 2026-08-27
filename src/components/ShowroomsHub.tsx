@@ -1,3 +1,4 @@
+import { NO_IMAGE_SVG } from "../types";
 import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { 
@@ -236,7 +237,7 @@ export default function ShowroomsHub({
                   <LazyImage
                     alt={`${dealer.name} Cover`}
                     className="absolute inset-0 w-full h-full opacity-60 group-hover:opacity-75 group-hover:scale-105 transition-all duration-700 object-cover object-center"
-                    src={dealer.coverImage || 'https://images.unsplash.com/photo-1562575214-da9fcf59b907?auto=format&fit=crop&w=800&q=80'}
+                    src={dealer.coverImage || NO_IMAGE_SVG}
                     width={400}
                     height={176}
                   />

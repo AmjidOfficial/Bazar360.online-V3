@@ -21,7 +21,7 @@ export const CENTRAL_FAQS: FAQItem[] = [
     category: 'peshawar_kpk',
     questionEn: 'How can I buy a used or imported car in Peshawar through Bazar360?',
     questionUr: 'پشاور میں بازار 360 کے ذریعے گاڑی کیسے خریدی جائے؟',
-    answerEn: 'Browse live inventory from verified Peshawar showrooms (such as Auto Choice Peshawar on Ring Road / University Road) and private sellers. You can filter by make, model, year, transmission, and budget, inspect detailed HD photos, and click the direct WhatsApp or Call button to negotiate directly with the seller.',
+    answerEn: 'Browse live inventory from verified Peshawar showrooms (such as Bazar360 Peshawar on Ring Road / University Road) and private sellers. You can filter by make, model, year, transmission, and budget, inspect detailed HD photos, and click the direct WhatsApp or Call button to negotiate directly with the seller.',
     answerUr: 'پشاور کے تصدیق شدہ شو رومز اور پرائیویٹ سیلرز کی لائیو گاڑیاں دیکھیں۔ اپنی پسند کی گاڑی منتخب کریں اور براہ راست واٹس ایپ یا کال کے ذریعے رابطہ کریں۔'
   },
   {

@@ -28,7 +28,7 @@ interface AdminBrandingManagerProps {
 
 export function AdminBrandingManager({ currentUser }: AdminBrandingManagerProps) {
   const [bazar360Logo, setBazar360Logo] = useState<string>('/bazar360_logo_dark.jpg');
-  const [autoChoiceLogo, setAutoChoiceLogo] = useState<string>('/auto_choice_logo_dark.jpg');
+  const [autoChoiceLogo, setAutoChoiceLogo] = useState<string>('');
   
   const [uploadingBazar360, setUploadingBazar360] = useState<boolean>(false);
   const [uploadingAutoChoice, setUploadingAutoChoice] = useState<boolean>(false);
@@ -149,7 +149,7 @@ export function AdminBrandingManager({ currentUser }: AdminBrandingManagerProps)
       } else {
         setAutoChoiceLogo(uploadedUrl);
         setAutoChoiceHealth(prev => ({ ...prev, uploadedUrl }));
-        toast.success(`Auto Choice logo compressed (${processed.savedPercentage}% saved) & uploaded via Cloudinary!`);
+        toast.success(`Bazar360 logo compressed (${processed.savedPercentage}% saved) & uploaded via Cloudinary!`);
       }
     } catch (err: any) {
       console.error('Failed to process image upload:', err);
@@ -203,7 +203,7 @@ export function AdminBrandingManager({ currentUser }: AdminBrandingManagerProps)
     if (!window.confirm('Reset branding logos back to default static assets?')) return;
     
     const defaultB360 = '/bazar360_logo_dark.jpg';
-    const defaultAC = '/auto_choice_logo_dark.jpg';
+    const defaultAC = '';
 
     setBazar360Logo(defaultB360);
     setAutoChoiceLogo(defaultAC);
@@ -335,13 +335,13 @@ export function AdminBrandingManager({ currentUser }: AdminBrandingManagerProps)
           </div>
         </div>
 
-        {/* Card 2: Auto Choice Logo */}
+        {/* Card 2: Bazar360 Logo */}
         <div className="bg-bg-primary/60 border border-border-main rounded-2xl p-5 space-y-4 flex flex-col justify-between">
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-black text-[var(--color-text-header)] uppercase tracking-wider flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full bg-orange-500" />
-                Auto Choice Logo
+                Bazar360 Logo
               </h4>
               <span className="text-[10px] font-mono bg-orange-500/10 text-orange-400 px-2 py-0.5 rounded border border-orange-500/20 font-bold">
                 Showroom Hub
@@ -352,7 +352,7 @@ export function AdminBrandingManager({ currentUser }: AdminBrandingManagerProps)
             <div className="relative w-full h-36 rounded-xl bg-bg-secondary border border-border-main flex items-center justify-center p-4 overflow-hidden group">
               <img
                 src={autoChoiceLogo}
-                alt="Auto Choice Logo"
+                alt="Bazar360 Logo"
                 className="max-h-full max-w-full object-contain filter drop-shadow group-hover:scale-105 transition-transform duration-300"
                 referrerPolicy="no-referrer"
               />
@@ -381,7 +381,7 @@ export function AdminBrandingManager({ currentUser }: AdminBrandingManagerProps)
                 ) : (
                   <>
                     <Upload size={14} />
-                    <span>Replace Auto Choice Logo</span>
+                    <span>Replace Bazar360 Logo</span>
                   </>
                 )}
               </div>

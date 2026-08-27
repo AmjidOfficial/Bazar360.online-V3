@@ -11,12 +11,16 @@ import {
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, db, googleProvider, facebookProvider } from '../firebase';
 import { UserProfile, dbSaveUserProfile, dbFetchUserProfile } from '../lib/dbService';
-import { useAuth } from './AuthContext';
 
 export const getFriendlyAuthErrorMessage = (errorMsg: string, lang: 'en' | 'ur' = 'en'): string => {
   const isUrdu = lang === 'ur';
   const msg = errorMsg.toLowerCase();
   
+  if (msg.includes('auth/popup-blocked') || msg.includes('popup-blocked')) {
+    return isUrdu 
+      ? 'براؤزر نے پاپ اپ کو مسدود کر دیا ہے۔ براہ کرم ای میل اور پاس ورڈ کے ذریعے سائن ان کریں یا نئی ٹیب میں کھولیں۔' 
+      : 'Browser popup was blocked in the preview sandbox. Please sign in using Email & Password or open the app in a new tab.';
+  }
   if (msg.includes('auth/invalid-credential') || msg.includes('invalid-credential') || msg.includes('wrong-password') || msg.includes('user-not-found')) {
     return isUrdu 
       ? 'غلط ای میل یا پاس ورڈ۔ براہ کرم دوبارہ کوشش کریں۔' 
@@ -52,16 +56,6 @@ export const getFriendlyAuthErrorMessage = (errorMsg: string, lang: 'en' | 'ur' 
       ? 'نیٹ ورک کا مسئلہ۔ براہ کرم اپنا انٹرنیٹ کنکشن چیک کریں۔' 
       : 'Network error. Please check your internet connection.';
   }
-  if (msg.includes('popup-closed-by-user') || msg.includes('popup_closed_by_user')) {
-    return isUrdu 
-      ? 'سائن ان پاپ اپ مکمل ہونے سے پہلے بند کر دیا گیا تھا۔ براہ کرم دوبارہ کوشش کریں یا نیچے ڈیمو پروفائلز استعمال کریں۔' 
-      : 'The sign-in popup was closed before completion. Please try again or use one of our secure demo profiles below.';
-  }
-  if (msg.includes('cancelled-popup-request') || msg.includes('cancelled_popup_request') || msg.includes('pending promise') || msg.includes('internal assertion failed') || msg.includes('assertion failed')) {
-    return isUrdu 
-      ? 'براؤزر کی سیکیورٹی یا منقطع کنکشن کی وجہ سے پاپ اپ بند ہو گیا۔ براہ کرم دوبارہ کوشش کریں یا نیچے ڈیمو پروفائلز استعمال کریں۔' 
-      : 'Browser security or an interrupted connection blocked the login. Please try again or choose one of our quick-entry demo profiles below.';
-  }
   
   const match = errorMsg.match(/Firebase:\s*Error\s*\((.*?)\)\.?/);
   if (match && match[1]) {
@@ -80,7 +74,6 @@ interface AuthModalProps {
 }
 
 export default function AuthModal({ isOpen, onClose, onSuccess, lang }: AuthModalProps) {
-  const { loginAsDemo } = useAuth();
   const isUrdu = lang === 'ur';
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -477,7 +470,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, lang }: AuthModa
 
             {/* Bottom footnote */}
             <div className="relative z-10 text-[9px] font-mono text-text-muted text-center">
-              © 2026 Auto Choice Sector & Bazar360. All Rights Reserved.
+              © 2026 Bazar360 Sector & Bazar360. All Rights Reserved.
             </div>
           </div>
 
@@ -506,113 +499,8 @@ export default function AuthModal({ isOpen, onClose, onSuccess, lang }: AuthModa
 
               {/* Notification Badges */}
               {error && (
-                <div className="space-y-3">
-                  <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/25 text-red-400 text-[10.5px] font-bold leading-relaxed text-left font-mono">
-                    ⚠️ {error}
-                  </div>
-                  {/* Iframe sandbox helper */}
-                  <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-left text-amber-300 space-y-2">
-                    <p className="font-bold text-amber-400 flex items-center gap-1">🖥️ Iframe Sandbox / Browser Restriction Detected?</p>
-                    <p className="text-[10px] text-slate-300 leading-normal">
-                      Third-party browser policies or iframe restrictions sometimes block real Firebase Auth popup/network connections. Use one of our secure bypass profiles below to continue:
-                    </p>
-                    <div className="grid grid-cols-3 gap-2 pt-1">
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          try {
-                            setLoading(true);
-                            await loginAsDemo('Admin');
-                            setSuccess('Logged in successfully as Admin (Demo)!');
-                            setTimeout(() => {
-                              onSuccess?.({
-                                uid: 'demo-admin-uid-123',
-                                email: 'amjid.bisconni@gmail.com',
-                                displayName: 'Amjid Khattak (Demo Admin)',
-                                role: 'Admin',
-                                status: 'Active',
-                                createdAt: new Date().toISOString(),
-                                lastLogin: new Date().toISOString(),
-                                updatedAt: new Date().toISOString()
-                              });
-                              onClose();
-                              setSuccess(null);
-                              setLoading(false);
-                            }, 800);
-                          } catch (err: any) {
-                            setError(err.message);
-                            setLoading(false);
-                          }
-                        }}
-                        className="py-2 px-1.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 rounded-lg text-[9px] font-black uppercase tracking-wider text-amber-200 transition-all cursor-pointer text-center"
-                      >
-                        Admin
-                      </button>
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          try {
-                            setLoading(true);
-                            await loginAsDemo('Dealer');
-                            setSuccess('Logged in successfully as Dealer (Demo)!');
-                            setTimeout(() => {
-                              onSuccess?.({
-                                uid: 'demo-dealer-uid-456',
-                                email: 'mazharsouls@gmail.com',
-                                displayName: 'Malak Mazhar (Demo Showroom Owner)',
-                                role: 'Dealer',
-                                status: 'Active',
-                                createdAt: new Date().toISOString(),
-                                lastLogin: new Date().toISOString(),
-                                updatedAt: new Date().toISOString(),
-                                associatedShowroomId: 'auto-choice-peshawar'
-                              });
-                              onClose();
-                              setSuccess(null);
-                              setLoading(false);
-                            }, 800);
-                          } catch (err: any) {
-                            setError(err.message);
-                            setLoading(false);
-                          }
-                        }}
-                        className="py-2 px-1.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 rounded-lg text-[9px] font-black uppercase tracking-wider text-amber-200 transition-all cursor-pointer text-center"
-                      >
-                        Dealer
-                      </button>
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          try {
-                            setLoading(true);
-                            await loginAsDemo('Buyer');
-                            setSuccess('Logged in successfully as Buyer (Demo)!');
-                            setTimeout(() => {
-                              onSuccess?.({
-                                uid: 'demo-buyer-uid-789',
-                                email: 'buyer.demo@bazar360.online',
-                                displayName: 'Demo Guest Buyer',
-                                role: 'Buyer',
-                                status: 'Active',
-                                createdAt: new Date().toISOString(),
-                                lastLogin: new Date().toISOString(),
-                                updatedAt: new Date().toISOString()
-                              });
-                              onClose();
-                              setSuccess(null);
-                              setLoading(false);
-                            }, 800);
-                          } catch (err: any) {
-                            setError(err.message);
-                            setLoading(false);
-                          }
-                        }}
-                        className="py-2 px-1.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 rounded-lg text-[9px] font-black uppercase tracking-wider text-amber-200 transition-all cursor-pointer text-center"
-                      >
-                        Buyer
-                      </button>
-                    </div>
-                  </div>
+                <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/25 text-red-400 text-[10.5px] font-bold leading-relaxed text-left font-mono">
+                  ⚠️ {error}
                 </div>
               )}
 

@@ -296,10 +296,10 @@ const CATEGORY_STYLES: Record<string, { label: string; labelUr: string; color: s
 };
 
 const SAMPLE_BANNERS = [
-  'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1200&q=80'
+  '',
+  '',
+  '',
+  ''
 ];
 
 export function ShowroomAnnouncementsFeed({

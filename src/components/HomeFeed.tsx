@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { CarListing, Dealer } from '../types';
 import { VehicleCard } from './VehicleCard';
-import AutoChoiceHero from './AutoChoiceHero';
+import MarketplaceHero from './MarketplaceHero';
 import { TopBrandsRail } from './homepage/TopBrandsRail';
 import { ShowroomsSection } from './homepage/ShowroomsSection';
 import { ServicesSection } from './homepage/ServicesSection';
@@ -111,17 +111,15 @@ export function HomeFeed({
       className="min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-main)] overflow-x-hidden font-sans pb-24"
     >
       {/* 1. Hero & Fast Search Engine */}
-      <div className="w-full text-[var(--color-text-header)]">
-        <AutoChoiceHero 
-          lang={lang} 
-          onSearch={(query) => {
-            if (setSearchQuery) setSearchQuery(query);
-          }} 
-          setTab={setTab} 
-          listings={listings}
-          onSelectListing={onSelectListing}
-        />
-      </div>
+      <MarketplaceHero 
+        lang={lang} 
+        onSearch={(query) => {
+          if (setSearchQuery) setSearchQuery(query);
+        }} 
+        setTab={setTab} 
+        listings={listings}
+        onSelectListing={onSelectListing}
+      />
 
       {/* 2. Top Brands Rail */}
       <TopBrandsRail

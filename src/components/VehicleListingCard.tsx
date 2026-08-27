@@ -1,3 +1,4 @@
+import { NO_IMAGE_SVG } from "../types";
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowUpRight, ArrowRight, Heart, Trash, Mail, X, CheckCircle, User, Phone, MessageSquare, ShieldCheck, Maximize2, Zap, Gauge, Flame, ChevronLeft, ChevronRight, Share2, Check } from 'lucide-react';
@@ -84,9 +85,9 @@ export default function VehicleListingCard({
   const imagesList = car.images && car.images.length > 0 
     ? car.images 
     : [
-        car.imageUrl || 'https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&q=80&w=600',
-        'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=600',
-        'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&q=80&w=600'
+        car.imageUrl || NO_IMAGE_SVG,
+        NO_IMAGE_SVG,
+        NO_IMAGE_SVG
       ];
 
   const displayImage = imagesList[0];
@@ -121,7 +122,7 @@ export default function VehicleListingCard({
         userPhone: enqPhone,
         userEmail: enqEmail || 'visitor@bazar360.online',
         vehicleId: car.id,
-        showroomOwnerId: car.dealerId || dealer?.id || 'auto-choice-peshawar',
+        showroomOwnerId: car.dealerId || dealer?.id || '',
         inquiryMessage: enqMessage,
         inquiryDate: new Date().toISOString(),
         status: 'New' as const,
@@ -362,19 +363,19 @@ export default function VehicleListingCard({
               <div className="flex flex-col items-center justify-center">
                 <Zap size={10} className="text-amber-500 mb-0.5" />
                 <span className="text-[8px] sm:text-[9px] font-bold text-[var(--color-text-main)] leading-none truncate">
-                  {car.specs?.horspower || (car.engineCC && car.engineCC > 2000 ? '280 HP' : '150 HP')}
+                  {car.specs?.horspower || 'Not provided'}
                 </span>
               </div>
               <div className="flex flex-col items-center justify-center border-x border-[var(--color-border-main)]">
                 <Gauge size={10} className="text-orange-500 mb-0.5" />
                 <span className="text-[8px] sm:text-[9px] font-bold text-[var(--color-text-main)] leading-none truncate">
-                  {car.topSpeed || (car.engineCC && car.engineCC > 2000 ? '240 km/h' : '190 km/h')}
+                  {car.topSpeed || 'Not provided'}
                 </span>
               </div>
               <div className="flex flex-col items-center justify-center">
                 <Flame size={10} className="text-rose-500 mb-0.5" />
                 <span className="text-[8px] sm:text-[9px] font-bold text-[var(--color-text-main)] leading-none truncate">
-                  {car.acceleration || (car.engineCC && car.engineCC > 2000 ? '5.4s' : '9.2s')}
+                  {car.acceleration || 'Not provided'}
                 </span>
               </div>
             </div>

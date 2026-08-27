@@ -1,3 +1,4 @@
+import { NO_IMAGE_SVG } from "../../types";
 import React, { useState, useRef } from 'react';
 import { 
   Sparkles, QrCode, Download, Eye, Smartphone, Megaphone, CheckCircle2, 
@@ -57,7 +58,7 @@ export const MarketingSuite: React.FC<MarketingSuiteProps> = ({ listings, dealer
   const carSpecs = selectedCar 
     ? `${selectedCar.year} • ${selectedCar.transmission} • ${selectedCar.fuelType} • ${selectedCar.engineCC || 2000}cc`
     : customSpecs;
-  const carImage = selectedCar?.images?.[0] || selectedCar?.imageUrl || 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=1200';
+  const carImage = selectedCar?.images?.[0] || selectedCar?.imageUrl || NO_IMAGE_SVG;
 
   // Production-grade QR destinations
   const baseOrigin = typeof window !== 'undefined' && window.location.hostname !== 'localhost'

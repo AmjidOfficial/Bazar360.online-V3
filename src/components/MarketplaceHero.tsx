@@ -1,3 +1,4 @@
+import { NO_IMAGE_SVG } from "../types";
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -19,7 +20,7 @@ import {
 } from 'lucide-react';
 import { CarListing } from '../types';
 
-interface AutoChoiceHeroProps {
+interface MarketplaceHeroProps {
   lang: 'en' | 'ur';
   onSearch: (query: string) => void;
   setTab: (tab: string) => void;
@@ -39,7 +40,7 @@ function formatPakPrice(price: number): string {
   return `PKR ${price.toLocaleString()}`;
 }
 
-export default function AutoChoiceHero({ lang, onSearch, setTab, listings = [], onSelectListing }: AutoChoiceHeroProps) {
+export default function MarketplaceHero({ lang, onSearch, setTab, listings = [], onSelectListing }: MarketplaceHeroProps) {
   const isUrdu = lang === 'ur';
   const [searchInput, setSearchInput] = useState('');
   const [selectedMake, setSelectedMake] = useState('');
@@ -103,7 +104,7 @@ export default function AutoChoiceHero({ lang, onSearch, setTab, listings = [], 
   };
 
   return (
-    <div className="hero-section relative w-full bg-[var(--color-bg-primary)] text-[var(--color-text-header)] overflow-hidden pt-24 pb-12 lg:pt-32 lg:pb-20 border-b border-[var(--color-border)]">
+    <div className="relative w-full bg-[#0B192C] text-white overflow-hidden pt-24 pb-12 lg:pt-32 lg:pb-20 border-b border-[#1E293B]">
       
       {/* Subtle Automotive Orange Ambient Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-tr from-[#F97316]/10 via-[#0F172A]/30 to-transparent rounded-full blur-[100px] pointer-events-none" />
@@ -133,7 +134,7 @@ export default function AutoChoiceHero({ lang, onSearch, setTab, listings = [], 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.05 }}
-              className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[var(--color-text-header)] mb-3 leading-[1.15]"
+              className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white mb-3 leading-[1.15]"
             >
               {isUrdu ? 'اپنی اگلی گاڑی' : 'Find Your Next'}{' '}
               <span className="text-[#F97316]">
@@ -146,7 +147,7 @@ export default function AutoChoiceHero({ lang, onSearch, setTab, listings = [], 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.1 }}
-              className="text-sm sm:text-base text-[var(--color-text-muted)] max-w-xl mb-6 leading-relaxed font-normal"
+              className="text-sm sm:text-base text-[#94A3B8] max-w-xl mb-6 leading-relaxed font-normal"
             >
               {isUrdu
                 ? 'پاکستان بھر سے تصدیق شدہ گاڑیوں، شو رومز اور معائنے کے ساتھ آسانی سے خریدیں اور بیچیں۔'
@@ -375,7 +376,7 @@ export default function AutoChoiceHero({ lang, onSearch, setTab, listings = [], 
                     <AnimatePresence mode="wait">
                       <motion.img
                         key={activeHeroCar.id || selectedHeroIndex}
-                        src={activeHeroCar.images?.[0] || activeHeroCar.imageUrl || "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=1200"}
+                        src={activeHeroCar.images?.[0] || activeHeroCar.imageUrl || NO_IMAGE_SVG}
                         alt={activeHeroCar.title || `${activeHeroCar.make} ${activeHeroCar.model}`}
                         initial={{ opacity: 0, scale: 1.03 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -463,7 +464,7 @@ export default function AutoChoiceHero({ lang, onSearch, setTab, listings = [], 
                       <div className="flex items-center gap-1.5 shrink-0 text-[11px] font-semibold text-white/80 bg-[#1E293B] px-2.5 py-0.5 rounded-lg border border-white/10">
                         <Building2 size={12} className="text-[#22C55E]" />
                         <span className="truncate max-w-[130px]">
-                          {activeHeroCar.sellerName || 'Auto Choice'}
+                          {activeHeroCar.sellerName || 'Bazar360'}
                         </span>
                       </div>
                     </div>
@@ -561,7 +562,7 @@ export default function AutoChoiceHero({ lang, onSearch, setTab, listings = [], 
                             }`}
                           >
                             <img
-                              src={car.images?.[0] || car.imageUrl || 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=300'}
+                              src={car.images?.[0] || car.imageUrl || NO_IMAGE_SVG}
                               alt={car.make || 'Car'}
                               className="w-9 h-9 rounded-lg object-cover"
                             />

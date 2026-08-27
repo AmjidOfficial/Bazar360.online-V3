@@ -48,7 +48,7 @@ export default function AutoServicesView({ lang, preselectedCar }: AutoServicesV
 
   const isUrdu = lang === 'ur';
 
-  // 6 Primary Auto Choice Specialized Services
+  // 6 Primary Bazar360 Specialized Services
   const servicesList = [
     {
       id: 'inspection',
@@ -119,7 +119,7 @@ export default function AutoServicesView({ lang, preselectedCar }: AutoServicesV
         "9H Nano-Ceramic hydrophobic mirror finish",
         "Self-Healing TPU Clear or Gloss Black PPF installation",
         "Stone chip & UV ray fading resistance",
-        "Official Auto Choice Multi-Year Warranty Certificate"
+        "Official Bazar360 Multi-Year Warranty Certificate"
       ],
       category: 'care'
     },
@@ -132,7 +132,7 @@ export default function AutoServicesView({ lang, preselectedCar }: AutoServicesV
       price: isUrdu ? "صفر پریشانی" : "0 Hassle Consignment",
       desc: isUrdu 
         ? "ہماری ٹیم آپ کی گاڑی کا معائنہ، پروفیشنل فوٹوگرافی، اور تصدیق شدہ خریداروں کے ساتھ بات چیت سنبھالتی ہے" 
-        : "Let Auto Choice experts manage your car sale. We handle 4K photography, premium listing promotion, buyer filtering, and negotiation.",
+        : "Let Bazar360 experts manage your car sale. We handle 4K photography, premium listing promotion, buyer filtering, and negotiation.",
       features: [
         "Professional 4K Studio Photography & HD Video",
         "Featured placement across Bazar360 & partner networks",

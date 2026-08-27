@@ -204,7 +204,7 @@ export function generateInspectionPDF(car: CarListing, customData?: Partial<Insp
   doc.setTextColor(100, 116, 139);
   doc.setFont('helvetica', 'normal');
   doc.text(`Lead Auditor: ${report.inspectorName}`, 14, y + 6);
-  doc.text('Auto Choice Showroom & Service Hub, Peshawar, KP, Pakistan', 14, y + 10);
+  doc.text('Bazar360 Showroom & Service Hub, Peshawar, KP, Pakistan', 14, y + 10);
   doc.text('Official Digital Certification issued by Bazar360.online', 14, y + 14);
 
   // Digital Stamp Box

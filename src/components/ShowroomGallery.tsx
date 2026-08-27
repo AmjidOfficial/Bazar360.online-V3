@@ -14,11 +14,11 @@ interface ShowroomGalleryProps {
   isUploading?: boolean;
 }
 
-export function ShowroomGallery({ dealerId = 'auto-choice-peshawar', images: initialImages, onUpload, isUploading }: ShowroomGalleryProps) {
+export function ShowroomGallery({ dealerId = '', images: initialImages, onUpload, isUploading }: ShowroomGalleryProps) {
   const [images, setImages] = useState<string[]>(initialImages || [
-    'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=1200',
-    'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=1200',
-    'https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&q=80&w=1200'
+    '',
+    '',
+    ''
   ]);
   const [activeIdx, setActiveIdx] = useState(0);
   const [uploading, setUploading] = useState(false);

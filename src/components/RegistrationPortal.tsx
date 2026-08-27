@@ -179,7 +179,7 @@ export default function RegistrationPortal({
   const [showroomExperience, setShowroomExperience] = useState<number>(5);
   const [showroomEmployees, setShowroomEmployees] = useState<number>(3);
   const [showroomWhatsapp, setShowroomWhatsapp] = useState<string>('');
-  const [showroomLogo, setShowroomLogo] = useState<string>('https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&w=120&q=80');
+  const [showroomLogo, setShowroomLogo] = useState<string>('');
 
   // Individual profile state
   const [individualAddress, setIndividualAddress] = useState<string>('');
@@ -291,8 +291,8 @@ export default function RegistrationPortal({
           const dealerId = dealerDoc.id;
           const dealerData = dealerDoc.data();
           
-          const isDuplicate = dealerId !== 'auto-choice-peshawar' && 
-                              (dealerId === 'auto-choice' || 
+          const isDuplicate = dealerId !== '' && 
+                              (dealerId === '' || 
                                (dealerData.name && dealerData.name.toLowerCase().includes('auto choice')));
           
           if (isDuplicate) {
@@ -304,10 +304,10 @@ export default function RegistrationPortal({
         const listingsSnap = await getDocs(query(collection(db, 'listings'), limit(100)));
         for (const listingDoc of listingsSnap.docs) {
           const listingData = listingDoc.data();
-          if (listingData.dealerId === 'auto-choice' || (listingData.dealerId && listingData.dealerId.includes('auto-choice') && listingData.dealerId !== 'auto-choice-peshawar')) {
+          if (listingData.dealerId === '' || (listingData.dealerId && listingData.dealerId.includes('') && listingData.dealerId !== '')) {
             console.log(`Silent redirecting listing ${listingDoc.id} to flagship auto-choice-peshawar`);
             await updateDoc(doc(db, 'listings', listingDoc.id), {
-              dealerId: 'auto-choice-peshawar'
+              dealerId: ''
             });
           }
         }
@@ -747,7 +747,7 @@ export default function RegistrationPortal({
       state: extraFields.province || regProvince || 'Khyber Pakhtunkhwa',
       country: extraFields.country || regCountry || 'Pakistan',
       preferredLanguage: 'en',
-      profilePhoto: extraFields.profilePhoto || regProfilePhoto || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80',
+      profilePhoto: extraFields.profilePhoto || regProfilePhoto || '',
       cnic: '',
       whatsappNumber: extraFields.phoneNumber || regPhone || '',
       acceptedTerms: true,
@@ -1236,15 +1236,16 @@ export default function RegistrationPortal({
         const dealerId = `showroom-${user.uid}`;
         newShowroom = {
           id: dealerId,
+          ownerUid: user.uid,
           name: computedDisplayName,
           avatarLetter: regFirstName.trim().substring(0, 1).toUpperCase() + regLastName.trim().substring(0, 1).toUpperCase(),
-          avatarUrl: regProfilePhoto.trim() || 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&w=120&q=80',
+          avatarUrl: regProfilePhoto.trim() || '',
           subtitle: showroomSlogan || 'Verified Premium Dealership',
           location: showroomLocation || regCity,
-          rating: 5.0,
+          rating: 0,
           vehiclesCount: 0,
           followersCount: '0',
-          coverImage: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=1200&q=80',
+          coverImage: '',
           description: `${computedDisplayName} provides premium automotive listings. Commercial entity owned by ${showroomOwnerName || computedDisplayName}.`,
           phone: regPhone.trim(),
           whatsapp: regPhone.trim(),
@@ -1276,7 +1277,7 @@ export default function RegistrationPortal({
         state: regProvince,
         country: regCountry,
         preferredLanguage: 'en',
-        profilePhoto: regProfilePhoto.trim() || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80',
+        profilePhoto: regProfilePhoto.trim() || '',
         cnic: '',
         whatsappNumber: regPhone.trim(),
         acceptedTerms: true,
@@ -1383,7 +1384,7 @@ export default function RegistrationPortal({
     const updated: UserProfile = {
       ...currentUser,
       role: role,
-      displayName: role === 'Admin' ? 'Muhammad Amjid (Founder)' : role === 'Dealer' ? 'Auto Choice (Showroom Flagship)' : currentUser.displayName
+      displayName: role === 'Admin' ? 'Muhammad Amjid (Founder)' : role === 'Dealer' ? 'Bazar360 (Showroom Flagship)' : currentUser.displayName
     };
     setCurrentUser(updated);
     setSuccessMessage(`✓ Simulator Swapped Profile Privilege to "${role}"`);
@@ -1402,7 +1403,7 @@ export default function RegistrationPortal({
       return;
     }
 
-    const finalImg = newImageUrl || 'https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&q=80&w=600';
+    const finalImg = newImageUrl || '';
     const isDealerAccount = currentUser?.role === 'Dealer' || 
                             currentUser?.displayName?.includes('Ghani') || 
                             currentUser?.displayName?.includes('Mazhar') || 
@@ -1423,7 +1424,7 @@ export default function RegistrationPortal({
       imageUrl: finalImg,
       verified: true,
       featured: false,
-      dealerId: isDealerAccount ? 'auto-choice-peshawar' : 'private',
+      dealerId: isDealerAccount ? '' : 'private',
       assignedSalesRepId: currentUser?.uid || 'guest-seller',
       createdBy: currentUser?.uid || 'guest-seller',
       phone: currentUser?.phoneNumber || guestPhone || '',
@@ -1609,8 +1610,8 @@ export default function RegistrationPortal({
         const dealerId = dealerDoc.id;
         const dealerData = dealerDoc.data();
         
-        const isDuplicate = dealerId !== 'auto-choice-peshawar' && 
-                            (dealerId === 'auto-choice' || 
+        const isDuplicate = dealerId !== '' && 
+                            (dealerId === '' || 
                              (dealerData.name && dealerData.name.toLowerCase().includes('auto choice')));
         
         if (isDuplicate) {
@@ -1625,17 +1626,17 @@ export default function RegistrationPortal({
       
       for (const listingDoc of listingsSnap.docs) {
         const listingData = listingDoc.data();
-        if (listingData.dealerId === 'auto-choice' || (listingData.dealerId && listingData.dealerId.includes('auto-choice') && listingData.dealerId !== 'auto-choice-peshawar')) {
+        if (listingData.dealerId === '' || (listingData.dealerId && listingData.dealerId.includes('') && listingData.dealerId !== '')) {
           console.log(`Redirecting listing ${listingDoc.id} to flagship auto-choice-peshawar`);
           await updateDoc(doc(db, 'listings', listingDoc.id), {
-            dealerId: 'auto-choice-peshawar'
+            dealerId: ''
           });
           listingUpdateCount++;
         }
       }
       
       setShowroomDuplicates(false);
-      alert(`Showroom profiles compiled and merged successfully under ID "auto-choice-peshawar"! Consolidated ${mergeCount} duplicate profile(s) and redirected ${listingUpdateCount} listing(s) directly to the flagship Auto Choice Peshawar.`);
+      alert(`Showroom profiles compiled and merged successfully under ID "auto-choice-peshawar"! Consolidated ${mergeCount} duplicate profile(s) and redirected ${listingUpdateCount} listing(s) directly to the flagship Bazar360 Peshawar.`);
     } catch (error) {
       console.error('Failed to merge showrooms in database:', error);
       setShowroomDuplicates(false);
@@ -1714,7 +1715,7 @@ export default function RegistrationPortal({
                 setCurrentUser({
                   uid: 'usr-auto-choice-pesh',
                   email: 'peshawar@autochoice.online',
-                  displayName: 'Auto Choice Peshawar (Flagship)',
+                  displayName: 'Bazar360 Peshawar (Flagship)',
                   phoneNumber: '03159085086',
                   phoneVerified: true,
                   city: 'Peshawar',
@@ -1724,17 +1725,17 @@ export default function RegistrationPortal({
                   createdAt: new Date().toISOString(),
                   lastLogin: new Date().toISOString(),
                   updatedAt: new Date().toISOString(),
-                  salesPodId: 'auto-choice-peshawar'
+                  salesPodId: ''
                 });
                 setSuccessMessage('✓ Logged into Peshawar Flagship Hub: AUTO CHOICE');
               }}
               className={`py-2 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all border col-span-2 sm:col-span-1 cursor-pointer ${
-                currentUser?.displayName?.includes('Auto Choice')
+                currentUser?.displayName?.includes('Bazar360')
                   ? 'bg-amber-500 border-amber-500 text-stone-950 shadow-md'
                   : 'bg-amber-500/10 border-amber-500/20 text-amber-400 hover:bg-amber-500/20'
               }`}
             >
-              ★ Auto Choice Flagship
+              ★ Bazar360 Flagship
             </button>
           </div>
         </div>
@@ -1757,8 +1758,8 @@ export default function RegistrationPortal({
           style={{
             backgroundImage: `url(${
               glassTheme === 'light'
-                ? 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80'
-                : 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=1200&q=80'
+                ? ''
+                : ''
             })`
           }}
         >
@@ -2207,7 +2208,7 @@ export default function RegistrationPortal({
                     </label>
                     <input
                       type="url"
-                      placeholder="https://images.unsplash.com/..."
+                      placeholder=''
                       value={regProfilePhoto}
                       onChange={e => setRegProfilePhoto(e.target.value)}
                       className="w-full bg-[var(--color-bg-secondary)] border border-white/10 rounded-xl p-2.5 text-xs text-[var(--color-text-header)] placeholder-slate-500 focus:outline-none focus:border-orange-500"
@@ -2446,15 +2447,15 @@ export default function RegistrationPortal({
                 {/* Grid */}
                 <div className="grid grid-cols-3 gap-2 pt-2">
                   {[
-                    { idx: 0, name: "Toyota Fortuner (Hybrid)", isCorrect: true, url: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=150&q=80" },
-                    { idx: 1, name: "Suzuki Alto (Hatchback)", isCorrect: false, url: "https://images.unsplash.com/photo-1625211910240-df6a445e5210?auto=format&fit=crop&w=150&q=80" },
-                    { idx: 2, name: "Honda Civic Sedan", isCorrect: false, url: "https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&w=150&q=80" },
-                    { idx: 3, name: "Porsche Cayenne (SUV)", isCorrect: true, url: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=150&q=80" },
-                    { idx: 4, name: "Vespa Scooter", isCorrect: false, url: "https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=150&q=80" },
-                    { idx: 5, name: "Hyundai Tucson (SUV)", isCorrect: true, url: "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=150&q=80" },
-                    { idx: 6, name: "Yamaha Bike", isCorrect: false, url: "https://images.unsplash.com/photo-1449426468159-d96dbf08f19f?auto=format&fit=crop&w=150&q=80" },
-                    { idx: 7, name: "Range Rover Sport (SUV)", isCorrect: true, url: "https://images.unsplash.com/photo-1606016159991-dfe4f2746ad5?auto=format&fit=crop&w=150&q=80" },
-                    { idx: 8, name: "BMW Sedan", isCorrect: false, url: "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=150&q=80" }
+                    { idx: 0, name: "Toyota Fortuner (Hybrid)", isCorrect: true, url: '' },
+                    { idx: 1, name: "Suzuki Alto (Hatchback)", isCorrect: false, url: '' },
+                    { idx: 2, name: "Honda Civic Sedan", isCorrect: false, url: '' },
+                    { idx: 3, name: "Porsche Cayenne (SUV)", isCorrect: true, url: '' },
+                    { idx: 4, name: "Vespa Scooter", isCorrect: false, url: '' },
+                    { idx: 5, name: "Hyundai Tucson (SUV)", isCorrect: true, url: '' },
+                    { idx: 6, name: "Yamaha Bike", isCorrect: false, url: '' },
+                    { idx: 7, name: "Range Rover Sport (SUV)", isCorrect: true, url: '' },
+                    { idx: 8, name: "BMW Sedan", isCorrect: false, url: '' }
                   ].map((img, i) => {
                     const isSelected = window.recaptchaVerifier && Array.isArray(window.recaptchaVerifier) ? window.recaptchaVerifier.includes(i) : false;
                     return (
@@ -3114,8 +3115,8 @@ export default function RegistrationPortal({
                         if (!currentUser) return false;
                         if (currentUser.role === 'Admin') return true;
                         if (currentUser.role === 'Dealer') {
-                          if (currentUser.displayName?.includes('Auto Choice') || currentUser.displayName?.includes('Ghani Khan') || currentUser.displayName?.includes('Mazhar') || currentUser.displayName?.includes('Malak') || currentUser.email === 'khattakghani94@gmail.com' || currentUser.email === 'mazharsouls@gmail.com') {
-                            return v.dealerId === 'auto-choice-peshawar' || v.createdBy === currentUser.uid;
+                          if (currentUser.displayName?.includes('Bazar360') || currentUser.displayName?.includes('Ghani Khan') || currentUser.displayName?.includes('Mazhar') || currentUser.displayName?.includes('Malak') || currentUser.email === 'khattakghani94@gmail.com' || currentUser.email === 'mazharsouls@gmail.com') {
+                            return v.dealerId === '' || v.createdBy === currentUser.uid;
                           }
                           return v.createdBy === currentUser.uid || v.dealerId === currentUser.uid;
                         }
@@ -3127,8 +3128,8 @@ export default function RegistrationPortal({
                               if (!currentUser) return false;
                               if (currentUser.role === 'Admin') return true;
                               if (currentUser.role === 'Dealer') {
-                                if (currentUser.displayName?.includes('Auto Choice') || currentUser.displayName?.includes('Ghani Khan') || currentUser.displayName?.includes('Mazhar') || currentUser.displayName?.includes('Malak') || currentUser.email === 'khattakghani94@gmail.com' || currentUser.email === 'mazharsouls@gmail.com') {
-                                  return v.dealerId === 'auto-choice-peshawar' || v.createdBy === currentUser.uid;
+                                if (currentUser.displayName?.includes('Bazar360') || currentUser.displayName?.includes('Ghani Khan') || currentUser.displayName?.includes('Mazhar') || currentUser.displayName?.includes('Malak') || currentUser.email === 'khattakghani94@gmail.com' || currentUser.email === 'mazharsouls@gmail.com') {
+                                  return v.dealerId === '' || v.createdBy === currentUser.uid;
                                 }
                                 return v.createdBy === currentUser.uid || v.dealerId === currentUser.uid;
                               }
@@ -3826,7 +3827,7 @@ export default function RegistrationPortal({
                     <label className="text-[10px] font-mono uppercase text-text-muted block mb-1">Vehicle Image / Media URL (Optional)</label>
                     <input
                       type="url"
-                      placeholder="e.g. https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=600"
+                      placeholder="e.g. https://via.placeholder.com/600x400.png?text=Showroom+Cover"
                       value={newImageUrl}
                       onChange={e => setNewImageUrl(e.target.value)}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-800 focus:outline-none focus:border-sky-500 font-mono text-[11px]"
@@ -3879,14 +3880,14 @@ export default function RegistrationPortal({
 
                   <div className="space-y-4">
                     {allVehicles.filter(car => {
-                      const isDealerAC = currentUser.displayName?.includes('Auto Choice') || 
+                      const isDealerAC = currentUser.displayName?.includes('Bazar360') || 
                                          currentUser.displayName?.includes('Ghani Khan') || 
                                          currentUser.displayName?.includes('Mazhar') || 
                                          currentUser.displayName?.includes('Malak') || 
                                          currentUser.email === 'khattakghani94@gmail.com' ||
                                          currentUser.email === 'mazharsouls@gmail.com';
                       if (isDealerAC) {
-                        return car.dealerId === 'auto-choice-peshawar' || car.createdBy === currentUser.uid || car.assignedSalesRepId === currentUser.uid;
+                        return car.dealerId === '' || car.createdBy === currentUser.uid || car.assignedSalesRepId === currentUser.uid;
                       }
                       return car.createdBy === currentUser.uid || car.assignedSalesRepId === currentUser.uid;
                     }).map(car => (
@@ -4008,14 +4009,14 @@ export default function RegistrationPortal({
                     ))}
 
                     {allVehicles.filter(car => {
-                      const isDealerAC = currentUser.displayName?.includes('Auto Choice') || 
+                      const isDealerAC = currentUser.displayName?.includes('Bazar360') || 
                                          currentUser.displayName?.includes('Ghani Khan') || 
                                          currentUser.displayName?.includes('Mazhar') || 
                                          currentUser.displayName?.includes('Malak') || 
                                          currentUser.email === 'khattakghani94@gmail.com' ||
                                          currentUser.email === 'mazharsouls@gmail.com';
                       if (isDealerAC) {
-                        return car.dealerId === 'auto-choice-peshawar' || car.createdBy === currentUser.uid || car.assignedSalesRepId === currentUser.uid;
+                        return car.dealerId === '' || car.createdBy === currentUser.uid || car.assignedSalesRepId === currentUser.uid;
                       }
                       return car.createdBy === currentUser.uid || car.assignedSalesRepId === currentUser.uid;
                     }).length === 0 && (
@@ -4036,7 +4037,7 @@ export default function RegistrationPortal({
           {/* ========================================== */}
           {/* 3. VERIFIED SHOWROOM OWNER DASHBOARD */}
           {/* ========================================== */}
-          {currentUser.role === 'Dealer' && !currentUser.displayName?.includes('Auto Choice') && (
+          {currentUser.role === 'Dealer' && !currentUser.displayName?.includes('Bazar360') && (
             <div className="space-y-6 text-left animate-fade-in">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
@@ -4121,7 +4122,7 @@ export default function RegistrationPortal({
           {/* ========================================== */}
           {/* 4. AUTO CHOICE FLAGSHIP EXCLUSIVE WORKSPACE */}
           {/* ========================================== */}
-          {currentUser.role === 'Dealer' && currentUser.displayName?.includes('Auto Choice') && (
+          {currentUser.role === 'Dealer' && currentUser.displayName?.includes('Bazar360') && (
             <div className="space-y-6 text-left animate-fade-in">
               <div className="bg-amber-500 border border-amber-400 text-slate-900 rounded-3xl p-6 shadow-md flex justify-between items-center flex-wrap gap-4">
                 <div className="space-y-1">
@@ -4152,7 +4153,7 @@ export default function RegistrationPortal({
                       <AlertTriangle size={16} className="text-amber-600" /> DUPLICATE SHOWROOM ENTRIES DETECTED
                     </h4>
                     <p className="text-xs text-amber-800 max-w-2xl">
-                      We detected a duplicate system listing for <strong className="font-extrabold text-amber-950">"Auto Choice"</strong> and <strong className="font-extrabold text-amber-950">"Auto Choice Peshawar"</strong>. Merge them now to consolidate views and preserve all activity logs.
+                      We detected a duplicate system listing for <strong className="font-extrabold text-amber-950">"Bazar360"</strong> and <strong className="font-extrabold text-amber-950">"Bazar360 Peshawar"</strong>. Merge them now to consolidate views and preserve all activity logs.
                     </p>
                   </div>
                   <button

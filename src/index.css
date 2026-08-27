@@ -70,43 +70,6 @@ h5, h6, p, span, button, input, select, textarea, label {
 }
 
 /* ==========================================================================
-   HERO SECTION TYPOGRAPHY & COLOR VARIABLES RESET (.hero-section)
-   ========================================================================== */
-.hero-section {
-  color: var(--color-text-header) !important;
-  font-family: 'Manrope', sans-serif !important;
-}
-
-html body .hero-section h1,
-html body .hero-section h2,
-html body .hero-section h3,
-html body .hero-section h4,
-html body .hero-section h5,
-html body .hero-section h6,
-html body .hero-section [role="heading"],
-html body #clean-room-hero-section h1,
-html body #clean-room-hero-section h2,
-html body #clean-room-hero-section h3,
-html body #clean-room-hero-section h4,
-html body #clean-room-hero-section h5,
-html body #clean-room-hero-section h6 {
-  font-family: 'Manrope', sans-serif !important;
-  font-weight: 800 !important;
-  color: var(--color-text-header) !important;
-  letter-spacing: -0.03em !important;
-}
-
-.hero-section p,
-.hero-section span,
-.hero-section label,
-#clean-room-hero-section p,
-#clean-room-hero-section span,
-#clean-room-hero-section label {
-  font-family: "Manrope", var(--font-sans, sans-serif) !important;
-  font-weight: 400 !important;
-}
-
-/* ==========================================================================
    BAZAR360 LIGHT PREMIUM AUTOMOTIVE DESIGN UTILITIES
    ========================================================================== */
 
@@ -282,21 +245,6 @@ html body #clean-room-hero-section h6 {
   h3 {
     font-size: clamp(1.15rem, 4vw, 1.35rem) !important;
   }
-
-  .grid-auto-fit-cards {
-    grid-template-columns: 1fr !important;
-    gap: 1rem !important;
-  }
-
-  .grid-auto-fit-dealers {
-    grid-template-columns: 1fr !important;
-    gap: 1rem !important;
-  }
-
-  .bazar-grid-12 {
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-    gap: 1rem !important;
-  }
 }
 
 @media (pointer: coarse), (max-width: 768px) {
@@ -330,13 +278,6 @@ html body #clean-room-hero-section h6 {
   }
 }
 
-@media (max-width: 1024px) {
-  .bazar-grid-12 {
-    grid-template-columns: repeat(8, minmax(0, 1fr)) !important;
-    gap: 1.25rem !important;
-  }
-}
-
 @media (min-width: 1025px) {
   .grid-desktop-3 {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
@@ -364,10 +305,24 @@ html body #clean-room-hero-section h6 {
   gap: 1.25rem;
 }
 
+@media (max-width: 640px) {
+  .grid-auto-fit-cards {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
 .grid-auto-fit-dealers {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
   gap: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .grid-auto-fit-dealers {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
 }
 
 /* ==========================================================================
@@ -376,24 +331,24 @@ html body #clean-room-hero-section h6 {
 
 :root.theme-luxury-light, .theme-luxury-light {
   --color-bg-primary: #FFFFFF !important;
-  --color-bg-secondary: #F8FAFC !important;
-  --color-bg-tertiary: #F1F5F9 !important;
-  --color-text-main: #0F172A !important;
-  --color-text-header: #0F172A !important;
-  --color-border-main: #E2E8F0 !important;
-  --color-accent-main: #F97316 !important;
-  --color-accent-hover: #EA580C !important;
+  --color-bg-secondary: #FAFAFA !important;
+  --color-bg-tertiary: #F5F5F5 !important;
+  --color-text-main: #1A1A1A !important;
+  --color-text-header: #0A0A0A !important;
+  --color-border-main: #EAEAEA !important;
+  --color-accent-main: #C5A059 !important; /* Single shared muted Champagne */
+  --color-accent-hover: #A6854A !important;
 }
 
 :root.theme-cosmic-dark, .theme-cosmic-dark {
-  --color-bg-primary: #0F172A !important;
-  --color-bg-secondary: #1E293B !important;
-  --color-bg-tertiary: #0B192C !important;
-  --color-text-main: #F8FAFC !important;
+  --color-bg-primary: #0A0A0A !important;
+  --color-bg-secondary: #121212 !important;
+  --color-bg-tertiary: #1A1A1A !important;
+  --color-text-main: #D1D1D1 !important;
   --color-text-header: #FFFFFF !important;
-  --color-border-main: rgba(255, 255, 255, 0.1) !important;
-  --color-accent-main: #F97316 !important;
-  --color-accent-hover: #EA580C !important;
+  --color-border-main: rgba(255, 255, 255, 0.06) !important;
+  --color-accent-main: #C5A059 !important; /* Single shared muted Champagne */
+  --color-accent-hover: #A6854A !important;
 }
 
 :root.theme-emerald, .theme-emerald {
@@ -427,6 +382,20 @@ html body #clean-room-hero-section h6 {
   grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: 1.5rem;
   width: 100%;
+}
+
+@media (max-width: 1024px) {
+  .bazar-grid-12 {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: 1.25rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .bazar-grid-12 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+  }
 }
 
 /* Global viewport optimizations - eliminate horizontal shift */

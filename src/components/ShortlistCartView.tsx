@@ -85,7 +85,7 @@ export function ShortlistCartView({
               {isUrdu ? 'میرا شارٹ لسٹ اور باسکٹ' : 'My Shortlist & Cart'}
             </h1>
             <p className="text-xs text-[var(--color-text-muted)] font-mono">
-              Auto Choice Certified Direct Showroom Inquiry Basket ({items.length} {items.length === 1 ? 'Vehicle' : 'Vehicles'})
+              Bazar360 Certified Direct Showroom Inquiry Basket ({items.length} {items.length === 1 ? 'Vehicle' : 'Vehicles'})
             </p>
           </div>
         </div>

@@ -1,3 +1,4 @@
+import { NO_IMAGE_SVG } from "../types";
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -43,7 +44,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
     {
       id: '1',
       name: 'Tesla Certified Peshawar',
-      avatar: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?auto=format&fit=crop&w=120&q=80',
+      avatar: NO_IMAGE_SVG,
       message: 'Hi! Is the Model 3 Long Range still available for test drive?',
       time: '2m ago',
       online: true,
@@ -52,8 +53,8 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
     },
     {
       id: '2',
-      name: 'Auto Choice Flagship',
-      avatar: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=120&q=80',
+      name: 'Bazar360 Flagship',
+      avatar: NO_IMAGE_SVG,
       message: 'The Porsche 911 GT3 RS is prepped and available on Ring Road.',
       time: '1h ago',
       online: true,
@@ -63,7 +64,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
     {
       id: '3',
       name: 'BMW of Islamabad',
-      avatar: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=120&q=80',
+      avatar: NO_IMAGE_SVG,
       message: 'Thanks for your interest in X5 M Competition! Token accepted.',
       time: '3h ago',
       online: false,
@@ -73,8 +74,8 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
     {
       id: '4',
       name: 'Muhammad Amjid (Founder)',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80',
-      message: 'Welcome to Bazar360 Auto Choice ecosystem! Let us know if you need assistance.',
+      avatar: NO_IMAGE_SVG,
+      message: 'Welcome to Bazar360 Bazar360 ecosystem! Let us know if you need assistance.',
       time: 'Yesterday',
       online: true,
       category: 'support',
@@ -83,7 +84,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
     {
       id: '5',
       name: 'John Smith (Verified Buyer)',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80',
+      avatar: NO_IMAGE_SVG,
       message: 'More interior pics sent via WhatsApp!',
       time: '2 days ago',
       online: false,
@@ -171,7 +172,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
           {/* Hero Porsche Vehicle Image */}
           <div className="relative w-full h-[250px] bg-gradient-to-b from-purple-100 via-purple-50 to-white flex items-center justify-center p-4">
             <img 
-              src="https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=800&q=80" 
+              src={NO_IMAGE_SVG} 
               alt="Porsche GT3 RS"
               className="w-full h-full object-cover rounded-3xl shadow-md"
             />
@@ -396,7 +397,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
           {/* Hero Banner with Overlapping Avatar */}
           <div className="relative w-full h-[140px] bg-slate-200">
             <img 
-              src="https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=800&q=80" 
+              src={NO_IMAGE_SVG} 
               alt="Porsche Banner"
               className="w-full h-full object-cover"
             />
@@ -410,7 +411,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
             {/* Overlapping Avatar */}
             <div className="absolute -bottom-10 left-6 relative">
               <img 
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80" 
+                src={NO_IMAGE_SVG} 
                 alt="Steven Clark Avatar"
                 className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-lg"
               />

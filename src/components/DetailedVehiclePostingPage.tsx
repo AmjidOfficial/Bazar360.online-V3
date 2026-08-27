@@ -1,3 +1,4 @@
+import { NO_IMAGE_SVG } from "../types";
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'react-hot-toast';
@@ -156,7 +157,7 @@ export default function DetailedVehiclePostingPage({
   const [city, setCity] = useState('Peshawar');
   const [location, setLocation] = useState('Ring Road, Peshawar, Pakistan');
   const [postingMode, setPostingMode] = useState<'individual' | 'showroom'>('individual');
-  const [selectedShowroomForPost, setSelectedShowroomForPost] = useState<string>(contextDealerId || (dealers[0]?.id || 'auto-choice-peshawar'));
+  const [selectedShowroomForPost, setSelectedShowroomForPost] = useState<string>(contextDealerId || (dealers[0]?.id || ''));
   const [sellerName, setSellerName] = useState(currentUser?.displayName || '');
   const [sellerPhone, setSellerPhone] = useState(currentUser?.phoneNumber || '');
   const [sellerWhatsApp, setSellerWhatsApp] = useState(currentUser?.phoneNumber || '');
@@ -212,6 +213,24 @@ export default function DetailedVehiclePostingPage({
       if (contextListing.sellerPhone) setSellerPhone(contextListing.sellerPhone);
       if (contextListing.sellerWhatsApp) setSellerWhatsApp(contextListing.sellerWhatsApp);
       if (contextListing.sellerName) setSellerName(contextListing.sellerName);
+
+      // Populate existing images into photos array
+      const existingImgs = (Array.isArray(contextListing.images) && contextListing.images.length > 0)
+        ? contextListing.images
+        : (contextListing.imageUrl && contextListing.imageUrl !== NO_IMAGE_SVG ? [contextListing.imageUrl] : []);
+
+      if (existingImgs.length > 0) {
+        const loadedPhotos: UploadingMedia[] = existingImgs.map((url, idx) => ({
+          id: 'existing_photo_' + idx + '_' + Date.now(),
+          file: new File([], 'existing_' + idx),
+          previewUrl: url,
+          size: 0,
+          progress: 100,
+          status: 'success',
+          cloudinaryUrl: url
+        }));
+        setPhotos(loadedPhotos);
+      }
     }
   }, [contextListing]);
 
@@ -491,15 +510,15 @@ export default function DetailedVehiclePostingPage({
 
     setIsSubmitting(true);
     
-    // Collect uploaded image URLs
+    // Collect uploaded image URLs or preview data URLs
     const uploadedPhotoUrls = photos
-      .filter(p => p.status === 'success' && p.cloudinaryUrl)
-      .map(p => p.cloudinaryUrl as string);
+      .map(p => p.cloudinaryUrl || p.previewUrl)
+      .filter((url): url is string => Boolean(url && url !== NO_IMAGE_SVG && url.trim().length > 0));
 
     // Default fallback image if no photo uploaded
     const finalImages = uploadedPhotoUrls.length > 0 
       ? uploadedPhotoUrls 
-      : ['https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=1200'];
+      : [NO_IMAGE_SVG];
 
     const primaryImage = finalImages[coverPhotoIndex] || finalImages[0];
     const numPrice = parseFloat(price.replace(/,/g, '')) || 0;
@@ -513,6 +532,8 @@ export default function DetailedVehiclePostingPage({
       title: listingTitle,
       make,
       model,
+      vehicleType,
+      variant,
       year,
       price: numPrice,
       mileage: numMileage,
@@ -531,6 +552,8 @@ export default function DetailedVehiclePostingPage({
       sellerName: sellerName || 'Bazar360 Verified Seller',
       sellerType: postingMode === 'showroom' ? 'Showroom' : 'Individual',
       dealerId: postingMode === 'showroom' ? selectedShowroomForPost : 'private',
+      createdBy: currentUser?.uid || 'guest-seller',
+      assignedSalesRepId: currentUser?.uid || 'guest-seller',
       featured: true,
       verified: true,
       approved: true,
@@ -562,14 +585,23 @@ export default function DetailedVehiclePostingPage({
         if (onPostCreated) onPostCreated(payload);
       }, 1500);
     } catch (err: any) {
-      console.warn('Backend save notice:', err);
-      localStorage.removeItem('bazar360_post_ad_draft');
-      toast.success('Listing saved! Pending platform approval.');
-      setSuccess(true);
+      console.error('[Firestore] Error saving listing:', err);
       setIsSubmitting(false);
-      setTimeout(() => {
-        if (onPostCreated) onPostCreated(payload);
-      }, 1500);
+      
+      const isPermissionError = err.message?.includes('permission') || err.code === 'permission-denied';
+      if (isPermissionError) {
+        toast.error(
+          lang === 'ur' 
+            ? 'اشتہار شائع کرنے کے لیے برائے مہربانی پہلے لاگ ان کریں۔' 
+            : 'Please login or check credentials to publish your vehicle.'
+        );
+      } else {
+        toast.error(
+          lang === 'ur'
+            ? 'اشتہار محفوظ کرنے میں خرابی پیش آئی۔ دوبارہ کوشش کریں۔'
+            : `Error saving vehicle: ${err.message || 'Please check connection.'}`
+        );
+      }
     }
   };
 
@@ -631,7 +663,7 @@ export default function DetailedVehiclePostingPage({
                 VIP Managed Brokerage Service
               </span>
               <h3 className="text-lg font-black text-[var(--color-text-header)] uppercase tracking-tight">
-                Let Auto Choice & Bazar360 Sell Your Vehicle
+                Let Bazar360 & Bazar360 Sell Your Vehicle
               </h3>
               <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
                 Our team handles verified vehicle inspection, professional photography, pricing valuation, online marketing, and buyer negotiations to close top market value deals for you.
@@ -643,9 +675,9 @@ export default function DetailedVehiclePostingPage({
             <button
               type="button"
               onClick={() => {
-                const msg = encodeURIComponent("Hello Auto Choice team, I would like to request the 'Sell For U' VIP Brokerage service for my car.");
+                const msg = encodeURIComponent("Hello Bazar360 team, I would like to request the 'Sell For U' VIP Brokerage service for my car.");
                 window.open(`https://wa.me/923159085086?text=${msg}`, '_blank');
-                toast.success("Opening WhatsApp with Auto Choice Concierge Desk!");
+                toast.success("Opening WhatsApp with Bazar360 Concierge Desk!");
               }}
               className="flex-1 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
@@ -1659,7 +1691,7 @@ export default function DetailedVehiclePostingPage({
               <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] rounded-3xl overflow-hidden shadow-xl space-y-4">
                 <div className="relative aspect-[16/9] bg-slate-900">
                   <img
-                    src={photos[coverPhotoIndex]?.previewUrl || photos[0]?.previewUrl || 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=1200'}
+                    src={photos[coverPhotoIndex]?.previewUrl || photos[0]?.previewUrl || NO_IMAGE_SVG}
                     alt="Preview"
                     className="w-full h-full object-cover"
                   />
@@ -1667,7 +1699,7 @@ export default function DetailedVehiclePostingPage({
                     {formatPricePKR(price)}
                   </div>
                   <div className="absolute top-3 right-3 bg-emerald-500 text-slate-950 font-mono font-black text-[10px] uppercase px-2.5 py-1 rounded-full shadow">
-                    Verified Listing
+                    Verified Seller Ad
                   </div>
                 </div>
 
@@ -1718,7 +1750,7 @@ export default function DetailedVehiclePostingPage({
                       <span className="font-bold text-[var(--color-text-header)]">{sellerName} ({sellerPhone})</span>
                     </div>
                     <span className="px-2.5 py-1 bg-orange-500/10 text-orange-500 border border-orange-500/20 rounded-xl text-[10px] uppercase font-bold">
-                      {postingMode === 'showroom' ? 'Showroom Listing' : 'Individual Listing'}
+                      {postingMode === 'showroom' ? 'Showroom Ad' : 'Individual Ad'}
                     </span>
                   </div>
                 </div>

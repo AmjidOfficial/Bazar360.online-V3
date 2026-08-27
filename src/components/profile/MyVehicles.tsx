@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CarListing } from '../../types';
+import { CarListing, NO_IMAGE_SVG } from '../../types';
 import { UserProfile, dbSaveListing, dbDeleteListing } from '../../lib/dbService';
 import { dbLogUserActivity } from '../../lib/userProfileService';
 import { EmptyState } from './EmptyState';
@@ -140,7 +140,7 @@ export const MyVehicles: React.FC<MyVehiclesProps> = ({
           >
             <div className="relative h-44 bg-bg-secondary overflow-hidden">
               <img
-                src={car.imageUrl || 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=400'}
+                src={car.imageUrl || NO_IMAGE_SVG}
                 alt={`${car.make} ${car.model}`}
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"

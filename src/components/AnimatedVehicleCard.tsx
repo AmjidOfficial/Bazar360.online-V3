@@ -25,7 +25,7 @@ export function AnimatedVehicleCard({ children, index = 0, className = '' }: Ani
         delay: Math.min(index * 0.07, 0.5),
         ease: [0.21, 0.47, 0.32, 0.98],
       }}
-      className={className}
+      className={`w-full ${className}`}
     >
       {children}
     </motion.div>

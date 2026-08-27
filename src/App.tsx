@@ -7,6 +7,7 @@ import {
   dbFetchDealers, 
   dbFetchListings, 
   dbFetchListingById,
+  dbFetchDealerById,
   dbSaveListing, 
   dbRegisterDealership, 
   dbApproveListing, 
@@ -60,7 +61,6 @@ import { VehicleCard } from './components/VehicleCard';
 import LeadCaptureForm from './components/LeadCaptureForm';
 import FirstTimeLeadModal from './components/FirstTimeLeadModal';
 import PWAInstallBanner from './components/PWAInstallBanner';
-import { FirstTimeVisitorModal } from './components/FirstTimeVisitorModal';
 import { ScrollToTopButton } from './components/ScrollToTopButton';
 import { useAuth, AuthProvider } from './components/AuthContext';
 import ContactDrawer from './components/ContactDrawer';
@@ -96,14 +96,37 @@ function AnimatedLogoCycler() {
   );
 }
 
-const METRIC_TABS_DATA: Record<string, Array<{label: string; value: string}>> = {};
+const METRIC_TABS_DATA = {
+  Design: [
+    { label: "Aerodynamic Drag Coefficient", value: "0.24 Cd" },
+    { label: "Chassis Composition", value: "High-Tensile Carbon-Infused Steel Ring" },
+    { label: "Ground Physics", value: "Underbody Ground-Effect Venturi Tunnels" }
+  ],
+  Safety: [
+    { label: "ADAS Autonomous Level", value: "Level 2+ Lidar lane-keep" },
+    { label: "Structural anchors", value: "Isofix rigid alloy bindings" },
+    { label: "Collision Mitigation", value: "Dynamic automated front & rear braking" }
+  ],
+  Luxury: [
+    { label: "Acoustic Insulation", value: "Triple-pane laminated quiet-glass" },
+    { label: "Climate Diffuser", value: "Ionized active forest breezer module" },
+    { label: "Showroom Audio Setup", value: "Burmester 3D Surround sound structure" }
+  ],
+  Performance: [
+    { label: "0-100 Speed Sprint", value: "3.8 seconds" },
+    { label: "Torque Vectoring", value: "Dual-motor active traction differential" },
+    { label: "Gearbox Synchro Ratio", value: "8-speed twin-clutch direct-shift" }
+  ]
+};
 
-const HOTSPOTS_LIST: any[] = [];
+const HOTSPOTS_LIST = [
+  { id: 'engine', name: 'Piston block & Engine layout', text: 'Dual overhead cam 24-valve configuration optimized for PKR fuel gradients.', x: '25%', y: '45%' },
+  { id: 'suspension', name: 'Suspension compression ratio', text: 'Adaptive pneumatic damping ring with dynamic rebound control on broken roads.', x: '65%', y: '55%' },
+  { id: 'exhaust', name: 'Exhaust airflow channel', text: 'Quad low-back-pressure active exhaust ports with carbon acoustic resonators.', x: '88%', y: '65%' },
+];
 
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import ShowroomProfile from "./pages/ShowroomProfile";
-import AdminShowroomCreator from './components/AdminShowroomCreator';
-import ShowroomOwnerPortal from './components/ShowroomOwnerPortal';
 import { VehicleDetail } from "./components/VehicleDetail";
 
 import { RoleProvider } from './contexts/RoleContext';
@@ -122,11 +145,8 @@ export default function AppWrapper() {
             <Route path="/dealers" element={<App />} />
             <Route path="/sell" element={<App />} />
             <Route path="/portal" element={<App />} />
-            <Route path="/owner" element={<ShowroomOwnerPortal />} />
-            <Route path="/showroom-owner" element={<ShowroomOwnerPortal />} />
             <Route path="/search" element={<App />} />
             <Route path="/favorites" element={<App />} />
-            <Route path="/admin/showrooms" element={<AdminShowroomCreator />} />
             <Route path="/admin" element={<App />} />
             <Route path="/community" element={<App />} />
             <Route path="/dealers/:showroomSlug" element={<ShowroomProfile />} />
@@ -208,7 +228,7 @@ function App() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstallBanner, setShowInstallBanner] = useState<boolean>(false);
 
-  // Preselected car for Auto Choice Services Hub
+  // Preselected car for Bazar360 Services Hub
   const [preselectedServiceCar, setPreselectedServiceCar] = useState<CarListing | null>(null);
 
   // Enterprise BAZAR360 Live Messaging State
@@ -813,19 +833,39 @@ function App() {
       return;
     }
 
-    dbFetchListingById(pendingListingId).then((fetched) => {
+    dbFetchListingById(pendingListingId).then(async (fetched) => {
       if (!isMounted) return;
       if (fetched) {
         setSelectedListing(fetched);
         setSelectedDealerId(fetched.dealerId || '');
         setVehicleNotFound(false);
       } else {
-        setVehicleNotFound(true);
+        // Check if the requested ID is actually a Showroom / Dealer ID (e.g. auto-choice-peshawar)
+        const matchedDealer = dealers.find(d => d.id === pendingListingId) || await dbFetchDealerById(pendingListingId);
+        if (matchedDealer) {
+          setSelectedDealerId(matchedDealer.id);
+          setTab('dealer-storefront');
+          setSelectedListing(null);
+          setVehicleNotFound(false);
+          try {
+            window.history.replaceState(null, '', `#/dealers/${matchedDealer.id}`);
+          } catch (e) {}
+        } else {
+          setVehicleNotFound(true);
+        }
       }
       setPendingListingId(null);
-    }).catch(() => {
+    }).catch(async () => {
       if (isMounted) {
-        setVehicleNotFound(true);
+        const matchedDealer = dealers.find(d => d.id === pendingListingId) || await dbFetchDealerById(pendingListingId);
+        if (matchedDealer) {
+          setSelectedDealerId(matchedDealer.id);
+          setTab('dealer-storefront');
+          setSelectedListing(null);
+          setVehicleNotFound(false);
+        } else {
+          setVehicleNotFound(true);
+        }
         setPendingListingId(null);
       }
     });
@@ -1106,7 +1146,7 @@ function App() {
       displayName = 'Muhammad Amjid (Founder)';
     } else if (role === 'Showroom Owner') {
       displayName = 'Muhammad Amjid (Founder / Showroom Owner)';
-      salesPodId = ''; // Hard link to Auto Choice Peshawar for live sandbox tests!
+      salesPodId = ''; // Hard link to Bazar360 Peshawar for live sandbox tests!
     } else if (role === 'Private Seller') {
       displayName = 'Muhammad Amjid (Founder / Private Seller)';
     }
@@ -1138,11 +1178,11 @@ function App() {
     const finalListing: CarListing = {
       ...newListing,
       approved: isApprovedByDefault,
-      assignedSalesRepId: currentUser?.uid,
-      createdBy: currentUser?.uid,
+      assignedSalesRepId: currentUser?.uid || 'guest-seller',
+      createdBy: currentUser?.uid || 'guest-seller',
       dealerId: resolvedDealerId,
       sellerType: resolvedDealerId === 'private' ? 'Individual' : 'Showroom',
-      sellerName: newListing.sellerName || currentUser?.displayName,
+      sellerName: newListing.sellerName || currentUser?.displayName || 'Individual Seller',
       sellerPhone: newListing.sellerPhone || currentUser?.phoneNumber || '',
       createdAt: new Date().toISOString()
     };
@@ -1348,12 +1388,7 @@ function App() {
     return isModerator || isOwner;
   });
 
-  // Flagship Priority Injection: Sort  entries to the absolute top of everything
-  const prioritizedListings = React.useMemo(() => {
-    const flagshipListings = visibleListings.filter(l => l.dealerId === '');
-    const ordinaryListings = visibleListings.filter(l => l.dealerId !== '');
-    return [...flagshipListings, ...ordinaryListings];
-  }, [visibleListings]);
+  const prioritizedListings = visibleListings;
 
   if (currentCategory === 'gateway') {
     const handleVote = (sectorId: string, e: React.MouseEvent) => {
@@ -1976,14 +2011,14 @@ function App() {
                 🛍️ BAZAR360 {activeIndustry} Showcase Channel (Demo Sandbox)
               </h3>
               <p className="text-xs text-[var(--color-text-muted)] leading-relaxed max-w-2xl">
-                You are currently viewing the horizontal {activeIndustry} expansion sector. BAZAR360 dynamically adapts its interface parameters, catalog filters, and pricing indices for this domain. The core system remains verified on 'Auto Choice'.
+                You are currently viewing the horizontal {activeIndustry} expansion sector. BAZAR360 dynamically adapts its interface parameters, catalog filters, and pricing indices for this domain. The core system remains verified on 'Bazar360'.
               </p>
             </div>
             <button
               onClick={() => setActiveIndustry('Automotive')}
               className="bg-emerald-600 hover:bg-[var(--color-accent-hover)] active:scale-95 duration-150 text-slate-950 font-mono font-black text-[10px] uppercase py-2.5 px-4.5 rounded-xl block shrink-0 tracking-widest cursor-pointer"
             >
-              Reset to Auto Choice
+              Reset to Bazar360
             </button>
           </div>
         )}
@@ -2389,9 +2424,6 @@ function App() {
 
 
 
-      {/* FIRST TIME VISITOR LEAD CAPTURE PROMPT */}
-      <FirstTimeVisitorModal />
-
       {/* BACK TO TOP BUTTON */}
       <ScrollToTopButton currentTab={currentTab} />
 
@@ -2602,21 +2634,15 @@ function App() {
               {/* Showroom Logo / Branding Header */}
               <div className="bg-bg-secondary/60 p-4 rounded-2xl border border-[var(--color-border-main)] flex items-center gap-4">
                 <div className="w-16 h-16 rounded-full border-2 border-[var(--color-accent-main)] overflow-hidden bg-[var(--color-bg-secondary)] shrink-0">
-                  {selectedQrDealer.id === '' ? (
+                  {selectedQrDealer.avatarUrl || selectedQrDealer.logoUrl ? (
                     <img 
-                      src="/auto_choice_logo_dark.jpg" 
-                      alt="Auto Choice Logo" 
-                      className="w-full h-full object-contain" 
-                    />
-                  ) : selectedQrDealer.avatarUrl ? (
-                    <img 
-                      src={`${selectedQrDealer.avatarUrl}?v=20260719`} 
+                      src={`${selectedQrDealer.avatarUrl || selectedQrDealer.logoUrl}`} 
                       alt={selectedQrDealer.name} 
                       className="w-full h-full object-cover" 
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-emerald-500 font-black text-[var(--color-text-header)] text-xl">
-                      {selectedQrDealer.avatarLetter}
+                    <div className="w-full h-full flex items-center justify-center bg-[var(--color-accent-main)] font-black text-[var(--color-text-header)] text-xl">
+                      {selectedQrDealer.avatarLetter || selectedQrDealer.name.substring(0, 1).toUpperCase()}
                     </div>
                   )}
                 </div>
@@ -2638,10 +2664,7 @@ function App() {
                 
                 {/* Google Map Launch Button */}
                 <a 
-                  href={selectedQrDealer.id === ''
-                    ? "https://maps.google.com/?q=Auto+choice+Alamas+Car+Village+Ring+Road+Peshawar"
-                    : `https://maps.google.com/?q=${encodeURIComponent(selectedQrDealer.location)}`
-                  }
+                  href={`https://maps.google.com/?q=${encodeURIComponent(selectedQrDealer.location || selectedQrDealer.name)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] hover:border-[var(--color-accent-main)] text-[var(--color-accent-main)] hover:text-[var(--color-text-header)] py-2.5 px-3.5 rounded-xl text-[9px] uppercase font-mono font-bold tracking-widest flex items-center justify-center gap-1.5 duration-150 cursor-pointer mt-2"
@@ -2657,38 +2680,12 @@ function App() {
                   <span className="text-[9px] uppercase tracking-wider font-mono font-black text-orange-400 block">Contacts & Showroom Team</span>
                 </div>
 
-                {selectedQrDealer.id === '' ? (
-                  <div className="space-y-2 pt-1">
-                    <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
-                      <div className="bg-[var(--color-bg-secondary)]/60 p-2 rounded-xl border border-[var(--color-border-main)]">
-                        <span className="text-[var(--color-text-muted)] text-[8px] uppercase block">Malak Mazhar</span>
-                        <a href="tel:03159085086" className="text-[var(--color-text-header)] font-bold block hover:text-[var(--color-accent-main)]">0315-9085086</a>
-                      </div>
-                      <div className="bg-[var(--color-bg-secondary)]/60 p-2 rounded-xl border border-[var(--color-border-main)]">
-                        <span className="text-[var(--color-text-muted)] text-[8px] uppercase block">Muhammad Amjid</span>
-                        <a href="tel:03149198403" className="text-[var(--color-text-header)] font-bold block hover:text-[var(--color-accent-main)]">03149198403</a>
-                      </div>
-                      <div className="bg-[var(--color-bg-secondary)]/60 p-2 rounded-xl border border-[var(--color-border-main)]">
-                        <span className="text-[var(--color-text-muted)] text-[8px] uppercase block">M. Nasir Mirza</span>
-                        <span className="text-[var(--color-text-header)] font-bold">Member</span>
-                      </div>
-                      <div className="bg-[var(--color-bg-secondary)]/60 p-2 rounded-xl border border-[var(--color-border-main)]">
-                        <span className="text-[var(--color-text-muted)] text-[8px] uppercase block">Asfandyar Zafar</span>
-                        <span className="text-[var(--color-text-header)] font-bold">Member</span>
-                      </div>
-                    </div>
-                    <div className="text-[9px] font-sans text-[var(--color-text-muted)] text-center italic">
-                      "Our Team & Contacts are fully verified and available for custom quotes."
-                    </div>
+                <div className="space-y-1.5 text-text-muted">
+                  <div className="flex justify-between items-center bg-[var(--color-bg-secondary)]/60 p-2.5 rounded-xl border border-[var(--color-border-main)] font-mono">
+                    <span>👤 {selectedQrDealer.contactPerson || 'Showroom Manager'}</span>
+                    <a href={`tel:${selectedQrDealer.phone}`} className="text-[var(--color-accent-main)] font-bold">{selectedQrDealer.phone}</a>
                   </div>
-                ) : (
-                  <div className="space-y-1.5 text-text-muted">
-                    <div className="flex justify-between items-center bg-[var(--color-bg-secondary)]/60 p-2.5 rounded-xl border border-[var(--color-border-main)] font-mono">
-                      <span>👤 {selectedQrDealer.contactPerson || 'Showroom Manager'}</span>
-                      <a href={`tel:${selectedQrDealer.phone}`} className="text-[var(--color-accent-main)] font-bold">{selectedQrDealer.phone}</a>
-                    </div>
-                  </div>
-                )}
+                </div>
               </div>
 
               {/* QR Code Container */}
@@ -2733,27 +2730,15 @@ function App() {
                   const url = typeof window !== 'undefined'
                     ? `${window.location.origin}/dealers/${selectedQrDealer.id}`
                     : `https://bazar360.online/dealers/${selectedQrDealer.id}`;
-                  const mapLink = selectedQrDealer.id === ''
-                    ? "https://maps.google.com/?q=Auto+choice+Alamas+Car+Village+Ring+Road+Peshawar"
-                    : `https://maps.google.com/?q=${encodeURIComponent(selectedQrDealer.location)}`;
+                  const mapLink = `https://maps.google.com/?q=${encodeURIComponent(selectedQrDealer.location || selectedQrDealer.name)}`;
                   
                   let text = `🚗 *${selectedQrDealer.name.toUpperCase()}* 🚗\n`;
-                  text += `✨ Slogan: "${selectedQrDealer.subtitle || 'The Right Choice'}"\n`;
+                  text += `✨ Slogan: "${selectedQrDealer.subtitle || 'Elite Automotive Dealership'}"\n`;
                   text += `📍 Address: ${selectedQrDealer.location}\n`;
                   text += `🗺️ Google Maps: ${mapLink}\n`;
                   
-                  if (selectedQrDealer.id === '') {
-                    text += `👤 Contact Person: Malak Mazhar\n`;
-                    text += `📞 Call/WhatsApp: +92 315 9085086\n`;
-                    text += `👥 Showroom Team Desk:\n`;
-                    text += `  • M. Nasir Mirza\n`;
-                    text += `  • Asfandyar Zafar\n`;
-                    text += `  • Malak Mazhar (0315-9085086)\n`;
-                    text += `  • Malak Waseem (0346-9085033)\n`;
-                  } else {
-                    text += `👤 Contact: ${selectedQrDealer.contactPerson || 'Showroom Manager'}\n`;
-                    text += `📞 Phone: ${selectedQrDealer.phone}\n`;
-                  }
+                  text += `👤 Contact: ${selectedQrDealer.contactPerson || 'Showroom Manager'}\n`;
+                  text += `📞 Phone: ${selectedQrDealer.phone || 'Not Provided'}\n`;
                   
                   text += `🌐 View Showroom Inventory: ${url}\n\n`;
                   text += `Shared via Bazar360.online - Pakistan's Flagship Automotive Portal! 🇵🇰`;

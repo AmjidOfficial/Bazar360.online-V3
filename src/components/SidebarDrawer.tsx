@@ -62,7 +62,7 @@ export default function SidebarDrawer({
 
   const t = {
     en: {
-      navigation: "Auto Choice Menu",
+      navigation: "Bazar360 Menu",
       home: "Home",
       inventory: "Search Fleet",
       showrooms: "Showrooms",
@@ -122,15 +122,13 @@ export default function SidebarDrawer({
           transition={{ type: 'spring', damping: 25, stiffness: 260 }}
           className="relative w-full max-w-lg max-h-[90vh] bg-[var(--color-bg-secondary)]/90 border border-[var(--color-accent-main)]/30 rounded-[32px] p-6 sm:p-8 overflow-y-auto text-[var(--color-text-header)] shadow-[0_25px_60px_rgba(0,0,0,0.8)] z-10 flex flex-col justify-between"
         >
-          {/* Top Bar with Perfectly Centered Logo & Close Control */}
-          <div className="relative flex items-center justify-center border-b border-[var(--color-accent-main)]/20 pb-4 mb-5 w-full">
-            <div className="flex items-center justify-center px-4 py-2 text-center">
-              <Bazar360Logo variant="header" size="md" showTagline={true} />
-            </div>
+          {/* Top Bar with Dual Logos & Close */}
+          <div className="flex items-center justify-between border-b border-[var(--color-accent-main)]/20 pb-4 mb-5">
+            <Bazar360Logo variant="header" size="md" showTagline={true} />
 
             <button
               onClick={onClose}
-              className="absolute right-0 top-1/2 -translate-y-1/2 p-2 rounded-full bg-[var(--color-accent-main)]/10 hover:bg-[var(--color-accent-main)]/20 text-[var(--color-accent-main)] border border-[var(--color-accent-main)]/30 transition-all cursor-pointer active:scale-95"
+              className="p-2 rounded-full bg-[var(--color-accent-main)]/10 hover:bg-[var(--color-accent-main)]/20 text-[var(--color-accent-main)] border border-[var(--color-accent-main)]/30 transition-all cursor-pointer active:scale-95"
               aria-label="Close menu"
             >
               <X size={20} />
@@ -169,7 +167,7 @@ export default function SidebarDrawer({
             ) : (
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-bold text-emerald-200">Welcome to Auto Choice</p>
+                  <p className="text-xs font-bold text-emerald-200">Welcome to Bazar360</p>
                   <p className="text-[10px] text-[var(--color-accent-main)]/80 font-sans">Sign in to post vehicles & chat</p>
                 </div>
                 <button

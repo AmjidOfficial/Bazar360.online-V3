@@ -63,9 +63,9 @@ export default function ContactView({ lang, onOpenSupportDrawer }: ContactViewPr
 
       teamHeading: "Meet Our Founders & Directors",
       teamSub: "The core architects of Bazar360 guiding dealership integrations and digital operations.",
-      partner: "Services & Auto Choice Partner",
+      partner: "Services & Bazar360 Partner",
       partnerName: "Malak Mazhar",
-      partnerBio: "Co-Founder and managing partner of Bazar360's flagship Auto Choice showroom. Leads business strategy, physical showroom coordination, and dealership operations.",
+      partnerBio: "Co-Founder and managing partner of Bazar360's flagship Bazar360 showroom. Leads business strategy, physical showroom coordination, and dealership operations.",
       founder: "Founder",
       founderName: "Muhammad Amjid",
       founderBio: "Visionary Founder and technological architect. Oversees core platform security, international investor relationships, and multi-tenant engineering expansion.",
@@ -86,7 +86,7 @@ export default function ContactView({ lang, onOpenSupportDrawer }: ContactViewPr
       successTitle: "Ticket Received Successfully!",
       successDesc: "Thank you for contacting Bazar360 support. An executive officer will message you on WhatsApp or Call your phone shortly.",
       addressLabel: "Corporate Headquarters",
-      address: "Peshawar Motorway Interchange, Auto Choice Flagship Showroom, Ring Road, Peshawar, Pakistan",
+      address: "Peshawar Motorway Interchange, Bazar360 Flagship Showroom, Ring Road, Peshawar, Pakistan",
       timingTitle: "Support Hours",
       timingDesc: "9:00 AM - Midnight (PKT) | 7 Days a week",
 
@@ -157,7 +157,7 @@ export default function ContactView({ lang, onOpenSupportDrawer }: ContactViewPr
     {
       q: lang === 'en' ? "How do I check if a showroom listing is verified?" : "میں کیسے چیک کروں کہ شو روم کی گاڑی تصدیق شدہ ہے؟",
       a: lang === 'en' 
-        ? "Look for the green 'Verified Showroom' shield badge on listings. This indicates the vehicle physically resides in one of our partner showrooms (like Auto Choice Peshawar) and has been pre-inspected by Bazar360 staff with papers verified."
+        ? "Look for the green 'Verified Showroom' shield badge on listings. This indicates the vehicle physically resides in one of our partner showrooms (like Bazar360 Peshawar) and has been pre-inspected by Bazar360 staff with papers verified."
         : "گاڑیوں کی تفصیلات پر سبز 'تصدیق شدہ شو روم' بیج دیکھیں۔ اس کا مطلب ہے کہ گاڑی ہمارے پارٹنر شو روم (جیسے آٹو چوائس پشاور) میں موجود ہے اور اس کے کاغذات کی تصدیق کی جا چکی ہے۔"
     },
     {
@@ -181,7 +181,7 @@ export default function ContactView({ lang, onOpenSupportDrawer }: ContactViewPr
     {
       q: lang === 'en' ? "What precautions should I take when buying a car?" : "گاڑی خریدتے وقت مجھے کیا احتیاطی تدابیر اختیار کرنی چاہئیں؟",
       a: lang === 'en'
-        ? "Always inspect the vehicle and original documents (Registration Book, File, Tax Token Status) physically before transferring funds. We strongly recommend meeting verified sellers in public spots or visiting our partner showroom hubs (e.g., Auto Choice Ring Road Peshawar) to conduct transactions safely."
+        ? "Always inspect the vehicle and original documents (Registration Book, File, Tax Token Status) physically before transferring funds. We strongly recommend meeting verified sellers in public spots or visiting our partner showroom hubs (e.g., Bazar360 Ring Road Peshawar) to conduct transactions safely."
         : "رقم منتقل کرنے سے پہلے ہمیشہ گاڑی اور اصل دستاویزات (رجسٹریشن بک، فائل، ٹیکس ٹوکن) کا جسمانی طور پر معائنہ کریں۔ ہم پرزور مشورہ دیتے ہیں کہ گاڑی کا سودا فزیکل شو رومز میں کریں۔"
     }
   ];
@@ -623,7 +623,7 @@ export default function ContactView({ lang, onOpenSupportDrawer }: ContactViewPr
                 3. Showroom Owner Mandates
               </h3>
               <p className="leading-relaxed">
-                All partner showroom owners (such as Showroom HQ, Auto Choice Peshawar, etc.) must maintain accurate listings on Bazar360. If a vehicle is sold physically at the showroom premises, the listing must be updated or marked 'Sold' within 12 hours of transaction completion to prevent false leads.
+                All partner showroom owners (such as Showroom HQ, Bazar360 Peshawar, etc.) must maintain accurate listings on Bazar360. If a vehicle is sold physically at the showroom premises, the listing must be updated or marked 'Sold' within 12 hours of transaction completion to prevent false leads.
               </p>
             </section>
 

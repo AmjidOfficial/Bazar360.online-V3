@@ -25,7 +25,14 @@ import { CarListing, Dealer } from '../types';
 import { VehicleCard } from './VehicleCard';
 import { VehicleSkeletonCard } from './VehicleSkeletonCard';
 import { motion } from 'motion/react';
-import { PAKISTAN_BRANDS, PAKISTAN_CITIES as IMPORTED_CITIES, CAR_MODELS } from '../lib/pakistanCarData';
+import { 
+  PAKISTAN_BRANDS, 
+  PAKISTAN_CITIES as IMPORTED_CITIES, 
+  CAR_MODELS,
+  getMakesForType,
+  getModelsForMake,
+  getVariantsForModel
+} from '../lib/pakistanCarData';
 
 interface SearchExplorerViewProps {
   listings: CarListing[];
@@ -88,8 +95,10 @@ export default function SearchExplorerView({
   
   // Filter States
   const [localQuery, setLocalQuery] = useState(searchQuery);
+  const [filterVehicleType, setFilterVehicleType] = useState('All'); // 'All' | 'car' | 'motorcycle' | 'commercial'
   const [filterMake, setFilterMake] = useState('All');
   const [filterModel, setFilterModel] = useState('');
+  const [filterVariant, setFilterVariant] = useState('');
   const [filterBodyCategory, setFilterBodyCategory] = useState('All');
   const [filterCity, setFilterCity] = useState('All');
   const [filterTransmission, setFilterTransmission] = useState('All');
@@ -110,32 +119,56 @@ export default function SearchExplorerView({
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 12;
 
+  // Dynamic Options for Cascading Dropdowns
+  const dynamicMakes = useMemo(() => {
+    if (filterVehicleType === 'All') {
+      return ['All', ...PAKISTAN_BRANDS];
+    }
+    return ['All', ...getMakesForType(filterVehicleType)];
+  }, [filterVehicleType]);
+
+  const dynamicModels = useMemo(() => {
+    if (filterMake === 'All') {
+      return [];
+    }
+    return getModelsForMake(filterVehicleType === 'All' ? 'car' : filterVehicleType, filterMake);
+  }, [filterVehicleType, filterMake]);
+
+  const dynamicVariants = useMemo(() => {
+    if (!filterModel) {
+      return [];
+    }
+    return getVariantsForModel(filterModel);
+  }, [filterModel]);
+
   // Reset pagination to Page 1 when filters or sorting change
   useEffect(() => {
     setCurrentPage(1);
-  }, [localQuery, filterMake, filterModel, filterBodyCategory, filterCity, filterTransmission, filterFuel, filterCondition, filterAssembly, priceMin, priceMax, yearMin, yearMax, filterFavorites, filterRecentViews, sortBy, filterSellerType]);
+  }, [localQuery, filterVehicleType, filterMake, filterModel, filterVariant, filterBodyCategory, filterCity, filterTransmission, filterFuel, filterCondition, filterAssembly, priceMin, priceMax, yearMin, yearMax, filterFavorites, filterRecentViews, sortBy, filterSellerType]);
 
-  // Reset model filter if it does not belong to the selected make
-  useEffect(() => {
-    if (filterMake !== 'All' && CAR_MODELS[filterMake] && filterModel) {
-      const isValidModel = CAR_MODELS[filterMake].some(
-        m => m.toLowerCase() === filterModel.toLowerCase()
-      );
-      if (!isValidModel) {
-        setFilterModel('');
-      }
-    }
-  }, [filterMake]);
+  // CASCADING RESET LOGIC
+  const handleVehicleTypeChange = (newType: string) => {
+    setFilterVehicleType(newType);
+    setFilterMake('All');
+    setFilterModel('');
+    setFilterVariant('');
+  };
+
+  const handleMakeChange = (newMake: string) => {
+    setFilterMake(newMake);
+    setFilterModel('');
+    setFilterVariant('');
+  };
+
+  const handleModelChange = (newModel: string) => {
+    setFilterModel(newModel);
+    setFilterVariant('');
+  };
 
   // Synchronize category or search query updates from Home view brand clicks
   useEffect(() => {
     if (selectedCategory && selectedCategory !== 'All') {
-      // Check if it's a make or body category
-      if (BODY_CATEGORIES.some(b => b.id.toLowerCase() === selectedCategory.toLowerCase())) {
-        setFilterBodyCategory(selectedCategory);
-      } else {
-        setFilterMake(selectedCategory);
-      }
+      setFilterMake(selectedCategory);
     }
   }, [selectedCategory]);
 
@@ -148,8 +181,10 @@ export default function SearchExplorerView({
       filterTitle: "Filters",
       resetAll: "Reset All",
       searchPlaceholder: "Search make, model, variant, or city...",
+      vehicleType: "Vehicle Category",
       make: "Make / Brand",
       model: "Model",
+      variant: "Variant",
       modelPlaceholder: "e.g. Civic, Corolla",
       bodyType: "Body Category",
       yearRange: "Year Range",
@@ -190,8 +225,10 @@ export default function SearchExplorerView({
       filterTitle: "فلٹرز",
       resetAll: "تمام ختم کریں",
       searchPlaceholder: "برانڈ، ماڈل یا شہر تلاش کریں...",
+      vehicleType: "گاڑی کی قسم",
       make: "برانڈ / میک",
       model: "ماڈل",
+      variant: "ویرینٹ",
       modelPlaceholder: "مثال کے طور پر سوک، کرولا",
       bodyType: "باڈی کی قسم",
       yearRange: "سال کی حد",
@@ -235,8 +272,10 @@ export default function SearchExplorerView({
     setLocalQuery('');
     setSearchQuery('');
     setSelectedCategory('All');
+    setFilterVehicleType('All');
     setFilterMake('All');
     setFilterModel('');
+    setFilterVariant('');
     setFilterBodyCategory('All');
     setFilterCity('All');
     setFilterTransmission('All');
@@ -316,6 +355,27 @@ export default function SearchExplorerView({
       // Approved only, hide sold, paused, and archived from public searches
       if (car.approved === false || car.isSold || car.isPaused || car.isArchived) return false;
 
+      // Vehicle Type match
+      if (filterVehicleType !== 'All') {
+        const bikeBrands = ['Honda', 'Yamaha', 'Suzuki', 'Super Power', 'Road Prince', 'United', 'Unique', 'Hi-Speed', 'Crown', 'Kawasaki', 'BMW Motorrad', 'Vespa'];
+        const commBrands = ['Isuzu', 'Hino', 'Master', 'JAC', 'FAW', 'Hyundai', 'Toyota', 'Suzuki', 'Changan', 'Dongfeng', 'Shacman'];
+        
+        let actualType = (car.vehicleType || '').toLowerCase();
+        if (!actualType) {
+          const make = car.make;
+          const isBike = bikeBrands.includes(make) && (car.tags?.includes('Bike') || car.tags?.includes('Motorcycle') || car.title.toLowerCase().includes('cg 125') || car.title.toLowerCase().includes('cd 70') || car.title.toLowerCase().includes('ybr'));
+          const isComm = commBrands.includes(make) && (car.tags?.includes('Commercial') || car.tags?.includes('Loader') || car.tags?.includes('Truck') || car.tags?.includes('Van') || car.title.toLowerCase().includes('bolan') || car.title.toLowerCase().includes('shehzore') || car.title.toLowerCase().includes('ravi'));
+          
+          if (isBike) actualType = 'motorcycle';
+          else if (isComm) actualType = 'commercial';
+          else actualType = 'car';
+        }
+        
+        if (actualType !== filterVehicleType.toLowerCase()) {
+          return false;
+        }
+      }
+
       // Keyword query match
       if (localQuery) {
         const q = localQuery.toLowerCase();
@@ -335,6 +395,11 @@ export default function SearchExplorerView({
 
       // Model text match
       if (filterModel && !car.model.toLowerCase().includes(filterModel.toLowerCase())) {
+        return false;
+      }
+
+      // Variant match
+      if (filterVariant && !car.title.toLowerCase().includes(filterVariant.toLowerCase())) {
         return false;
       }
 
@@ -401,7 +466,7 @@ export default function SearchExplorerView({
 
       return true;
     });
-  }, [sourceVehicles, localQuery, filterMake, filterModel, filterBodyCategory, filterCity, filterTransmission, filterFuel, filterCondition, filterAssembly, priceMin, priceMax, yearMin, yearMax, filterFavorites, filterRecentViews, favoritesList, recentViewsList, filterSellerType]);
+  }, [sourceVehicles, localQuery, filterVehicleType, filterMake, filterModel, filterVariant, filterBodyCategory, filterCity, filterTransmission, filterFuel, filterCondition, filterAssembly, priceMin, priceMax, yearMin, yearMax, filterFavorites, filterRecentViews, favoritesList, recentViewsList, filterSellerType]);
 
   // Sort Logic
   const sortedVehicles = useMemo(() => {
@@ -531,6 +596,21 @@ export default function SearchExplorerView({
         </div>
       </div>
 
+      {/* 0. Vehicle Type Category Dropdown */}
+      <div className="space-y-2">
+        <label className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#64748B] block">{t.vehicleType}</label>
+        <select
+          value={filterVehicleType}
+          onChange={(e) => handleVehicleTypeChange(e.target.value)}
+          className="w-full bg-white border border-[#E2E8F0] text-[#0F172A] rounded-xl p-3 text-xs focus:border-[#007979] focus:ring-1 focus:ring-[#007979] outline-none shadow-2xs cursor-pointer"
+        >
+          <option value="All">{lang === 'ur' ? 'تمام گاڑیاں' : 'All Categories'}</option>
+          <option value="car">{lang === 'ur' ? 'کاریں' : 'Cars'}</option>
+          <option value="motorcycle">{lang === 'ur' ? 'موٹر سائیکلیں' : 'Motorcycles'}</option>
+          <option value="commercial">{lang === 'ur' ? 'کمرشل گاڑیاں' : 'Commercial Vehicles'}</option>
+        </select>
+      </div>
+
       {/* 1. Body Type Category Dropdown */}
       <div className="space-y-2">
         <label className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#64748B] block">{t.bodyType}</label>
@@ -550,10 +630,10 @@ export default function SearchExplorerView({
         <label className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#64748B] block">{t.make}</label>
         <select
           value={filterMake}
-          onChange={(e) => setFilterMake(e.target.value)}
+          onChange={(e) => handleMakeChange(e.target.value)}
           className="w-full bg-white border border-[#E2E8F0] text-[#0F172A] rounded-xl p-3 text-xs focus:border-[#007979] focus:ring-1 focus:ring-[#007979] outline-none shadow-2xs"
         >
-          {MAKES_LIST.map(make => (
+          {dynamicMakes.map(make => (
             <option key={make} value={make}>{make === 'All' ? t.any : make}</option>
           ))}
         </select>
@@ -563,14 +643,14 @@ export default function SearchExplorerView({
       <div className="space-y-2">
         <label className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#64748B] block">{t.model}</label>
         <div className="relative">
-          {filterMake !== 'All' && CAR_MODELS[filterMake] ? (
+          {filterMake !== 'All' && dynamicModels.length > 0 ? (
             <select
               value={filterModel}
-              onChange={(e) => setFilterModel(e.target.value)}
+              onChange={(e) => handleModelChange(e.target.value)}
               className="w-full bg-white border border-[#E2E8F0] text-[#0F172A] rounded-xl p-3 text-xs focus:border-[#007979] focus:ring-1 focus:ring-[#007979] outline-none cursor-pointer shadow-2xs"
             >
               <option value="">{lang === 'ur' ? "تمام ماڈلز (کوئی بھی)" : "All Models (Any)"}</option>
-              {CAR_MODELS[filterMake].map((model) => (
+              {dynamicModels.map((model) => (
                 <option key={model} value={model}>{model}</option>
               ))}
             </select>
@@ -579,13 +659,50 @@ export default function SearchExplorerView({
               <input
                 type="text"
                 value={filterModel}
-                onChange={(e) => setFilterModel(e.target.value)}
+                onChange={(e) => handleModelChange(e.target.value)}
                 placeholder={t.modelPlaceholder}
                 className="w-full bg-white border border-[#E2E8F0] text-[#0F172A] rounded-xl p-3 text-xs placeholder-[#94A3B8] focus:border-[#007979] focus:ring-1 focus:ring-[#007979] outline-none shadow-2xs"
               />
               {filterModel && (
                 <button
-                  onClick={() => setFilterModel('')}
+                  onClick={() => handleModelChange('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#0F172A] cursor-pointer"
+                >
+                  <X size={12} />
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* 3.5. Variant Selection */}
+      <div className="space-y-2">
+        <label className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#64748B] block">{t.variant}</label>
+        <div className="relative">
+          {filterModel && dynamicVariants.length > 0 ? (
+            <select
+              value={filterVariant}
+              onChange={(e) => setFilterVariant(e.target.value)}
+              className="w-full bg-white border border-[#E2E8F0] text-[#0F172A] rounded-xl p-3 text-xs focus:border-[#007979] focus:ring-1 focus:ring-[#007979] outline-none cursor-pointer shadow-2xs"
+            >
+              <option value="">{lang === 'ur' ? "تمام ویرینٹس (کوئی بھی)" : "All Variants (Any)"}</option>
+              {dynamicVariants.map((variant) => (
+                <option key={variant} value={variant}>{variant}</option>
+              ))}
+            </select>
+          ) : (
+            <>
+              <input
+                type="text"
+                value={filterVariant}
+                onChange={(e) => setFilterVariant(e.target.value)}
+                placeholder={lang === 'ur' ? "مثال کے طور پر VTi Oriel" : "e.g. VTi Oriel, GLi"}
+                className="w-full bg-white border border-[#E2E8F0] text-[#0F172A] rounded-xl p-3 text-xs placeholder-[#94A3B8] focus:border-[#007979] focus:ring-1 focus:ring-[#007979] outline-none shadow-2xs"
+              />
+              {filterVariant && (
+                <button
+                  onClick={() => setFilterVariant('')}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#0F172A] cursor-pointer"
                 >
                   <X size={12} />

@@ -36,15 +36,15 @@ export function IdentityGreetingHeader({
 
   // Compute Stats
   const activePostingsCount = listings.filter(car => !car.approved).length;
-  const userListingsCount = currentUser ? listings.filter(car => car.createdBy === currentUser.uid || (isShowroomOwner && car.dealerId === 'auto-choice-peshawar')).length : 0;
+  const userListingsCount = currentUser ? listings.filter(car => car.createdBy === currentUser.uid || (isShowroomOwner && car.dealerId === '')).length : 0;
   const totalVehicles = listings.filter(car => car.approved).length;
 
   // Find associated showroom name
   const associatedShowroom = isShowroomOwner 
-    ? dealers.find(d => d.id === currentUser?.associatedShowroomId || d.id === 'auto-choice-peshawar')
+    ? dealers.find(d => d.id === currentUser?.associatedShowroomId || d.id === '')
     : null;
 
-  const showroomName = associatedShowroom?.name || 'Auto Choice Showroom';
+  const showroomName = associatedShowroom?.name || 'Bazar360 Showroom';
 
   return (
     <div className="w-full bg-[var(--color-bg-primary)] border-b border-white/10 select-none relative overflow-hidden py-4 px-4 md:px-8 shadow-inner">
@@ -129,7 +129,7 @@ export function IdentityGreetingHeader({
               {isGuest && (
                 lang === 'ur'
                   ? 'پشاور اور خیبر پختونخوا کے معروف شو رومز سے جڑنے اور بہترین ڈیلز حاصل کرنے کے لیے سائن ان کریں۔'
-                  : 'Connect with elite KPK showrooms like Auto Choice, access direct dealer pricing, and start listing vehicles.'
+                  : 'Connect with elite KPK showrooms like Bazar360, access direct dealer pricing, and start listing vehicles.'
               )}
               {isAdmin && (
                 lang === 'ur'

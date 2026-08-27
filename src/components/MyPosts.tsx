@@ -1,3 +1,4 @@
+import { NO_IMAGE_SVG } from "../types";
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   Car, Clock, CheckCircle2, XCircle, Tag, Trash2, Edit2, 
@@ -302,7 +303,7 @@ export function MyPosts({
                   {/* Image & Status Overlay */}
                   <div className="relative h-44 bg-bg-primary overflow-hidden">
                     <LazyImage
-                      src={car.images?.[0] || car.imageUrl || 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=800&q=80'}
+                      src={car.images?.[0] || car.imageUrl || NO_IMAGE_SVG}
                       alt={`${car.year} ${car.make} ${car.model}`}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />

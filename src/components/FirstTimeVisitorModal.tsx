@@ -49,7 +49,7 @@ export function FirstTimeVisitorModal({ onClose }: FirstTimeVisitorModalProps) {
         city: 'Peshawar',
         details: 'First-time visitor preference registration on Bazar360.',
         customerId: 'visitor',
-        showroomOwnerId: 'auto-choice-peshawar',
+        showroomOwnerId: '',
         inquiryDate: new Date().toISOString(),
         status: 'New',
         createdAt: new Date().toISOString()
@@ -119,7 +119,7 @@ export function FirstTimeVisitorModal({ onClose }: FirstTimeVisitorModalProps) {
               {/* Title & Desc */}
               <div className="space-y-2">
                 <h3 className="text-xl sm:text-2xl font-black uppercase text-[var(--color-text-header)] tracking-tight">
-                  Welcome to Bazar360 & Auto Choice
+                  Welcome to Bazar360 & Bazar360
                 </h3>
                 <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
                   Enter your contact details for instant WhatsApp bargain alerts, verified dealer contacts, and tailored vehicle recommendations.

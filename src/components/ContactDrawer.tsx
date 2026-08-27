@@ -29,7 +29,7 @@ export default function ContactDrawer({ isOpen, onClose, lang, initialMessage }:
       title: "24/7 Support Desk",
       subtitle: "Get instant assistance from BAZAR360 representatives",
       helpline: "Helpline Connectivity",
-      partnerLabel: "Services & Auto Choice Partner",
+      partnerLabel: "Services & Bazar360 Partner",
       founderLabel: "Founder",
       malakName: "Malak Mazhar",
       amjidName: "Muhammad Amjid",

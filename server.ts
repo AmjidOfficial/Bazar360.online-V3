@@ -147,7 +147,7 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  app.use(express.json());
+  app.use(express.json({ limit: '25mb' }));
 
   // Protect all API endpoints with Firebase App Check
   app.use("/api", appCheckVerification);
@@ -290,16 +290,16 @@ Incorporate details of our showcase fleet where appropriate. Maintain roleplay p
       }
 
       const curatedCoverImages = [
-        "https://images.unsplash.com/photo-1562141983-f32fdfa2bcfa?auto=format&fit=crop&q=80&w=1200", // Modern showroom
-        "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&q=80&w=1200", // Prestige lineup
-        "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=1200", // Cyberpunk neon showroom
-        "https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?auto=format&fit=crop&q=80&w=1200"  // Luxury dealership
+        "",
+        "",
+        "",
+        ""
       ];
 
       const curatedLogos = [
-        "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&q=80&w=300", // Dark shield logo
-        "https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80&w=300", // Minimal monogram
-        "https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&q=80&w=300"  // Elegant brand
+        "",
+        "",
+        ""
       ];
 
       const hash = name.split("").reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
@@ -315,7 +315,7 @@ Incorporate details of our showcase fleet where appropriate. Maintain roleplay p
           id: `act-tiktok-${Date.now()}`,
           timestamp: "Just now",
           badge: "TikTok Reel",
-          imageUrl: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=600",
+          imageUrl: "",
           title: `Trending TikTok walkaround on @${name.toLowerCase().replace(/\s+/g, '')}`,
           description: `Watch our high-engagement video walkaround and exhaust sound review of our newly imported premium sports touring model.`,
           price: "Available PKR"
@@ -327,7 +327,7 @@ Incorporate details of our showcase fleet where appropriate. Maintain roleplay p
           id: `act-social-${Date.now() + 1}`,
           timestamp: "3 hours ago",
           badge: instagram ? "Instagram Showcase" : "Facebook Active Campaign",
-          imageUrl: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&q=80&w=600",
+          imageUrl: "",
           title: "Prestige Fleet Campaign Spotlight",
           description: `Meticulously pre-purchased diagnostics passed. Spotlighting the luxury specifications of our highest-grade SUVs this month.`,
           price: "Elite Specs"
@@ -339,7 +339,7 @@ Incorporate details of our showcase fleet where appropriate. Maintain roleplay p
           id: `act-web-${Date.now() + 2}`,
           timestamp: "Yesterday",
           badge: "Web Direct Port",
-          imageUrl: "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&q=80&w=600",
+          imageUrl: "",
           title: "Interactive Web Portal Online",
           description: `Check out our newly optimized digital dealership website. Browse full certificates, schedule on-site inspections, or request direct transportation.`,
           price: "Online Booking"
@@ -351,7 +351,7 @@ Incorporate details of our showcase fleet where appropriate. Maintain roleplay p
           id: `act-fallback-${Date.now()}`,
           timestamp: "Just now",
           badge: "Launch Event",
-          imageUrl: "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=600",
+          imageUrl: "",
           title: `Welcome to ${name} Showroom floor`,
           description: `We are live on BAZAR360! Stop by our physical collection or use WhatsApp to request personalized walkarounds with verified specs.`,
           price: "Direct Access"
@@ -764,9 +764,9 @@ Your task is to translate any incoming text block beautifully and accurately int
         xml += `  </url>\n`;
       });
 
-      // Dealers / Showrooms (e.g. )
+      // Dealers / Showrooms (e.g. auto-choice-peshawar)
       dealersList.forEach(d => {
-        const dId = d.id || '';
+        const dId = d.id || 'auto-choice-peshawar';
         xml += `  <url>\n`;
         xml += `    <loc>https://bazar360.online/dealers/${dId}</loc>\n`;
         xml += `    <changefreq>weekly</changefreq>\n`;
@@ -796,7 +796,7 @@ Your task is to translate any incoming text block beautifully and accurately int
       let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
       xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
       xml += `  <url>\n    <loc>https://bazar360.online/</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
-      xml += `  <url>\n    <loc>https://bazar360.online/dealers/</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
+      xml += `  <url>\n    <loc>https://bazar360.online/dealers/auto-choice-peshawar</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
       xml += `</urlset>`;
       res.header('Content-Type', 'application/xml');
       res.status(200).send(xml);

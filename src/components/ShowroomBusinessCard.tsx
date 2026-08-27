@@ -207,7 +207,7 @@ END:VCARD`;
   // Showroom specific logo path depending on card theme
   const getShowroomLogoSrc = (): string => {
     if (dealer.logo) return dealer.logo;
-    return cardTheme === 'dark' ? '/auto_choice_logo_dark.jpg' : '/auto_choice_logo_light.jpg';
+    return cardTheme === 'dark' ? '' : '/auto_choice_logo_light.jpg';
   };
 
   // Dynamic Theme Matrix & Presets

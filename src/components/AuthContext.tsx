@@ -22,7 +22,6 @@ interface AuthContextType {
   isAdmin: boolean;
   loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
-  loginAsDemo: (roleType: 'Admin' | 'Dealer' | 'Buyer') => Promise<void>;
   updateProfile: (data: Partial<UserProfile>) => Promise<void>;
   toggleFavorite: (car: CarListing) => Promise<void>;
   favorites: CarListing[];
@@ -84,21 +83,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
-    // If we loaded in demo mode, pre-populate mock firebaseUser
-    if (localStorage.getItem('bazar360_is_demo') === 'true' && currentUser) {
-      setFirebaseUser({
-        uid: currentUser.uid,
-        email: currentUser.email,
-        displayName: currentUser.displayName,
-        emailVerified: true
-      } as any);
-      setLoading(false);
-    }
-
     const unsubscribe = onAuthStateChanged(auth, async (fUser) => {
+      setFirebaseUser(fUser);
       if (fUser) {
-        localStorage.removeItem('bazar360_is_demo'); // Clear demo mode if real user logs in
-        setFirebaseUser(fUser);
         try {
           let profile = await dbFetchUserProfile(fUser.uid);
           
@@ -166,12 +153,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.error('[AuthContext] Profile load failed:', err);
         }
       } else {
-        const isDemo = localStorage.getItem('bazar360_is_demo') === 'true';
-        if (!isDemo) {
-          setCurrentUser(null);
-          localStorage.removeItem('bazar360_user');
-          setFirebaseUser(null);
-        }
+        setCurrentUser(null);
+        localStorage.removeItem('bazar360_user');
       }
       setLoading(false);
     });
@@ -202,73 +185,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const loginAsDemo = async (roleType: 'Admin' | 'Dealer' | 'Buyer') => {
-    setLoading(true);
-    let mockProfile: UserProfile;
-    
-    if (roleType === 'Admin') {
-      mockProfile = {
-        uid: 'demo-admin-uid-123',
-        email: 'amjid.bisconni@gmail.com',
-        displayName: 'Amjid Khattak (Demo Admin)',
-        phoneNumber: '+923001234567',
-        phoneVerified: true,
-        role: 'Admin',
-        status: 'Active',
-        createdAt: new Date().toISOString(),
-        lastLogin: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        city: 'Peshawar',
-        state: 'Khyber Pakhtunkhwa'
-      };
-    } else if (roleType === 'Dealer') {
-      mockProfile = {
-        uid: 'demo-dealer-uid-456',
-        email: 'mazharsouls@gmail.com',
-        displayName: 'Malak Mazhar (Demo Showroom Owner)',
-        phoneNumber: '+923159085086',
-        phoneVerified: true,
-        role: 'Dealer',
-        status: 'Active',
-        createdAt: new Date().toISOString(),
-        lastLogin: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        city: 'Peshawar',
-        state: 'Khyber Pakhtunkhwa',
-        associatedShowroomId: 'auto-choice-peshawar'
-      };
-    } else {
-      mockProfile = {
-        uid: 'demo-buyer-uid-789',
-        email: 'buyer.demo@bazar360.online',
-        displayName: 'Demo Guest Buyer',
-        phoneNumber: '+923219876543',
-        phoneVerified: false,
-        role: 'Buyer',
-        status: 'Active',
-        createdAt: new Date().toISOString(),
-        lastLogin: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        city: 'Peshawar',
-        state: 'Khyber Pakhtunkhwa'
-      };
-    }
-    
-    localStorage.setItem('bazar360_is_demo', 'true');
-    localStorage.setItem('bazar360_user', JSON.stringify(mockProfile));
-    setCurrentUser(mockProfile);
-    setFirebaseUser({
-      uid: mockProfile.uid,
-      email: mockProfile.email,
-      displayName: mockProfile.displayName,
-      emailVerified: true,
-    } as any);
-    setLoading(false);
-  };
-
   const logout = async () => {
     try {
-      localStorage.removeItem('bazar360_is_demo');
       await signOut(auth);
       setCurrentUser(null);
       setFirebaseUser(null);
@@ -505,7 +423,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isAdmin,
       loginWithGoogle,
       logout,
-      loginAsDemo,
       updateProfile,
       toggleFavorite,
       favorites,

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 
 const TAGLINES = [
   "Bazar360: Drive Your Future, Today.",
-  "Auto Choice | The Right Choice: Where Every Road Leads to Your Perfect Ride.",
+  "Bazar360 | The Right Choice: Where Every Road Leads to Your Perfect Ride.",
   "Bazar360: Seamless Journeys, Smarter Automotive Choices.",
   "Your Dream Vehicle Awaits: Backed by The Right Choice."
 ];
@@ -27,7 +27,7 @@ export function TaglineDisplay() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.5 }}
-          className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-tight font-display text-[var(--color-text-header)] drop-shadow-md text-center"
+          className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight leading-tight font-sans text-text-main text-center"
         >
           {TAGLINES[index]}
         </motion.h2>

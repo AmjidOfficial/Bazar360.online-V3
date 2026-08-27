@@ -1,7 +1,7 @@
 import React from 'react';
 import { X, GitCompare, MessageCircle, Phone, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { CarListing } from '../types';
+import { CarListing, NO_IMAGE_SVG } from '../types';
 
 interface ShowroomComparisonModalProps {
   isOpen: boolean;
@@ -28,17 +28,12 @@ export function ShowroomComparisonModal({
   };
 
   const getSpecsList = (car: CarListing) => {
-    const calculatedHP = car.specs?.horspower || (
-      car.engineCC > 3500 ? '450 HP' :
-      car.engineCC > 2400 ? '280 HP' :
-      car.engineCC > 1500 ? '160 HP' : '110 HP'
-    );
+    const rawHp = car.specs?.horspower || '';
+    const calculatedHP = rawHp 
+      ? (rawHp.toString().toLowerCase().includes('hp') || rawHp.toString().toLowerCase().includes('bhp') ? rawHp : `${rawHp} HP`)
+      : 'Not provided';
 
-    const calculatedTopSpeed = car.topSpeed || (
-      car.engineCC > 3500 ? '280 km/h' :
-      car.engineCC > 2400 ? '250 km/h' :
-      car.engineCC > 1500 ? '220 km/h' : '190 km/h'
-    );
+    const calculatedTopSpeed = car.topSpeed || 'Not provided';
 
     return [
       { label: 'Price', value: formatPrice(car.price), highlight: true },
@@ -49,9 +44,9 @@ export function ShowroomComparisonModal({
       { label: 'Fuel Type', value: car.fuelType },
       { label: 'Power', value: calculatedHP },
       { label: 'Top Speed', value: calculatedTopSpeed },
-      { label: 'Body Condition', value: car.bodyCondition || 'Total Genuine' },
-      { label: 'Documents', value: car.documentType || 'Smart Card' },
-      { label: 'Tax Status', value: car.tokenTaxStatus || 'Paid' }
+      { label: 'Body Condition', value: car.bodyCondition || 'Not provided' },
+      { label: 'Documents', value: car.documentType || 'Not provided' },
+      { label: 'Tax Status', value: car.tokenTaxStatus || 'Not provided' }
     ];
   };
 
@@ -151,7 +146,7 @@ export function ShowroomComparisonModal({
                         {/* Image Frame */}
                         <div className="aspect-video relative overflow-hidden bg-black/10 shrink-0">
                           <img
-                            src={car.imageUrl || 'https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&q=80&w=600'}
+                            src={car.imageUrl || NO_IMAGE_SVG}
                             alt={`${car.make} ${car.model}`}
                             className="w-full h-full object-cover"
                             referrerPolicy="no-referrer"

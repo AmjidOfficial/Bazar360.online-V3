@@ -15,7 +15,7 @@ export async function generateMetadata({ vehicle, dealer }: { vehicle?: CarListi
   const categoryKeyword = vehicle.fuelType === 'Hybrid' ? 'Hybrid Car' : vehicle.fuelType === 'Electric' ? 'Electric Car' : 'Car';
   const intentPhrase = `Buy ${vehicle.condition} ${categoryKeyword} in ${city}`;
 
-  const finalTitle = `${intentPhrase} | ${vehicle.make} ${vehicle.model} ${vehicle.year} - Auto Choice`;
+  const finalTitle = `${intentPhrase} | ${vehicle.make} ${vehicle.model} ${vehicle.year} - Bazar360`;
   const finalDesc = `Looking to ${intentPhrase}? Browse ${vehicle.title} (${vehicle.year}) in pristine condition for sale. Features: ${vehicle.fuelType}, ${vehicle.transmission} transmission, ${vehicle.mileage} km. Direct WhatsApp connect with zero showroom commission.`;
   
   const baseImage = vehicle.imageUrl || (vehicle.images && vehicle.images[0]) || 'https://bazar360.online/favicon.png';
@@ -29,7 +29,7 @@ export async function generateMetadata({ vehicle, dealer }: { vehicle?: CarListi
       title: finalTitle,
       description: finalDesc,
       url: `https://bazar360.online/vehicle/${vehicle.id}`,
-      siteName: 'Auto Choice',
+      siteName: 'Bazar360',
       images: [
         {
           url: ogImage,
@@ -369,7 +369,7 @@ export const SEO: React.FC<SEOProps> = ({ type, vehicle, dealer, dealers, listin
       meta.setAttribute('content', contentVal);
     };
 
-    let finalTitle = 'Auto Choice - Peshawar\'s Premier Automotive Showroom Partner';
+    let finalTitle = 'Bazar360 - Peshawar\'s Premier Automotive Showroom Partner';
     let finalDesc = 'Find pre-owned cars, verified vehicle listings, and certified hybrid vehicle inventories on Bazar360 Pakistan. Direct dealer WhatsApp connect with zero commission.';
     let finalImage = 'https://bazar360.online/favicon.png';
     let finalUrl = 'https://bazar360.online';
@@ -385,7 +385,7 @@ export const SEO: React.FC<SEOProps> = ({ type, vehicle, dealer, dealers, listin
       
       finalTitle = `${intentPhrase} | ${vehicle.make} ${vehicle.model} ${vehicle.year} - Bazar360`;
       finalDesc = `Looking to ${intentPhrase}? Browse ${vehicle.title} (${vehicle.year}) in pristine condition for sale. Features: ${vehicle.fuelType}, ${vehicle.transmission} transmission, ${vehicle.mileage} km. Direct WhatsApp connect with zero showroom commission.`;
-      const rawVehImg = vehicle.imageUrl || (vehicle.images && vehicle.images[0]) || 'https://bazar360.online/auto_choice_logo_dark.jpg';
+      const rawVehImg = vehicle.imageUrl || (vehicle.images && vehicle.images[0]) || '';
       finalImage = rawVehImg.startsWith('http') ? rawVehImg : `https://bazar360.online/${rawVehImg.replace(/^\//, '')}`;
       finalUrl = `https://bazar360.online/vehicle/${vehicle.id}`;
 
@@ -404,7 +404,7 @@ export const SEO: React.FC<SEOProps> = ({ type, vehicle, dealer, dealers, listin
       
       finalTitle = `${dealer.name} - Verified Showroom | Bazar360 Online`;
       finalDesc = `Looking to ${intentPhrase}? Explore their collection of verified pre-owned cars, hybrid vehicle inventories, and premium vehicles. Direct dealer connection and instant WhatsApp bargains on Bazar360.`;
-      const rawLogoImg = dealer.logoUrl || dealer.logo || dealer.avatarUrl || dealer.coverImage || 'https://bazar360.online/auto_choice_logo_dark.jpg';
+      const rawLogoImg = dealer.logoUrl || dealer.logo || dealer.avatarUrl || dealer.coverImage || '';
       finalImage = rawLogoImg.startsWith('http') ? rawLogoImg : `https://bazar360.online/${rawLogoImg.replace(/^\//, '')}`;
       finalUrl = `https://bazar360.online/dealers/${dealer.id}`;
 
@@ -423,7 +423,7 @@ export const SEO: React.FC<SEOProps> = ({ type, vehicle, dealer, dealers, listin
       
       finalTitle = `${intentPhrase} | ${vehicle.title} - Bazar360`;
       finalDesc = `Get the best deal to ${intentPhrase}! Available for PKR ${vehicle.price.toLocaleString()} on Bazar360. Check specifications, verify documents, and initiate WhatsApp negotiations directly.`;
-      const rawBothImg = vehicle.imageUrl || (vehicle.images && vehicle.images[0]) || dealer.logoUrl || dealer.logo || 'https://bazar360.online/auto_choice_logo_dark.jpg';
+      const rawBothImg = vehicle.imageUrl || (vehicle.images && vehicle.images[0]) || dealer.logoUrl || dealer.logo || '';
       finalImage = rawBothImg.startsWith('http') ? rawBothImg : `https://bazar360.online/${rawBothImg.replace(/^\//, '')}`;
       finalUrl = `https://bazar360.online/dealers/${dealer.id}/listings/${vehicle.id}`;
 
@@ -449,7 +449,7 @@ export const SEO: React.FC<SEOProps> = ({ type, vehicle, dealer, dealers, listin
     setMetaTag('property', 'og:image:type', 'image/jpeg', 'seo-og-image-type');
     setMetaTag('property', 'og:url', finalUrl, 'seo-og-url');
     setMetaTag('property', 'og:type', 'website', 'seo-og-type');
-    setMetaTag('property', 'og:site_name', 'Auto Choice', 'seo-og-site');
+    setMetaTag('property', 'og:site_name', 'Bazar360', 'seo-og-site');
     setMetaTag('property', 'og:locale', 'en_US', 'seo-og-locale');
  
     // Inject Twitter Card Meta Tags
