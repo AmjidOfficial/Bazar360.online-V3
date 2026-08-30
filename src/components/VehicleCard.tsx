@@ -1,21 +1,17 @@
 import { NO_IMAGE_SVG } from "../types";
 import React, { useState, useRef } from 'react';
-import { MapPin, ArrowUpRight, ArrowRight, Heart, ChevronLeft, ChevronRight, Zap, Gauge, Flame, GitCompare, ShieldCheck, ZoomIn, ChevronDown, ChevronUp, Share2, Check } from 'lucide-react';
+import { MapPin, ArrowUpRight, ArrowRight, Heart, ChevronLeft, ChevronRight, Zap, Gauge, Flame, GitCompare, ShieldCheck, ChevronDown, Share2, Check, Phone } from 'lucide-react';
 import { CarListing, Dealer } from '../types';
 import { getOptimizedUrl } from '../lib/cloudinaryService';
 import { motion, AnimatePresence } from 'motion/react';
-import { hoverEffects } from './AnimationProvider';
 import { VehicleVerificationModal } from './VehicleVerificationModal';
-import { LazyImage } from './LazyImage';
-import { GlassCard } from './GlassCard';
 import { Lightbox } from './Lightbox';
 
 // Swiper integration
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Pagination, Navigation } from 'swiper/modules';
+import { Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
-import 'swiper/css/navigation';
 
 interface VehicleCardProps {
   car: CarListing;
@@ -83,9 +79,9 @@ export function VehicleCard({
 
   const formatPrice = (price: number) => {
     if (price >= 10000000) {
-      return `Rs. ${(price / 10000000).toFixed(2)} Crore`;
+      return `PKR ${(price / 10000000).toFixed(2)} Crore`;
     }
-    return `Rs. ${(price / 100000).toFixed(1)} Lakh`;
+    return `PKR ${(price / 100000).toFixed(1)} Lakh`;
   };
 
   const isVideoUrl = (url: string) => {
@@ -93,38 +89,40 @@ export function VehicleCard({
     return url.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/) || url.includes('/video/upload/') || url.includes('video');
   };
 
-  // Display actual specs or "Not provided"
-  const calculatedTopSpeed = car.topSpeed || 'Not provided';
-  const calculatedAcceleration = car.acceleration || 'Not provided';
+  const calculatedTopSpeed = car.topSpeed || 'N/A';
+  const calculatedAcceleration = car.acceleration || 'N/A';
   
   const rawHp = car.specs?.horspower || '';
   const calculatedHP = rawHp 
     ? (rawHp.toString().toLowerCase().includes('hp') || rawHp.toString().toLowerCase().includes('bhp') ? rawHp : `${rawHp} HP`)
-    : 'Not provided';
+    : `${car.engineCC || 1500} CC`;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 24, scale: 0.96 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
       transition={{
-        duration: 0.45,
+        duration: 0.35,
         ease: [0.16, 1, 0.3, 1],
-        delay: Math.min(index * 0.05, 0.35)
+        delay: Math.min(index * 0.04, 0.25)
       }}
       whileHover={{ 
-        y: -4, 
-        scale: 1.02,
-        transition: { type: "spring", stiffness: 300, damping: 20 }
+        y: -8, 
+        rotateX: 2.5,
+        rotateY: -2,
+        scale: 1.012,
+        transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] }
       }}
-      whileTap={{ scale: 0.98 }}
+      whileTap={{ scale: 0.985 }}
+      style={{ transformStyle: 'preserve-3d', perspective: 1000 }}
       onClick={() => onSelect(car)}
-      className={`group relative flex ${variant === 'list' ? 'flex-col md:flex-row' : 'flex-col'} bg-white rounded-2xl overflow-hidden cursor-pointer border border-[#E2E8F0] transition-all duration-300 hover:border-[#007979]/60 hover:shadow-md`}
+      className={`group relative flex ${variant === 'list' ? 'flex-col md:flex-row' : 'flex-col'} bg-[var(--color-bg-secondary)] rounded-2xl overflow-hidden cursor-pointer border border-[var(--color-border-main)] transition-all duration-300 hover:border-[var(--color-accent-main)]/60 hover:shadow-lg`}
       id={`vehicle-card-${car.id}`}
     >
-      {/* 1. HERO MEDIA CANVAS - Full Length View Widescreen Stage */}
+      {/* 1. HERO MEDIA CANVAS */}
       <div 
-        className={`relative w-full ${variant === 'list' ? 'md:w-5/12 lg:w-4/12' : ''} aspect-[16/10] overflow-hidden bg-slate-900 touch-pan-y shrink-0`}
+        className={`relative w-full ${variant === 'list' ? 'md:w-5/12 lg:w-4/12' : ''} aspect-[16/10] overflow-hidden bg-[#090D14] touch-pan-y shrink-0`}
         onClick={(e) => {
           const target = e.target as HTMLElement;
           if (target.closest('.custom-swiper-btn') || target.closest('.swiper-pagination')) {
@@ -151,7 +149,7 @@ export function VehicleCard({
                   playsInline
                 />
               ) : (
-                <div className="relative w-full h-full bg-slate-900 overflow-hidden">
+                <div className="relative w-full h-full bg-[#090D14] overflow-hidden">
                   <img
                     src={getOptimizedUrl(imgUrl, {
                       width: 800,
@@ -179,9 +177,9 @@ export function VehicleCard({
                 e.stopPropagation();
                 swiperRef.current?.swiper?.slidePrev();
               }}
-              className="custom-swiper-btn absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 hover:bg-[#007979] text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-30 shadow-md active:scale-90 border border-white/20 cursor-pointer"
+              className="custom-swiper-btn absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/60 hover:bg-[var(--color-accent-main)] hover:text-[#090D14] text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-30 shadow-md active:scale-90 border border-white/20 cursor-pointer"
             >
-              <ChevronLeft size={14} className="stroke-[2.5]" />
+              <ChevronLeft size={14} />
             </button>
             <button
               type="button"
@@ -189,29 +187,29 @@ export function VehicleCard({
                 e.stopPropagation();
                 swiperRef.current?.swiper?.slideNext();
               }}
-              className="custom-swiper-btn absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 hover:bg-[#007979] text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-30 shadow-md active:scale-90 border border-white/20 cursor-pointer"
+              className="custom-swiper-btn absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/60 hover:bg-[var(--color-accent-main)] hover:text-[#090D14] text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-30 shadow-md active:scale-90 border border-white/20 cursor-pointer"
             >
-              <ChevronRight size={14} className="stroke-[2.5]" />
+              <ChevronRight size={14} />
             </button>
           </>
         )}
 
         {/* Dynamic Vignette */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20 pointer-events-none z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#090D14]/75 via-transparent to-[#090D14]/25 pointer-events-none z-10" />
 
-        {/* Dynamic Sold Overlay on image */}
+        {/* Dynamic Sold Overlay */}
         {status === 'Sold' && (
           <div className="absolute inset-0 bg-black/50 backdrop-grayscale-[40%] pointer-events-none z-15 flex items-center justify-center">
-            <div className="bg-rose-600/95 text-white font-bold text-xs uppercase tracking-[0.25em] px-4 py-1.5 rounded-full border border-rose-400/40 shadow-2xl rotate-[-6deg] backdrop-blur-sm">
+            <div className="bg-rose-600/95 text-white font-bold text-xs uppercase tracking-[0.2em] px-4 py-1.5 rounded-full border border-rose-400/40 shadow-2xl backdrop-blur-sm">
               Vehicle Sold
             </div>
           </div>
         )}
 
-        {/* Condition & Validation Overlays with Showroom Logo Space */}
+        {/* Condition & Showroom Overlays */}
         <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-20 text-left items-start max-w-[70%]">
           {dealer && (dealer.logoUrl || dealer.logo) && (
-            <div className="flex items-center gap-1.5 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/15 shadow-lg">
+            <div className="flex items-center gap-1.5 bg-[#090D14]/80 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/15 shadow-lg">
               <img 
                 src={getOptimizedUrl(dealer.logoUrl || dealer.logo, { width: 120, quality: 'auto:best' })} 
                 alt={dealer.name || 'Showroom Logo'} 
@@ -224,7 +222,7 @@ export function VehicleCard({
 
           <div className="flex gap-1 flex-wrap items-center">
             {car.featured && (
-              <span className="bg-[#007979] text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-lg">
+              <span className="bg-[var(--color-accent-main)] text-[#090D14] text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-lg">
                 Featured
               </span>
             )}
@@ -247,21 +245,20 @@ export function VehicleCard({
           </div>
         </div>
 
-        {/* Action Overlays */}
-        <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
-          <motion.button
-            whileTap={{ scale: 0.85 }}
+        {/* Action Buttons: Share, Favorite, Compare */}
+        <div className="absolute top-3 right-3 z-20 flex flex-col gap-1.5">
+          <button
             type="button"
             title={copied ? 'Link Copied!' : 'Share Vehicle Link'}
             onClick={handleShare}
-            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer shadow-lg backdrop-blur-md border ${
+            className={`w-7 h-7 rounded-full flex items-center justify-center transition-all cursor-pointer shadow-lg backdrop-blur-md border ${
               copied
-                ? 'bg-[#007979] text-white border-[#007979]'
-                : 'bg-black/40 text-gray-200 hover:text-white hover:bg-black/60 border-white/10'
+                ? 'bg-[var(--color-accent-main)] text-[#090D14] border-[var(--color-accent-main)]'
+                : 'bg-black/50 text-gray-200 hover:text-white hover:bg-black/70 border-white/10'
             }`}
           >
-            {copied ? <Check size={14} className="stroke-[3] animate-bounce" /> : <Share2 size={14} />}
-          </motion.button>
+            {copied ? <Check size={12} className="stroke-[3]" /> : <Share2 size={12} />}
+          </button>
 
           {onToggleFavorite && (
             <button
@@ -270,13 +267,13 @@ export function VehicleCard({
                 e.stopPropagation();
                 onToggleFavorite(car);
               }}
-              className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer shadow-lg backdrop-blur-md ${
+              className={`w-7 h-7 rounded-full flex items-center justify-center transition-all cursor-pointer shadow-lg backdrop-blur-md ${
                 isFavorite
                   ? 'bg-rose-500 text-white'
-                  : 'bg-black/40 text-gray-200 hover:text-white hover:bg-black/60 border border-white/10'
+                  : 'bg-black/50 text-gray-200 hover:text-white hover:bg-black/70 border border-white/10'
               }`}
             >
-              <Heart size={14} fill={isFavorite ? 'currentColor' : 'none'} />
+              <Heart size={12} fill={isFavorite ? 'currentColor' : 'none'} />
             </button>
           )}
 
@@ -287,18 +284,18 @@ export function VehicleCard({
                 e.stopPropagation();
                 onToggleCompare(car);
               }}
-              className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer shadow-lg backdrop-blur-md ${
+              className={`w-7 h-7 rounded-full flex items-center justify-center transition-all cursor-pointer shadow-lg backdrop-blur-md ${
                 isComparing
-                  ? 'bg-[#007979] text-white border border-[#007979]/40'
-                  : 'bg-black/40 text-gray-200 hover:text-white hover:bg-black/60 border border-white/10'
+                  ? 'bg-[var(--color-accent-main)] text-[#090D14] border border-[var(--color-accent-main)]'
+                  : 'bg-black/50 text-gray-200 hover:text-white hover:bg-black/70 border border-white/10'
               }`}
             >
-              <GitCompare size={14} className={isComparing ? 'animate-pulse' : ''} />
+              <GitCompare size={12} />
             </button>
           )}
         </div>
 
-        {/* Model Year Badge */}
+        {/* Model Year & Verification Badge */}
         <div className="absolute bottom-3 left-3 flex items-center gap-1.5 z-20">
           <div className="bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-full text-[9px] font-bold text-white tracking-widest border border-white/10">
             {car.year}
@@ -310,7 +307,7 @@ export function VehicleCard({
                 e.stopPropagation();
                 setIsVerifyModalOpen(true);
               }}
-              className="bg-[#007979] hover:bg-[#006060] text-white text-[8px] font-sans font-bold uppercase tracking-widest px-2.5 py-1 rounded-full flex items-center gap-1 shadow-lg active:scale-95 transition-all cursor-pointer border border-[#007979]/20"
+              className="bg-[var(--color-accent-main)] text-[#090D14] text-[8px] font-sans font-bold uppercase tracking-widest px-2.5 py-1 rounded-full flex items-center gap-1 shadow-lg active:scale-95 transition-all cursor-pointer"
             >
               <ShieldCheck size={10} className="stroke-[3]" />
               <span>Verified</span>
@@ -319,62 +316,67 @@ export function VehicleCard({
         </div>
       </div>
 
-      {/* 2. PRIMARY FACE INFO - Bottom Details Section */}
-      <div className="p-3 sm:p-4 flex flex-col justify-between flex-grow bg-white z-30">
+      {/* 2. PRIMARY DETAILS SECTION */}
+      <div className="p-3.5 sm:p-4 flex flex-col justify-between flex-grow bg-[var(--color-bg-secondary)] z-30">
         <div>
-          <span className="text-[9px] font-bold uppercase text-[#007979] tracking-[0.2em] block leading-none">{car.make}</span>
-          <h3 className="text-xs sm:text-base font-bold text-[#0F172A] mt-1 leading-tight line-clamp-1">
+          <span className="text-[9px] font-bold uppercase text-[var(--color-accent-main)] tracking-[0.15em] block leading-none">{car.make}</span>
+          <h3 className="text-sm sm:text-base font-bold text-[var(--color-text-header)] mt-1 leading-tight line-clamp-1">
             {car.model}
           </h3>
-          <p className="text-[9px] sm:text-[10px] font-medium text-[#64748B] uppercase tracking-wide mt-0.5 sm:mt-1 truncate">
-            {car.transmission} • {car.fuelType} • {car.engineCC}cc
+          <p className="text-[10px] font-medium text-[var(--color-text-muted)] uppercase tracking-wide mt-0.5 truncate">
+            {car.transmission} • {car.fuelType} • {car.engineCC ? `${car.engineCC}cc` : '1.5L'}
           </p>
 
           {/* Specs Mini-Grid */}
-          <div className="grid grid-cols-3 gap-0.5 sm:gap-1 mt-2 sm:mt-3 py-1.5 sm:py-2 border-y border-[#E2E8F0] text-center">
+          <div className="grid grid-cols-3 gap-1 mt-2.5 py-1.5 border-y border-[var(--color-border-main)] text-center">
             <div className="flex flex-col items-center justify-center">
-              <Zap size={10} className="text-[#007979] mb-0.5" />
-              <span className="text-[8px] sm:text-[9px] font-bold text-[#0F172A] leading-none truncate">{calculatedHP}</span>
+              <Zap size={11} className="text-[var(--color-accent-main)] mb-0.5" />
+              <span className="text-[9px] font-bold text-[var(--color-text-main)] leading-none truncate">{calculatedHP}</span>
             </div>
-            <div className="flex flex-col items-center justify-center border-x border-[#E2E8F0]">
-              <Gauge size={10} className="text-[#007979] mb-0.5" />
-              <span className="text-[8px] sm:text-[9px] font-bold text-[#0F172A] leading-none truncate">{calculatedTopSpeed}</span>
+            <div className="flex flex-col items-center justify-center border-x border-[var(--color-border-main)]">
+              <Gauge size={11} className="text-[var(--color-accent-main)] mb-0.5" />
+              <span className="text-[9px] font-bold text-[var(--color-text-main)] leading-none truncate">
+                {car.mileage ? `${(car.mileage / 1000).toFixed(0)}k km` : 'Unreg.'}
+              </span>
             </div>
             <div className="flex flex-col items-center justify-center">
-              <Flame size={10} className="text-rose-500 mb-0.5" />
-              <span className="text-[8px] sm:text-[9px] font-bold text-[#0F172A] leading-none truncate">{calculatedAcceleration}</span>
+              <MapPin size={11} className="text-[var(--color-accent-main)] mb-0.5" />
+              <span className="text-[9px] font-bold text-[var(--color-text-main)] leading-none truncate">
+                {car.registrationCity || car.location || 'Pakistan'}
+              </span>
             </div>
           </div>
         </div>
 
-        <div className="pt-2 sm:pt-3 flex flex-col gap-1.5 mt-auto">
+        {/* Price & Actions Row */}
+        <div className="pt-3 flex flex-col gap-1.5 mt-auto">
           <div className="flex items-center justify-between gap-1 w-full">
-            <span className="text-xs sm:text-[15px] font-bold text-[#007979] font-sans leading-tight whitespace-nowrap truncate">
+            <span className="text-sm sm:text-base font-extrabold text-[var(--color-accent-main)] font-sans leading-tight whitespace-nowrap truncate">
               {formatPrice(car.price)}
             </span>
-            <div className="flex items-center gap-1 shrink-0">
+            <div className="flex items-center gap-1.5 shrink-0">
               <button
                 type="button"
-                title={isExpanded ? 'Collapse Specs' : 'Expand Core Specs'}
+                title={isExpanded ? 'Collapse Specs' : 'Expand Specs'}
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsExpanded(!isExpanded);
                 }}
-                className="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-full text-[8px] sm:text-[9px] font-bold uppercase tracking-wider transition-all bg-[#F8FAFC] hover:bg-[#F1F5F9] border border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] cursor-pointer flex items-center gap-0.5 sm:gap-1 shadow-2xs active:scale-95"
+                className="px-2 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all bg-[var(--color-bg-tertiary)] hover:bg-[var(--color-border-main)] text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] cursor-pointer flex items-center gap-0.5 border border-[var(--color-border-main)]"
               >
                 <span>Specs</span>
                 <ChevronDown 
                   size={10} 
-                  className={`transition-transform duration-300 ${isExpanded ? 'rotate-180' : 'rotate-0'}`} 
+                  className={`transition-transform duration-200 ${isExpanded ? 'rotate-180' : 'rotate-0'}`} 
                 />
               </button>
               <button
                 type="button"
                 onClick={() => onSelect(car)}
-                className="bg-[#007979] hover:bg-[#006060] text-white px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full text-[8px] sm:text-[9px] font-bold uppercase tracking-wider transition-all shadow-xs cursor-pointer flex items-center gap-0.5 sm:gap-1"
+                className="btn-gold-primary py-1 px-3 text-[9px] rounded-lg"
               >
-                <span>Explore</span>
-                <ArrowUpRight size={10} className="stroke-[2.5]" />
+                <span>View</span>
+                <ArrowUpRight size={11} />
               </button>
             </div>
           </div>
@@ -387,91 +389,60 @@ export function VehicleCard({
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25, ease: 'easeInOut' }}
+              transition={{ duration: 0.2, ease: 'easeInOut' }}
               onClick={(e) => e.stopPropagation()}
-              className="mt-3 pt-3 border-t border-[#E2E8F0] space-y-2 text-left overflow-hidden"
+              className="mt-3 pt-3 border-t border-[var(--color-border-main)] space-y-2 text-left overflow-hidden"
             >
-              <div className="flex items-center justify-between text-[10px] font-mono font-bold uppercase tracking-wider text-[#007979]">
-                <span>Core Vehicle Specs</span>
-                <span className="text-[9px] text-[#64748B] font-mono">{car.registrationCity || 'Pakistan'}</span>
+              <div className="flex items-center justify-between text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--color-accent-main)]">
+                <span>Vehicle Specifications</span>
+                <span className="text-[9px] text-[var(--color-text-muted)] font-mono">{car.registrationCity || 'Pakistan'}</span>
               </div>
 
-              <div className="grid grid-cols-2 gap-1.5 text-[10px] font-sans">
-                <div className="bg-[#F8FAFC] p-2 rounded-xl border border-[#E2E8F0] flex flex-col justify-center">
-                  <span className="text-[8px] text-[#64748B] uppercase font-bold tracking-wider">Mileage</span>
-                  <span className="font-bold text-[#0F172A] font-mono mt-0.5">
+              <div className="grid grid-cols-2 gap-1.5 text-[10px]">
+                <div className="bg-[var(--color-bg-tertiary)] p-2 rounded-xl border border-[var(--color-border-subtle)] flex flex-col justify-center">
+                  <span className="text-[8px] text-[var(--color-text-muted)] uppercase font-bold tracking-wider">Mileage</span>
+                  <span className="font-bold text-[var(--color-text-header)] font-mono mt-0.5">
                     {car.mileage ? `${Number(car.mileage).toLocaleString()} km` : 'Unregistered'}
                   </span>
                 </div>
 
-                <div className="bg-[#F8FAFC] p-2 rounded-xl border border-[#E2E8F0] flex flex-col justify-center">
-                  <span className="text-[8px] text-[#64748B] uppercase font-bold tracking-wider">Transmission</span>
-                  <span className="font-bold text-[#0F172A] mt-0.5">
+                <div className="bg-[var(--color-bg-tertiary)] p-2 rounded-xl border border-[var(--color-border-subtle)] flex flex-col justify-center">
+                  <span className="text-[8px] text-[var(--color-text-muted)] uppercase font-bold tracking-wider">Transmission</span>
+                  <span className="font-bold text-[var(--color-text-header)] mt-0.5">
                     {car.transmission}
                   </span>
                 </div>
 
-                <div className="bg-[#F8FAFC] p-2 rounded-xl border border-[#E2E8F0] flex flex-col justify-center">
-                  <span className="text-[8px] text-[#64748B] uppercase font-bold tracking-wider">Engine</span>
-                  <span className="font-bold text-[#0F172A] font-mono mt-0.5">
+                <div className="bg-[var(--color-bg-tertiary)] p-2 rounded-xl border border-[var(--color-border-subtle)] flex flex-col justify-center">
+                  <span className="text-[8px] text-[var(--color-text-muted)] uppercase font-bold tracking-wider">Engine</span>
+                  <span className="font-bold text-[var(--color-text-header)] font-mono mt-0.5">
                     {car.engineCC ? `${car.engineCC} cc` : car.fuelType}
                   </span>
                 </div>
 
-                <div className="bg-[#F8FAFC] p-2 rounded-xl border border-[#E2E8F0] flex flex-col justify-center">
-                  <span className="text-[8px] text-[#64748B] uppercase font-bold tracking-wider">Assembly</span>
-                  <span className="font-bold text-[#0F172A] mt-0.5">
+                <div className="bg-[var(--color-bg-tertiary)] p-2 rounded-xl border border-[var(--color-border-subtle)] flex flex-col justify-center">
+                  <span className="text-[8px] text-[var(--color-text-muted)] uppercase font-bold tracking-wider">Assembly</span>
+                  <span className="font-bold text-[var(--color-text-header)] mt-0.5">
                     {car.assemblyType || 'Local'}
                   </span>
                 </div>
 
-                <div className="bg-[#F8FAFC] p-2 rounded-xl border border-[#E2E8F0] flex flex-col justify-center">
-                  <span className="text-[8px] text-[#64748B] uppercase font-bold tracking-wider">Body Condition</span>
-                  <span className="font-bold text-[#0F172A] mt-0.5 truncate" title={car.bodyCondition || car.condition}>
-                    {car.bodyCondition || car.condition}
-                  </span>
-                </div>
-
-                <div className="bg-[#F8FAFC] p-2 rounded-xl border border-[#E2E8F0] flex flex-col justify-center">
-                  <span className="text-[8px] text-[#64748B] uppercase font-bold tracking-wider">Documents</span>
-                  <span className="font-bold text-[#007979] mt-0.5">
-                    {car.documentType || 'Smart Card'}
-                  </span>
-                </div>
-
-                <div className="bg-[#F8FAFC] p-2 rounded-xl border border-[#E2E8F0] flex flex-col justify-center col-span-2">
-                  <span className="text-[8px] text-[#64748B] uppercase font-bold tracking-wider">Seller Location / Address</span>
-                  <span className="font-bold text-[#0F172A] mt-0.5 truncate text-left" title={car.location || car.registrationCity || 'Pakistan'}>
-                    {car.location || car.registrationCity || 'Pakistan'}
-                  </span>
-                </div>
-
-                <div className="bg-[#F8FAFC] p-2 rounded-xl border border-[#E2E8F0] flex items-center justify-between col-span-2">
+                <div className="bg-[var(--color-bg-tertiary)] p-2 rounded-xl border border-[var(--color-border-subtle)] flex items-center justify-between col-span-2">
                   <div>
-                    <span className="text-[8px] text-[#64748B] uppercase font-bold tracking-wider block">Contact & Messaging</span>
-                    <span className="font-bold text-[#007979] font-mono text-[10px] text-left block">
-                      {car.sellerPhone || car.phone || (car.dealerId !== 'private' ? '+92 314 9198403' : 'N/A')}
+                    <span className="text-[8px] text-[var(--color-text-muted)] uppercase font-bold tracking-wider block">Seller Contact</span>
+                    <span className="font-bold text-[var(--color-accent-main)] font-mono text-[10px] text-left block">
+                      {car.sellerPhone || car.phone || '+92 314 9198403'}
                     </span>
                   </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      window.dispatchEvent(new CustomEvent('open-b360-messaging', {
-                        detail: {
-                          relatedListing: car,
-                          recipientUser: {
-                            uid: car.createdBy || car.dealerId || 'seller',
-                            displayName: car.sellerName || `${car.make} ${car.model} Seller`,
-                            phoneNumber: car.sellerPhone || car.phone
-                          },
-                          initialMessage: `Hi! Is the ${car.year} ${car.make} ${car.model} (Rs. ${car.price ? Number(car.price).toLocaleString() : 'N/A'}) still available?`
-                        }
-                      }));
-                    }}
-                    className="px-3 py-1.5 bg-[#007979] hover:bg-[#006060] text-white font-bold text-[9px] uppercase tracking-wider rounded-xl shadow-xs transition-all cursor-pointer flex items-center gap-1 active:scale-95"
+                  <a
+                    href={`https://wa.me/${(car.sellerPhone || car.phone || '923149198403').replace(/\D/g, '')}?text=${encodeURIComponent(`Hi, I am inquiring about the ${car.year} ${car.make} ${car.model} on Bazar360.`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold text-[9px] uppercase tracking-wider rounded-lg transition-all flex items-center gap-1"
                   >
-                    Message Seller
-                  </button>
+                    <span>WhatsApp</span>
+                  </a>
                 </div>
               </div>
             </motion.div>

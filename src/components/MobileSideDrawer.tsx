@@ -38,7 +38,7 @@ export default function MobileSideDrawer({
   lang,
   onLanguageToggle
 }: MobileSideDrawerProps) {
-  const { currentTheme, setTheme } = useTheme();
+  const { isDark, toggleTheme } = useTheme();
 
   // Close drawer on ESC press & prevent background scrolling
   useEffect(() => {
@@ -76,14 +76,6 @@ export default function MobileSideDrawer({
   };
 
   const isUrdu = lang === 'ur';
-
-  // Available themes mapping
-  const themeOptions = [
-    { id: 'theme-luxury-light' as ThemeClassType, label: 'Luxury Light', icon: Sun, color: 'bg-white text-slate-800' },
-    { id: 'theme-cosmic-dark' as ThemeClassType, label: 'Cosmic Dark', icon: Moon, color: 'bg-slate-950 text-slate-100' },
-    { id: 'theme-emerald' as ThemeClassType, label: 'Emerald', icon: Leaf, color: 'bg-[#022C22] text-[#10B981]' },
-    { id: 'theme-gold' as ThemeClassType, label: 'Gold', icon: Flame, color: 'bg-[#18181B] text-[#D4A373]' },
-  ];
 
   const isAdmin = currentUser?.role === 'Admin' || 
                   currentUser?.role === 'Super Admin' || 
@@ -436,29 +428,12 @@ export default function MobileSideDrawer({
 
             {/* APPEARANCE / THEME INLINE SELECTOR CHANGER */}
             <div className="px-2 py-2 mt-2 bg-slate-950/40 rounded-xl border border-white/5 space-y-2">
-              <span className="block text-[8.5px] font-mono font-black uppercase text-slate-400 tracking-wider">
-                Appearance & Colors
-              </span>
-              <div className="grid grid-cols-2 gap-1.5">
-                {themeOptions.map((opt) => {
-                  const isSelected = currentTheme === opt.id;
-                  const Icon = opt.icon;
-                  return (
-                    <button
-                      key={opt.id}
-                      onClick={() => setTheme(opt.id)}
-                      className={`px-2 py-1.5 rounded-lg border text-[9.5px] font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                        isSelected
-                          ? 'border-[#007979] bg-[#007979]/10 text-white font-black'
-                          : 'border-white/5 bg-slate-900/40 text-slate-400 hover:text-white hover:border-white/10'
-                      }`}
-                    >
-                      <Icon size={12} className={isSelected ? 'text-[#007979]' : 'text-slate-400'} />
-                      <span className="truncate">{opt.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
+              <button
+                onClick={toggleTheme}
+                className="w-full px-3 py-2 rounded-lg border border-white/5 bg-slate-900/40 text-slate-300 hover:text-white hover:border-white/10 text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer transition-all"
+              >
+                <span>Toggle Light/Dark Mode</span>
+              </button>
             </div>
           </div>
 

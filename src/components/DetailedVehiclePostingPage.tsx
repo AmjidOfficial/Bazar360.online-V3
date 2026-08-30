@@ -42,7 +42,7 @@ import {
 import { translations, Language } from '../translations';
 import { dbSaveListing } from '../lib/dbService';
 import { CarListing, Dealer } from '../types';
-import { uploadToCloudinary, deleteFromCloudinary } from '../lib/cloudinaryService';
+import { uploadToCloudinary, deleteFromCloudinary, getVehicleCloudinaryFolder } from '../lib/cloudinaryService';
 import { applyWatermark } from '../services/WatermarkService';
 import { callMarketingEngine } from '../services/api';
 import { 
@@ -447,6 +447,15 @@ export default function DetailedVehiclePostingPage({
 
     setPhotos(prev => [...prev, ...newMediaItems]);
 
+    // Generate structured Cloudinary folder path for this vehicle upload
+    const ownerId = currentUser?.uid || (sellerPhone ? 'usr_' + sellerPhone.replace(/\D/g, '') : 'guest_seller');
+    const vehicleFolder = getVehicleCloudinaryFolder(ownerId, {
+      make,
+      model,
+      year,
+      id: contextListing?.id
+    });
+
     // Async upload each
     for (const item of newMediaItems) {
       try {
@@ -462,6 +471,8 @@ export default function DetailedVehiclePostingPage({
         }
 
         const res = await uploadToCloudinary(fileToUpload, {
+          folder: vehicleFolder,
+          tags: `owner_${ownerId},vehicle_${make}_${model}`,
           onProgress: (prog) => {
             setPhotos(prev => prev.map(p => p.id === item.id ? { ...p, progress: prog } : p));
           }
@@ -526,6 +537,25 @@ export default function DetailedVehiclePostingPage({
     const numEngine = parseInt(engineCC) || 1300;
 
     const listingTitle = `${year} ${make} ${model} ${variant}`;
+    
+    // Compute owner and Cloudinary folder metadata
+    const ownerId = currentUser?.uid || (sellerPhone ? 'usr_' + sellerPhone.replace(/\D/g, '') : 'guest-seller');
+    const vehicleFolder = getVehicleCloudinaryFolder(ownerId, {
+      make,
+      model,
+      year,
+      id: contextListing?.id
+    });
+
+    const mediaMeta = photos
+      .filter(p => p.cloudinaryUrl)
+      .map(p => ({
+        url: p.cloudinaryUrl!,
+        public_id: p.cloudinaryPublicId || '',
+        bytes: p.size,
+        folder: vehicleFolder,
+        uploadedAt: new Date().toISOString()
+      }));
 
     const payload: CarListing = {
       id: contextListing?.id || 'listing-' + Date.now(),
@@ -547,13 +577,26 @@ export default function DetailedVehiclePostingPage({
       assemblyType,
       location: location || `${city}, Pakistan`,
       description: description || `Clean ${year} ${make} ${model} ${variant} available for sale in ${city}.`,
-      sellerPhone: sellerPhone || '03159085086',
-      sellerWhatsApp: sellerWhatsApp || sellerPhone || '03159085086',
-      sellerName: sellerName || 'Bazar360 Verified Seller',
+      sellerPhone: sellerPhone || currentUser?.phoneNumber || '03159085086',
+      sellerWhatsApp: sellerWhatsApp || sellerPhone || currentUser?.phoneNumber || '03159085086',
+      sellerName: sellerName || currentUser?.displayName || 'Bazar360 Verified Seller',
+      sellerEmail: currentUser?.email || '',
       sellerType: postingMode === 'showroom' ? 'Showroom' : 'Individual',
       dealerId: postingMode === 'showroom' ? selectedShowroomForPost : 'private',
-      createdBy: currentUser?.uid || 'guest-seller',
-      assignedSalesRepId: currentUser?.uid || 'guest-seller',
+      createdBy: currentUser?.uid || ownerId,
+      ownerId: ownerId,
+      assignedSalesRepId: currentUser?.uid || ownerId,
+      ownerDetails: {
+        uid: currentUser?.uid || ownerId,
+        displayName: sellerName || currentUser?.displayName || 'Bazar360 Seller',
+        email: currentUser?.email || '',
+        photoURL: currentUser?.photoURL || '',
+        role: currentUser?.role || (postingMode === 'showroom' ? 'Showroom Owner' : 'Individual User'),
+        phone: sellerPhone || '',
+        associatedShowroomId: postingMode === 'showroom' ? selectedShowroomForPost : null
+      },
+      cloudinaryFolderPath: vehicleFolder,
+      mediaMetadata: mediaMeta.length > 0 ? mediaMeta : undefined,
       featured: true,
       verified: true,
       approved: true,

@@ -468,3 +468,21 @@ export async function deleteFromCloudinary(publicId: string, resourceType: 'imag
     return { success: false, error: error.message || 'Failed to communicate with Cloudinary delete API.' };
   }
 }
+
+/**
+ * Generate a clean, structured Cloudinary folder path for each vehicle upload:
+ * e.g., "bazar360/vehicles/{ownerId}/{make}_{model}_{year}_{listingId}"
+ * This guarantees Cloudinary organizes every vehicle's photos into its own folder
+ * linked to the post owner.
+ */
+export function getVehicleCloudinaryFolder(
+  ownerId?: string,
+  vehicleInfo?: { make?: string; model?: string; year?: number | string; id?: string }
+): string {
+  const safeOwner = (ownerId || auth.currentUser?.uid || 'guest_user').replace(/[^a-zA-Z0-9_-]/g, '_');
+  const make = (vehicleInfo?.make || 'vehicle').toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
+  const model = (vehicleInfo?.model || 'ad').toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
+  const year = vehicleInfo?.year || '2024';
+  const tag = vehicleInfo?.id ? vehicleInfo.id.replace(/[^a-zA-Z0-9_-]/g, '_') : `upload_${Date.now()}`;
+  return `bazar360/vehicles/${safeOwner}/${make}_${model}_${year}_${tag}`;
+}

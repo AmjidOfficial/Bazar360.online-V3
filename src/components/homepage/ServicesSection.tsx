@@ -46,7 +46,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ setTab, lang }
   ];
 
   return (
-    <section className="w-full bg-[var(--color-bg-primary)] py-16 px-4 sm:px-6 lg:px-8 border-b border-[var(--color-border)]">
+    <section className="w-full bg-[var(--color-bg-primary)] py-16 px-4 sm:px-6 lg:px-8 border-b border-[var(--color-border-main)]">
       <div className="max-w-7xl mx-auto">
         
         {/* Header */}
@@ -65,7 +65,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ setTab, lang }
 
           <button
             onClick={() => setTab('services')}
-            className="px-4 py-2.5 rounded-xl bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-tertiary)] border border-[var(--color-border)] text-[var(--color-text-main)] text-xs font-bold flex items-center gap-2 transition-all shrink-0 cursor-pointer w-fit shadow-sm hover:border-[var(--color-accent-main)]/40"
+            className="btn-luxury-secondary text-xs"
           >
             <span>View All Services</span>
             <ArrowRight size={14} className="text-[var(--color-accent-main)]" />
@@ -80,14 +80,14 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ setTab, lang }
               <div
                 key={s.id}
                 onClick={() => setTab(s.targetTab || 'services')}
-                className="bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-6 rounded-2xl shadow-sm hover:shadow-md hover:border-[var(--color-accent-main)]/50 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between group"
+                className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] p-6 rounded-2xl shadow-xs hover:shadow-md hover:border-[var(--color-accent-main)]/50 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between group"
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-[var(--color-accent-main)]/15 text-[var(--color-accent-main)] border border-[var(--color-accent-main)]/30 flex items-center justify-center group-hover:bg-[var(--color-accent-main)] group-hover:text-white transition-colors">
+                    <div className="w-12 h-12 rounded-xl bg-[var(--color-accent-subtle)] text-[var(--color-accent-main)] border border-[var(--color-accent-main)]/30 flex items-center justify-center group-hover:bg-[var(--color-accent-main)] group-hover:text-[#090D14] transition-colors">
                       <Icon size={22} />
                     </div>
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-[var(--color-bg-primary)] border border-[var(--color-border)] text-[var(--color-text-muted)]">
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-[var(--color-bg-primary)] border border-[var(--color-border-main)] text-[var(--color-text-muted)]">
                       {s.badge}
                     </span>
                   </div>
@@ -103,7 +103,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ setTab, lang }
                   </p>
                 </div>
 
-                <div className="mt-6 pt-4 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-bold text-[var(--color-accent-main)]">
+                <div className="mt-6 pt-4 border-t border-[var(--color-border-main)] flex items-center justify-between text-xs font-bold text-[var(--color-accent-main)]">
                   <span>Learn More</span>
                   <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                 </div>

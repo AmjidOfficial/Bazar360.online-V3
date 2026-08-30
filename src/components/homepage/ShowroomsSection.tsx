@@ -1,6 +1,6 @@
 import React from 'react';
 import { Dealer } from '../../types';
-import { Building2, ShieldCheck, MapPin, Phone, Star, ArrowRight, ExternalLink } from 'lucide-react';
+import { Building2, ShieldCheck, MapPin, Star, ArrowRight, ExternalLink } from 'lucide-react';
 
 interface ShowroomsSectionProps {
   dealers: Dealer[];
@@ -22,26 +22,29 @@ export const ShowroomsSection: React.FC<ShowroomsSectionProps> = ({
   }
 
   return (
-    <section className="w-full bg-[var(--color-bg-secondary)] py-16 px-4 sm:px-6 lg:px-8 border-b border-[var(--color-border)]">
+    <section className="w-full bg-[var(--color-bg-primary)] py-16 px-4 sm:px-6 lg:px-8 border-b border-[var(--color-border-main)]">
       <div className="max-w-7xl mx-auto">
         
-        {/* Header */}
+        {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
           <div>
             <span className="text-xs font-mono font-bold uppercase tracking-widest text-[var(--color-accent-main)]">
-              {isUrdu ? 'تصدیق شدہ ڈیلرز' : 'Trusted Dealerships'}
+              {isUrdu ? 'تصدیق شدہ ڈیلرز' : 'Verified Showroom Partners'}
             </span>
             <h2 className="text-2xl sm:text-3xl font-bold text-[var(--color-text-header)] tracking-tight mt-1">
-              {isUrdu ? 'تصدیق شدہ ڈیلرز اور شورومز' : 'Explore Verified Showrooms'}
+              {isUrdu ? 'تصدیق شدہ ڈیلرز اور شورومز' : 'Explore Certified Dealerships'}
             </h2>
-            <p className="text-xs sm:text-sm text-[var(--color-text-muted)] mt-1 font-medium">
-              Buy directly from verified, licensed dealerships in Peshawar, Islamabad, Lahore & nationwide.
+            <p className="text-xs sm:text-sm text-[var(--color-text-muted)] mt-1">
+              {isUrdu
+                ? 'پشاور، اسلام آباد، لاہور اور پورے پاکستان سے تصدیق شدہ شورومز سے براہ راست گاڑیاں خریدیں۔'
+                : 'Browse verified inventory directly from certified physical dealerships across Pakistan.'}
             </p>
           </div>
 
           <button
+            type="button"
             onClick={() => setTab('dealers')}
-            className="px-4 py-2.5 rounded-xl bg-[var(--color-bg-primary)] hover:bg-[var(--color-bg-tertiary)] border border-[var(--color-border)] text-[var(--color-text-main)] text-xs font-bold flex items-center gap-2 transition-all shrink-0 cursor-pointer w-fit shadow-sm hover:border-[var(--color-accent-main)]/40"
+            className="btn-luxury-secondary text-xs shrink-0 w-fit"
           >
             <span>View All Showrooms</span>
             <ArrowRight size={14} className="text-[var(--color-accent-main)]" />
@@ -58,29 +61,35 @@ export const ShowroomsSection: React.FC<ShowroomsSectionProps> = ({
               <div
                 key={dealer.id}
                 onClick={() => onSelectDealer(dealer.id)}
-                className="group bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-2xl overflow-hidden shadow-sm hover:shadow-md hover:border-[var(--color-accent-main)]/50 transition-all duration-300 cursor-pointer flex flex-col hover:-translate-y-1"
+                className="group bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] rounded-2xl overflow-hidden shadow-xs hover:shadow-md hover:border-[var(--color-accent-main)]/50 transition-all duration-300 cursor-pointer flex flex-col hover:-translate-y-1"
               >
                 {/* Cover Image & Overlay */}
-                <div className="relative h-36 bg-[var(--color-bg-secondary)] overflow-hidden">
-                  <img
-                    src={cover}
-                    alt={dealer.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    referrerPolicy="no-referrer"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-black/20" />
+                <div className="relative h-36 bg-[var(--color-bg-tertiary)] overflow-hidden">
+                  {cover ? (
+                    <img
+                      src={cover}
+                      alt={dealer.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-[var(--color-bg-tertiary)] text-[var(--color-text-muted)]">
+                      <Building2 size={32} className="opacity-30" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#090D14]/80 via-transparent to-black/20" />
 
                   {/* Verification Badge */}
                   {(dealer.flagshipVerified || dealer.verified) && (
-                    <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-[var(--color-accent-main)] text-white text-[10px] font-mono font-bold uppercase tracking-wider flex items-center gap-1 shadow-md">
+                    <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-[var(--color-accent-main)] text-[#090D14] text-[10px] font-mono font-bold uppercase tracking-wider flex items-center gap-1 shadow-md">
                       <ShieldCheck size={12} />
                       <span>Verified</span>
                     </div>
                   )}
 
                   {/* Rating */}
-                  <div className="absolute bottom-3 right-3 px-2 py-0.5 rounded-lg bg-black/60 backdrop-blur-md text-amber-400 text-xs font-mono font-bold border border-white/20 flex items-center gap-1">
-                    <Star size={12} className="fill-amber-400 text-amber-400" />
+                  <div className="absolute bottom-3 right-3 px-2 py-0.5 rounded-lg bg-black/60 backdrop-blur-md text-[var(--color-accent-main)] text-xs font-mono font-bold border border-white/20 flex items-center gap-1">
+                    <Star size={12} className="fill-[var(--color-accent-main)] text-[var(--color-accent-main)]" />
                     <span>{dealer.rating || 4.9}</span>
                   </div>
                 </div>
@@ -88,7 +97,7 @@ export const ShowroomsSection: React.FC<ShowroomsSectionProps> = ({
                 {/* Content */}
                 <div className="p-5 flex-1 flex flex-col justify-between relative pt-8">
                   {/* Floating Logo */}
-                  <div className="absolute -top-7 left-5 w-14 h-14 rounded-2xl bg-[var(--color-bg-primary)] border-2 border-[var(--color-border)] shadow-md overflow-hidden flex items-center justify-center text-[var(--color-text-main)] font-bold text-lg">
+                  <div className="absolute -top-7 left-5 w-14 h-14 rounded-2xl bg-[var(--color-bg-secondary)] border-2 border-[var(--color-border-main)] shadow-md overflow-hidden flex items-center justify-center text-[var(--color-text-main)] font-bold text-lg">
                     {logo ? (
                       <img src={logo} alt={dealer.name} className="w-full h-full object-cover" />
                     ) : (
@@ -111,14 +120,14 @@ export const ShowroomsSection: React.FC<ShowroomsSectionProps> = ({
                   </div>
 
                   {/* Footer Stats & Button */}
-                  <div className="mt-5 pt-3 border-t border-[var(--color-border)] flex items-center justify-between">
+                  <div className="mt-5 pt-3 border-t border-[var(--color-border-main)] flex items-center justify-between">
                     <div className="text-xs font-mono">
                       <span className="text-[var(--color-accent-main)] font-bold">{dealer.vehiclesCount || 0}</span>
                       <span className="text-[var(--color-text-muted)] ml-1">Vehicles Listed</span>
                     </div>
 
                     <div className="inline-flex items-center gap-1 text-xs font-bold text-[var(--color-accent-main)] group-hover:translate-x-1 transition-transform">
-                      <span>Showroom</span>
+                      <span>Visit Showroom</span>
                       <ExternalLink size={12} />
                     </div>
                   </div>

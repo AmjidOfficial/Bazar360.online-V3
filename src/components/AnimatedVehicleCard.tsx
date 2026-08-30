@@ -15,11 +15,14 @@ export function AnimatedVehicleCard({ children, index = 0, className = '' }: Ani
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ 
-        y: -6, 
-        scale: 1.025,
+        y: -8, 
+        rotateX: 2.5,
+        rotateY: -2,
+        scale: 1.015,
         transition: { type: 'spring', stiffness: 350, damping: 22 }
       }}
       whileTap={{ scale: 0.985 }}
+      style={{ transformStyle: 'preserve-3d', perspective: 1000 }}
       transition={{
         duration: 0.45,
         delay: Math.min(index * 0.07, 0.5),

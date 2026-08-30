@@ -38,18 +38,17 @@ export default {
         'premium': '20px'
       },
       fontFamily: {
-        sans: ["var(--font-sans)", "Inter", "ui-sans-serif", "system-ui"],
-        mono: ["var(--font-mono)", "JetBrains Mono", "monospace"],
-        display: ["var(--font-display)", "Plus Jakarta Sans", "sans-serif"]
+        sans: ["Outfit", "Plus Jakarta Sans", "ui-sans-serif", "system-ui", "sans-serif"],
+        mono: ["JetBrains Mono", "monospace"],
+        display: ["Plus Jakarta Sans", "ui-sans-serif", "system-ui", "sans-serif"]
       },
       letterSpacing: {
-        luxury: "0.15em",
-        extreme: "0.25em",
+        luxury: "0.12em",
+        extreme: "0.2em",
       },
       boxShadow: {
-        'bento': 'var(--shadow-bento)',
-        'elevated': 'var(--shadow-elevated)',
-        'luxury-glow': '0 0 40px rgba(56, 189, 248, 0.08)',
+        'luxury': '0 16px 40px -12px rgba(0, 0, 0, 0.6)',
+        'luxury-glow': '0 0 40px rgba(197, 168, 128, 0.12)',
       }
     },
   },

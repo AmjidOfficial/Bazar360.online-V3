@@ -66,11 +66,33 @@ export interface CarListing {
   // Cloudinary Integrated properties
   cloudinaryPublicId?: string;
   cloudinaryPublicIds?: string[];
+  cloudinaryFolderPath?: string;
+  mediaMetadata?: Array<{
+    url: string;
+    public_id: string;
+    bytes?: number;
+    format?: string;
+    folder?: string;
+    uploadedAt?: string;
+  }>;
   videoUrl?: string;
   videoCloudinaryPublicId?: string;
   pdfUrl?: string;
   pdfCloudinaryPublicId?: string;
   pdfTitle?: string;
+
+  // Owner & Creator Identity Details
+  ownerId?: string;
+  sellerEmail?: string;
+  ownerDetails?: {
+    uid?: string;
+    displayName?: string;
+    email?: string;
+    photoURL?: string;
+    role?: string;
+    phone?: string;
+    associatedShowroomId?: string;
+  };
 
   // Premium specs for hero banner matching elite reference images
   topSpeed?: string;

@@ -410,7 +410,18 @@ function mapListingDoc(id: string, data: any): CarListing {
     images: resolvedImages,
     assemblyType: data.assemblyType || '',
     dentPaintDescription: data.dentPaintDescription || '',
-    tokenTaxStatus: data.tokenTaxStatus || ''
+    tokenTaxStatus: data.tokenTaxStatus || '',
+    ownerId: data.ownerId || data.createdBy || undefined,
+    sellerEmail: data.sellerEmail || data.ownerDetails?.email || undefined,
+    ownerDetails: data.ownerDetails || (data.ownerId || data.createdBy ? {
+      uid: data.ownerId || data.createdBy,
+      displayName: data.sellerName || 'Seller',
+      phone: data.sellerPhone || '',
+      role: data.sellerType === 'Showroom' ? 'Showroom Owner' : 'Individual User',
+      associatedShowroomId: resolvedDealerId !== 'private' ? resolvedDealerId : null
+    } : undefined),
+    cloudinaryFolderPath: data.cloudinaryFolderPath || undefined,
+    mediaMetadata: Array.isArray(data.mediaMetadata) ? data.mediaMetadata : undefined
   };
 }
 

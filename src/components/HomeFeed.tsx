@@ -130,25 +130,25 @@ export function HomeFeed({
 
       {/* 3. Featured Vehicles (Rendered ONLY when verified/featured listings exist) */}
       {featuredListings.length > 0 && (
-        <section className="w-full py-12 px-4 sm:px-6 lg:px-8 border-b border-[#E2E8F0] bg-white">
+        <section className="w-full py-12 px-4 sm:px-6 lg:px-8 border-b border-[var(--color-border-main)] bg-[var(--color-bg-secondary)]">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
               <div>
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#007979]/10 border border-[#007979]/20 text-[#007979] text-xs font-mono font-bold uppercase tracking-wider mb-2">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--color-accent-subtle)] border border-[var(--color-accent-main)]/30 text-[var(--color-accent-main)] text-xs font-mono font-bold uppercase tracking-wider mb-2">
                   <Sparkles size={14} />
                   <span>Handpicked Stock</span>
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] tracking-tight">
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-[var(--color-text-header)] tracking-tight">
                   {isUrdu ? 'خاص گاڑیاں (ممتاز انتخاب)' : 'Featured & Verified Vehicles'}
                 </h2>
               </div>
 
               <button
                 onClick={() => setTab('inventory')}
-                className="px-4 py-2.5 rounded-xl bg-white hover:bg-[#F8FAFC] border border-[#E2E8F0] text-[#0F172A] text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer w-fit shadow-xs"
+                className="btn-luxury-secondary text-xs"
               >
                 <span>Explore All Inventory</span>
-                <ArrowRight size={14} />
+                <ArrowRight size={14} className="text-[var(--color-accent-main)]" />
               </button>
             </div>
 
@@ -172,20 +172,20 @@ export function HomeFeed({
       )}
 
       {/* 4. Recently Added Marketplace Inventory */}
-      <section className="w-full py-16 px-4 sm:px-6 lg:px-8 border-b border-[#E2E8F0]">
+      <section className="w-full py-16 px-4 sm:px-6 lg:px-8 border-b border-[var(--color-border-main)] bg-[var(--color-bg-primary)]">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
-              <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#007979]">
+              <span className="text-xs font-mono font-bold uppercase tracking-widest text-[var(--color-accent-main)]">
                 {isUrdu ? 'حقیقی مارکیٹ پلیس لسٹنگز' : 'Real Marketplace Data'}
               </span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] mt-1 tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-[var(--color-text-header)] mt-1 tracking-tight">
                 {isUrdu ? 'حالیہ گاڑیوں کی فہرست' : 'Recently Added Vehicles'}
               </h2>
             </div>
 
             {/* Tab Filter Pills */}
-            <div className="flex flex-wrap items-center gap-1.5 p-1 bg-white rounded-2xl border border-[#E2E8F0] shadow-2xs">
+            <div className="flex flex-wrap items-center gap-1.5 p-1 bg-[var(--color-bg-secondary)] rounded-2xl border border-[var(--color-border-main)] shadow-xs">
               {[
                 { id: 'all', label: 'All Cars' },
                 { id: 'recent', label: 'Newest' },
@@ -198,8 +198,8 @@ export function HomeFeed({
                   onClick={() => setActiveTabFilter(tab.id as any)}
                   className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold uppercase transition-all cursor-pointer ${
                     activeTabFilter === tab.id
-                      ? 'bg-[#007979] text-white shadow-xs font-bold'
-                      : 'text-[#64748B] hover:text-[#0F172A]'
+                      ? 'bg-[var(--color-accent-main)] text-[#090D14] shadow-xs font-bold'
+                      : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] hover:bg-[var(--color-bg-tertiary)]'
                   }`}
                 >
                   {tab.label}
@@ -211,17 +211,17 @@ export function HomeFeed({
           {/* Selected Active Brand / City Badges */}
           {(selectedBrand || selectedCity) && (
             <div className="mb-6 flex flex-wrap items-center gap-2">
-              <span className="text-xs text-[#64748B]">Active Filters:</span>
+              <span className="text-xs text-[var(--color-text-muted)]">Active Filters:</span>
               {selectedBrand && (
-                <span className="px-3 py-1 rounded-full bg-[#007979]/10 border border-[#007979]/20 text-[#007979] text-xs font-mono font-bold flex items-center gap-2">
+                <span className="px-3 py-1 rounded-full bg-[var(--color-accent-subtle)] border border-[var(--color-accent-main)]/30 text-[var(--color-accent-main)] text-xs font-mono font-bold flex items-center gap-2">
                   Make: {selectedBrand}
-                  <button onClick={() => setSelectedBrand('')} className="hover:text-[#0F172A] cursor-pointer">×</button>
+                  <button onClick={() => setSelectedBrand('')} className="hover:text-[var(--color-text-header)] cursor-pointer">×</button>
                 </span>
               )}
               {selectedCity && (
-                <span className="px-3 py-1 rounded-full bg-[#007979]/10 border border-[#007979]/20 text-[#007979] text-xs font-mono font-bold flex items-center gap-2">
+                <span className="px-3 py-1 rounded-full bg-[var(--color-accent-subtle)] border border-[var(--color-accent-main)]/30 text-[var(--color-accent-main)] text-xs font-mono font-bold flex items-center gap-2">
                   City: {selectedCity}
-                  <button onClick={() => setSelectedCity('')} className="hover:text-[#0F172A] cursor-pointer">×</button>
+                  <button onClick={() => setSelectedCity('')} className="hover:text-[var(--color-text-header)] cursor-pointer">×</button>
                 </span>
               )}
               <button
@@ -229,7 +229,7 @@ export function HomeFeed({
                   setSelectedBrand('');
                   setSelectedCity('');
                 }}
-                className="text-xs text-[#64748B] hover:text-[#007979] hover:underline cursor-pointer"
+                className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-accent-main)] hover:underline cursor-pointer"
               >
                 Clear All
               </button>
@@ -254,10 +254,10 @@ export function HomeFeed({
               ))}
             </div>
           ) : (
-            <div className="py-16 text-center bg-white border border-[#E2E8F0] rounded-3xl p-8 shadow-xs">
-              <Car size={48} className="mx-auto text-[#94A3B8] mb-3 opacity-50" />
-              <h3 className="text-lg font-bold text-[#0F172A]">No Vehicles Found</h3>
-              <p className="text-xs text-[#64748B] mt-1 max-w-md mx-auto">
+            <div className="py-16 text-center bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] rounded-3xl p-8 shadow-xs">
+              <Car size={48} className="mx-auto text-[var(--color-text-muted)] mb-3 opacity-50" />
+              <h3 className="text-lg font-bold text-[var(--color-text-header)]">No Vehicles Found</h3>
+              <p className="text-xs text-[var(--color-text-muted)] mt-1 max-w-md mx-auto">
                 No active listings match your current filters. Try resetting your selected filters or search for another vehicle.
               </p>
               <button
@@ -266,7 +266,7 @@ export function HomeFeed({
                   setSelectedBrand('');
                   setSelectedCity('');
                 }}
-                className="mt-4 px-5 py-2.5 rounded-xl bg-[#007979] hover:bg-[#006060] text-white font-bold text-xs uppercase tracking-wider cursor-pointer shadow-xs"
+                className="mt-4 btn-gold-primary text-xs"
               >
                 Reset All Filters
               </button>
@@ -278,7 +278,7 @@ export function HomeFeed({
             <div className="mt-12 text-center">
               <button
                 onClick={() => setVisibleCount(prev => Math.min(prev + 8, sortedListings.length))}
-                className="px-8 py-3 rounded-2xl bg-white hover:bg-[#F8FAFC] border border-[#E2E8F0] text-[#0F172A] text-xs font-mono font-bold uppercase tracking-wider cursor-pointer transition-all shadow-xs"
+                className="btn-luxury-secondary px-8 py-3 text-xs"
               >
                 Load More Vehicles ({sortedListings.length - visibleCount} Remaining)
               </button>

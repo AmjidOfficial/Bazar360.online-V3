@@ -166,11 +166,14 @@ export default function VehicleListingCard({
           delay: Math.min(index * 0.05, 0.35)
         }}
         whileHover={{ 
-          y: -6, 
+          y: -8, 
+          rotateX: 2.5,
+          rotateY: -2,
           scale: 1.015,
-          transition: { type: 'spring', stiffness: 300, damping: 20 } 
+          transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] } 
         }}
         whileTap={{ scale: 0.98 }}
+        style={{ transformStyle: 'preserve-3d', perspective: 1000 }}
         className="group relative flex flex-col bg-bg-primary/45 dark:bg-bg-primary/45 backdrop-blur-[16px] -webkit-backdrop-blur-[16px] rounded-3xl overflow-hidden cursor-pointer border border-white/10 shadow-[0_10px_35px_-10px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-orange-500/50 hover:shadow-[0_20px_45px_rgba(249,115,22,0.18)]"
       >
         {/* 1. HERO MEDIA CANVAS - Fills top section */}
