@@ -233,13 +233,21 @@ export function ShowroomFilterableInventory({ inventory }: ShowroomFilterableInv
         >
           {filteredAndSortedInventory.map((car: Vehicle, idx: number) => {
             const rawP = getCarPrice(car);
+            const imageCount = (car.images && car.images.length) || (car.imageUrl ? 1 : 0);
+
             return (
               <AnimatedVehicleCard
                 key={car.id}
                 index={idx}
-                className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] rounded-2xl overflow-hidden hover:border-[var(--color-brand-orange)]/40 hover:shadow-lg transition-all duration-300 group flex flex-col h-full shadow-sm"
+                car={car}
+                className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] rounded-2xl overflow-hidden hover:border-[var(--color-brand-orange)]/60 transition-all duration-300 group/card flex flex-col h-full shadow-md hover:shadow-2xl hover:shadow-orange-500/15"
               >
-                <div className="w-full aspect-[16/10] sm:aspect-[16/9] md:aspect-[16/10] bg-[var(--color-bg-tertiary)] relative overflow-hidden shrink-0">
+                {/* Vehicle Image Container - Click to open Lightbox Modal */}
+                <div 
+                  data-lightbox-trigger="true"
+                  className="w-full aspect-[16/10] sm:aspect-[16/9] md:aspect-[16/10] bg-[var(--color-bg-tertiary)] relative overflow-hidden shrink-0 cursor-pointer group/img"
+                  title="Click to view full-screen high-resolution gallery"
+                >
                   {car.imageUrl || (car.images && car.images[0]) ? (
                     <img
                       src={getOptimizedUrl(car.imageUrl || car.images![0], {
@@ -250,8 +258,8 @@ export function ShowroomFilterableInventory({ inventory }: ShowroomFilterableInv
                         format: 'auto',
                         watermark: false
                       })}
-                      alt={car.title || 'Vehicle'}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 relative z-0"
+                      alt={car.title || `${car.make || ''} ${car.model || ''}`}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover/img:scale-108 relative z-0"
                       loading="lazy"
                     />
                   ) : (
@@ -260,10 +268,28 @@ export function ShowroomFilterableInventory({ inventory }: ShowroomFilterableInv
                     </div>
                   )}
                   {/* Subtle Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none z-10" />
-                  <div className="absolute top-4 left-4 z-20">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none z-10" />
+                  
+                  {/* Top Left Badge: Condition */}
+                  <div className="absolute top-3 left-3 z-20 pointer-events-none">
                     <span className="bg-black/70 backdrop-blur-md border border-white/10 text-[9px] font-mono font-bold uppercase tracking-wider text-[var(--color-text-header)] px-2.5 py-1 rounded-md">
                       {car.condition || 'Used'}
+                    </span>
+                  </div>
+
+                  {/* Top Right Badge: Image Count / Gallery Indicator */}
+                  {imageCount > 0 && (
+                    <div className="absolute top-3 right-3 z-20 pointer-events-none">
+                      <span className="bg-orange-500/90 text-slate-950 border border-orange-400/30 text-[10px] font-mono font-black uppercase px-2.5 py-1 rounded-md flex items-center gap-1 shadow-md">
+                        📸 {imageCount} {imageCount === 1 ? 'Photo' : 'Photos'}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Hover Overlay: Expand Lightbox Prompt */}
+                  <div className="absolute inset-0 z-20 bg-black/40 backdrop-blur-[2px] opacity-0 group-hover/img:opacity-100 transition-opacity duration-250 flex items-center justify-center">
+                    <span className="bg-orange-500 hover:bg-orange-600 text-slate-950 text-xs font-black uppercase tracking-wider px-3.5 py-2 rounded-xl shadow-xl flex items-center gap-2 transform translate-y-2 group-hover/img:translate-y-0 transition-all duration-250">
+                      <span>View HD Gallery</span>
                     </span>
                   </div>
                 </div>
