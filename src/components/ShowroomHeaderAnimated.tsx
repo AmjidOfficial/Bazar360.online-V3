@@ -111,7 +111,7 @@ export function ShowroomHeaderAnimated({ showroom, onOpenMediaManager, onOpenQrM
                 </span>
                 {showroom.rating && (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 dark:bg-bg-tertiary text-slate-700 dark:text-text-muted text-[10px] font-mono font-bold rounded-full border border-slate-200 dark:border-border-main">
-                    <Star size={12} className="text-amber-500 fill-amber-500" />
+                    <Star size={12} className="text-amber-600 fill-amber-600" />
                     {showroom.rating}
                   </span>
                 )}

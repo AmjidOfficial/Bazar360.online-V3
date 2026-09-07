@@ -1117,12 +1117,24 @@ export default function SearchExplorerView({
               <p className="text-[#64748B] font-sans max-w-sm text-sm">
                 {t.noResults}
               </p>
-              <button
-                onClick={handleResetFilters}
-                className="bg-[#007979] hover:bg-[#006060] text-white font-sans font-bold text-xs uppercase px-6 py-3 rounded-xl transition-all cursor-pointer active:scale-95 shadow-xs"
-              >
-                {t.clearFilters}
-              </button>
+              {activeFilters.length > 0 ? (
+                <button
+                  onClick={handleResetFilters}
+                  className="bg-[#007979] hover:bg-[#006060] text-white font-sans font-bold text-xs uppercase px-6 py-3 rounded-xl transition-all cursor-pointer active:scale-95 shadow-xs"
+                >
+                  {t.clearFilters}
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    handleResetFilters();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="bg-[#007979] hover:bg-[#006060] text-white font-sans font-bold text-xs uppercase px-6 py-3 rounded-xl transition-all cursor-pointer active:scale-95 shadow-xs"
+                >
+                  View All Categories
+                </button>
+              )}
             </div>
           )}
         </section>

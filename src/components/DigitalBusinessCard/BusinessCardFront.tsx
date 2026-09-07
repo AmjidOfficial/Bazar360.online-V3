@@ -18,9 +18,13 @@ export const BusinessCardFront: React.FC<BusinessCardFrontProps> = ({ dealer, th
           {dealer.verified && <ShieldCheck className="text-blue-500 fill-blue-500/20" size={24} />}
         </div>
         
-        <div className="mt-4">
-            <h2 className="text-3xl font-black uppercase tracking-tight">{dealer.name}</h2>
-            <p className="text-sm opacity-80 font-medium">{dealer.tagline}</p>
+        <div className="mt-4 min-w-0">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-black uppercase tracking-tight truncate" title={dealer.name}>
+              {dealer.name}
+            </h2>
+            <p className="text-xs sm:text-sm opacity-80 font-medium truncate" title={dealer.tagline}>
+              {dealer.tagline || 'Verified Automotive Partner'}
+            </p>
         </div>
 
         <div className="flex justify-between items-center mt-6 text-xs opacity-60 font-semibold uppercase tracking-widest">

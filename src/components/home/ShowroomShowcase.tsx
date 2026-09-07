@@ -52,7 +52,7 @@ export function ShowroomShowcase({ lang, dealers, onSelectDealer, setTab, dbLoad
                       {dealer.name}
                     </h3>
                     <div className="flex items-center gap-3 mt-2 text-xs font-sans text-[var(--color-text-muted)] font-semibold">
-                      <span className="flex items-center gap-1"><Star size={12} className="text-amber-500" /> {dealer.rating || '4.9'}</span>
+                      <span className="flex items-center gap-1"><Star size={12} className="text-amber-600 fill-amber-600" /> {dealer.rating || '4.9'}</span>
                       <span className="flex items-center gap-1 truncate"><MapPin size={12} className="text-text-muted" /> {dealer.location.split(',')[0]}</span>
                     </div>
                   </div>

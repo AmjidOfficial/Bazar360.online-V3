@@ -183,6 +183,7 @@ export default function ShowroomMiniSite({
     { id: 'home', label: 'Home', icon: <Info size={16} /> },
     { id: 'about', label: 'About', icon: <Newspaper size={16} /> },
     { id: 'inventory', label: 'Inventory', icon: <LayoutGrid size={16} /> },
+    { id: 'media', label: 'Showroom Gallery', icon: <ImageIcon size={16} /> },
     { id: 'community', label: 'Posts/Community', icon: <Megaphone size={16} /> },
     { id: 'businesscard', label: 'Digital Business Card', icon: <QrCode size={16} /> },
     ...(isOwner ? [{ id: 'mediamanager', label: 'Logo & Cover Manager', icon: <ImageIcon size={16} /> }] : [])
@@ -196,14 +197,14 @@ export default function ShowroomMiniSite({
         <div className="flex items-center gap-2">
           <button 
             onClick={onBack || (() => window.history.back())}
-            className="w-9 h-9 flex items-center justify-center bg-white/5 border border-white/10 text-gray-300 hover:text-orange-500 rounded-xl text-xs cursor-pointer active:scale-95 transition-all"
+            className="w-9 h-9 flex items-center justify-center bg-white/5 border border-white/10 text-gray-300 hover:text-[var(--color-accent-secondary)] rounded-xl text-xs cursor-pointer active:scale-95 transition-all"
             title="Back"
           >
             <ArrowLeft size={16} />
           </button>
           
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-orange-500/10 border border-orange-500/30 flex items-center justify-center font-black text-[10px] text-orange-500">
+            <div className="w-8 h-8 rounded-lg bg-[var(--color-accent-main)]/10 border border-[var(--color-accent-main)]/30 flex items-center justify-center font-black text-[10px] text-[var(--color-accent-main)]">
               {(dealer.logoUrl || dealer.logo) ? <img src={dealer.logoUrl || dealer.logo} alt="Logo" className="w-6 h-6 object-contain" /> : dealer.avatarLetter}
             </div>
             <div className="flex flex-col text-left">
@@ -232,7 +233,7 @@ export default function ShowroomMiniSite({
           {/* Quick Call */}
           <a
             href={`tel:${dealer.whatsapp || '03159085086'}`}
-            className="w-9 h-9 rounded-xl text-orange-400 bg-orange-500/10 border border-orange-500/20 hover:bg-orange-500/20 active:scale-90 transition-all flex items-center justify-center"
+            className="w-9 h-9 rounded-xl text-[var(--color-accent-secondary)] bg-[var(--color-accent-secondary)]/10 border border-[var(--color-accent-secondary)]/20 hover:bg-[var(--color-accent-secondary)]/20 active:scale-90 transition-all flex items-center justify-center"
             title="Call Showroom"
           >
             <Phone size={14} />
@@ -268,7 +269,7 @@ export default function ShowroomMiniSite({
             >
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono font-black uppercase tracking-widest text-orange-500">Showroom Desk</span>
+                  <span className="text-[10px] font-mono font-black uppercase tracking-widest text-[var(--color-accent-main)]">Showroom Desk</span>
                   <button 
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] border border-[var(--color-border-main)] rounded-lg cursor-pointer"
@@ -278,7 +279,7 @@ export default function ShowroomMiniSite({
                 </div>
 
                 <div className="flex items-center gap-3 border-b border-[var(--color-border-main)] pb-4">
-                  <div className="w-10 h-10 rounded-xl bg-orange-600/10 border border-orange-500/20 flex items-center justify-center font-black text-orange-500 shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-[var(--color-accent-main)]/10 border border-[var(--color-accent-main)]/20 flex items-center justify-center font-black text-[var(--color-accent-main)] shrink-0">
                     {(dealer.logoUrl || dealer.logo) ? <img src={dealer.logoUrl || dealer.logo} alt="Logo" className="w-8 h-8 object-contain" /> : dealer.avatarLetter}
                   </div>
                   <div className="min-w-0">
@@ -296,7 +297,7 @@ export default function ShowroomMiniSite({
                         onClick={() => handleTabClick(tab.id)}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-100 cursor-pointer ${
                           isActive 
-                            ? 'bg-orange-500 text-[var(--color-text-header)] shadow-lg shadow-orange-500/20' 
+                            ? 'bg-[var(--color-accent-main)] text-[#030712] shadow-lg shadow-[var(--color-accent-main)]/20' 
                             : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-bg-secondary)]'
                         }`}
                       >
@@ -336,14 +337,14 @@ export default function ShowroomMiniSite({
             {/* Back to Hub button */}
             <button 
               onClick={onBack || (() => window.history.back())}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--color-bg-primary)] border border-[var(--color-border-main)] text-xs font-mono font-black uppercase tracking-wider text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:border-orange-500/50 hover:shadow transition-all duration-150 cursor-pointer"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--color-bg-primary)] border border-[var(--color-border-main)] text-xs font-mono font-black uppercase tracking-wider text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:border-[var(--color-accent-main)]/50 hover:shadow transition-all duration-150 cursor-pointer"
             >
               <ArrowLeft size={14} /> Back to Hub
             </button>
 
             {/* Brand Header */}
             <div className="flex items-center gap-3 border-b border-[var(--color-border-main)] pb-5">
-              <div className="w-12 h-12 rounded-xl bg-orange-600/10 border border-orange-500/20 flex items-center justify-center font-black text-lg text-orange-500 shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-[var(--color-accent-main)]/10 border border-[var(--color-accent-main)]/20 flex items-center justify-center font-black text-lg text-[var(--color-accent-main)] shrink-0">
                 {(dealer.logoUrl || dealer.logo) ? <img src={dealer.logoUrl || dealer.logo} alt="Logo" className="w-9 h-9 object-contain" /> : dealer.avatarLetter}
               </div>
               <div className="min-w-0">
@@ -366,7 +367,7 @@ export default function ShowroomMiniSite({
                     onClick={() => handleTabClick(tab.id)}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-100 relative cursor-pointer ${
                       isActive 
-                        ? 'bg-orange-500 text-[var(--color-text-header)] shadow-lg shadow-orange-500/15' 
+                        ? 'bg-[var(--color-accent-main)] text-[#030712] shadow-lg shadow-[var(--color-accent-main)]/15' 
                         : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-bg-secondary)]'
                     }`}
                   >
@@ -434,7 +435,7 @@ export default function ShowroomMiniSite({
                         {/* LEFT/CENTER: Logo & Information Grid */}
                         <div className="flex flex-col md:flex-row md:items-center gap-5 md:gap-6 flex-1 min-w-0">
                           {/* Logo */}
-                          <div className="w-20 h-20 rounded-2xl bg-bg-primary border border-orange-500/20 flex items-center justify-center font-extrabold text-2xl text-orange-500 shadow-lg shrink-0 overflow-hidden mx-auto md:mx-0">
+                          <div className="w-20 h-20 rounded-2xl bg-bg-primary border border-[var(--color-accent-main)]/20 flex items-center justify-center font-extrabold text-2xl text-[var(--color-accent-main)] shadow-lg shrink-0 overflow-hidden mx-auto md:mx-0">
                             {(dealer.logoUrl || dealer.logo) ? (
                               <img src={dealer.logoUrl || dealer.logo} alt="Logo" className="w-full h-full object-contain p-1" />
                             ) : (
@@ -448,14 +449,14 @@ export default function ShowroomMiniSite({
                               <h2 className="text-2xl sm:text-3xl font-black text-[var(--color-text-main)] font-display tracking-tight uppercase truncate">
                                 {dealer.name}
                               </h2>
-                              <span className="px-2.5 py-0.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-500 text-[10px] font-mono font-bold uppercase tracking-wider flex items-center gap-1 shrink-0">
+                              <span className="px-2.5 py-0.5 rounded-full bg-[var(--color-accent-main)]/10 border border-[var(--color-accent-main)]/20 text-[var(--color-accent-main)] text-[10px] font-mono font-bold uppercase tracking-wider flex items-center gap-1 shrink-0">
                                 <ShieldCheck size={12} />
                                 Verified Partner
                               </span>
                             </div>
                             
                             <p className="text-[var(--color-text-muted)] text-xs font-sans flex items-start justify-center md:justify-start gap-1.5 leading-snug">
-                              <MapPin size={14} className="text-orange-500 shrink-0 mt-0.5" />
+                              <MapPin size={14} className="text-[var(--color-accent-main)] shrink-0 mt-0.5" />
                               <span className="line-clamp-2">{dealer.location || 'Alamas Car Village, Ring Road, Peshawar'}</span>
                             </p>
                             
@@ -467,7 +468,7 @@ export default function ShowroomMiniSite({
                             <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-2">
                               <a
                                 href={`tel:${dealer.whatsapp || dealer.phone || '03159085086'}`}
-                                className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-[var(--color-text-header)] font-mono font-bold text-xs uppercase rounded-xl transition-all cursor-pointer shadow flex items-center gap-2"
+                                className="px-4 py-2 bg-[var(--color-accent-main)] hover:bg-[var(--color-accent-hover)] text-[#030712] font-mono font-bold text-xs uppercase rounded-xl transition-all cursor-pointer shadow flex items-center gap-2"
                               >
                                 <Phone size={14} />
                                 <span>Call</span>
@@ -510,14 +511,14 @@ export default function ShowroomMiniSite({
                               includeMargin={false}
                             />
                           </div>
-                          <span className="text-[9px] font-mono font-black uppercase text-orange-500 tracking-widest mt-2 block">
+                          <span className="text-[9px] font-mono font-black uppercase text-[var(--color-accent-main)] tracking-widest mt-2 block">
                             Scan to Share
                           </span>
                         </div>
                       </div>
 
                       <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] p-6 md:p-8 rounded-3xl space-y-4 shadow-sm text-left">
-                        <h3 className="text-orange-500 font-mono font-bold text-xs uppercase tracking-widest flex items-center gap-2">
+                        <h3 className="text-[var(--color-accent-main)] font-mono font-bold text-xs uppercase tracking-widest flex items-center gap-2">
                           <Sparkles size={14} className="animate-spin" /> Executive Showroom Bio
                         </h3>
                         <div className="text-[var(--color-text-muted)] text-sm leading-relaxed font-sans prose prose-invert">
@@ -542,18 +543,18 @@ export default function ShowroomMiniSite({
 
                     {/* SHARE DIGITAL SHOWROOM COGNITIVE CARD */}
                     <div className="lg:col-span-4">
-                      <div className="bg-gradient-to-br from-slate-900 to-slate-950 p-8 rounded-3xl border border-white/5 shadow-2xl relative overflow-hidden group text-left">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl group-hover:bg-orange-500/20 transition-all pointer-events-none" />
+                      <div className="bg-[var(--color-bg-secondary)] p-8 rounded-3xl border border-[var(--color-border-main)] shadow-2xl relative overflow-hidden group text-left">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--color-accent-main)]/10 rounded-full blur-3xl group-hover:bg-[var(--color-accent-main)]/20 transition-all pointer-events-none" />
                         <h3 className="text-lg font-black text-[var(--color-text-header)] font-display mb-4 flex items-center gap-2">
-                          <Share2 size={18} className="text-orange-500" />
+                          <Share2 size={18} className="text-[var(--color-accent-main)]" />
                           Share Showroom
                         </h3>
-                        <p className="text-xs text-gray-400 font-sans leading-relaxed mb-6">
+                        <p className="text-xs text-[var(--color-text-muted)] font-sans leading-relaxed mb-6">
                           Utilize the Web Share integration to distribute this showroom profile directly with name, location, map link, and contact details!
                         </p>
                         <button 
                           onClick={handleShareShowroom}
-                          className="w-full py-3.5 bg-orange-500 hover:bg-orange-600 border border-orange-400/20 rounded-xl text-xs font-black uppercase tracking-widest text-[var(--color-text-header)] transition-all active:scale-95 cursor-pointer shadow-lg flex items-center justify-center gap-2"
+                          className="w-full py-3.5 bg-[var(--color-accent-main)] hover:bg-[var(--color-accent-hover)] border border-[var(--color-accent-main)]/20 rounded-xl text-xs font-black uppercase tracking-widest text-[#030712] transition-all active:scale-95 cursor-pointer shadow-lg flex items-center justify-center gap-2"
                         >
                           <Share2 size={14} />
                           Share Digital Profile
@@ -564,21 +565,21 @@ export default function ShowroomMiniSite({
 
                   {/* SHOWROOM LIVE ANNOUNCEMENTS PREVIEW BANNER */}
                   {dealer.activityFeed && dealer.activityFeed.length > 0 && (
-                    <div className="bg-gradient-to-r from-orange-500/10 via-amber-500/5 to-transparent border border-orange-500/30 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl relative overflow-hidden text-left">
-                      <div className="flex items-center justify-between gap-4 border-b border-orange-500/20 pb-4">
+                    <div className="bg-gradient-to-r from-[var(--color-accent-main)]/10 via-[var(--color-accent-secondary-subtle)] to-transparent border border-[var(--color-accent-main)]/30 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl relative overflow-hidden text-left">
+                      <div className="flex items-center justify-between gap-4 border-b border-[var(--color-accent-main)]/20 pb-4">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center font-black">
+                          <div className="w-8 h-8 rounded-xl bg-[var(--color-accent-main)]/20 text-[var(--color-accent-main)] flex items-center justify-center font-black">
                             <Megaphone size={18} className="animate-pulse" />
                           </div>
                           <div>
-                            <span className="text-[10px] font-mono font-bold text-orange-400 uppercase tracking-widest block">Broadcast</span>
+                            <span className="text-[10px] font-mono font-bold text-[var(--color-accent-main)] uppercase tracking-widest block">Broadcast</span>
                             <h3 className="text-base font-black text-[var(--color-text-header)] uppercase font-display">Live Showroom Updates & Offers</h3>
                           </div>
                         </div>
 
                         <button
                           onClick={() => handleTabClick('announcements')}
-                          className="px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-slate-950 font-mono font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md shrink-0"
+                          className="px-4 py-2 rounded-xl bg-[var(--color-accent-main)] hover:bg-[var(--color-accent-hover)] text-[#030712] font-mono font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md shrink-0"
                         >
                           View Feed ({dealer.activityFeed.length}) &rarr;
                         </button>
@@ -591,7 +592,7 @@ export default function ShowroomMiniSite({
                           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-bg-primary/60 border border-white/10 rounded-2xl p-4">
                             <div className="space-y-1 max-w-2xl">
                               <div className="flex items-center gap-2">
-                                <span className="px-2.5 py-0.5 rounded-full bg-orange-500/20 text-orange-400 font-mono text-[9px] font-bold uppercase tracking-wider">
+                                <span className="px-2.5 py-0.5 rounded-full bg-[var(--color-accent-main)]/20 text-[var(--color-accent-main)] font-mono text-[9px] font-bold uppercase tracking-wider">
                                   {latest.badge}
                                 </span>
                                 <span className="text-[10px] text-gray-400 font-mono">{latest.timestamp}</span>
@@ -618,7 +619,7 @@ export default function ShowroomMiniSite({
                       <h3 className="text-xl font-black text-[var(--color-text-main)] font-display uppercase tracking-widest">Showroom Highlights</h3>
                       <button 
                         onClick={() => handleTabClick('inventory')}
-                        className="text-xs font-mono font-black uppercase tracking-widest text-orange-500 hover:text-orange-400 transition-colors cursor-pointer"
+                        className="text-xs font-mono font-black uppercase tracking-widest text-[var(--color-accent-main)] hover:text-[var(--color-accent-hover)] transition-colors cursor-pointer"
                       >
                         Explore Fleet &rarr;
                       </button>
@@ -688,7 +689,7 @@ export default function ShowroomMiniSite({
                       <div className="bg-bg-primary rounded-2xl h-48 border border-[var(--color-border-main)] relative overflow-hidden flex items-center justify-center font-mono text-[var(--color-text-muted)]">
                         <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.03)_1.2px,transparent_1.2px)] [background-size:12px_12px] opacity-60"></div>
                         <div className="z-10 text-center space-y-1">
-                          <span className="text-[10px] uppercase font-black text-orange-500 block">GPS Pin Verified</span>
+                          <span className="text-[10px] uppercase font-black text-[var(--color-accent-main)] block">GPS Pin Verified</span>
                           <span className="text-xs text-[var(--color-text-main)] block">{dealer.location || 'Peshawar'}</span>
                         </div>
                       </div>
@@ -712,7 +713,7 @@ export default function ShowroomMiniSite({
                         </div>
                         <div className="flex justify-between py-1">
                           <span className="text-[var(--color-text-muted)]">Sunday:</span>
-                          <span className="text-orange-400 font-bold">Appointment Only</span>
+                          <span className="text-[var(--color-accent-main)] font-bold">Appointment Only</span>
                         </div>
                       </div>
                     </div>
@@ -762,7 +763,7 @@ export default function ShowroomMiniSite({
                         onClick={() => setIsCardBack(false)}
                         className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${
                           !isCardBack 
-                            ? 'bg-orange-500 text-[var(--color-text-header)] shadow-md' 
+                            ? 'bg-[var(--color-accent-main)] text-[#030712] shadow-md' 
                             : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'
                         }`}
                       >
@@ -772,7 +773,7 @@ export default function ShowroomMiniSite({
                         onClick={() => setIsCardBack(true)}
                         className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${
                           isCardBack 
-                            ? 'bg-orange-500 text-[var(--color-text-header)] shadow-md' 
+                            ? 'bg-[var(--color-accent-main)] text-[#030712] shadow-md' 
                             : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'
                         }`}
                       >
@@ -786,17 +787,17 @@ export default function ShowroomMiniSite({
                       
                       {/* Visual QR presentation frame */}
                       <div className="md:col-span-5 bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] p-8 rounded-3xl text-center space-y-6 shadow-2xl relative overflow-hidden">
-                        <div className="absolute inset-0 bg-[radial-gradient(rgba(249,115,22,0.03)_1.2px,transparent_1.2px)] [background-size:16px_16px] pointer-events-none"></div>
+                        <div className="absolute inset-0 bg-[radial-gradient(rgba(212,175,55,0.03)_1.2px,transparent_1.2px)] [background-size:16px_16px] pointer-events-none"></div>
                         
                         <div className="relative mx-auto w-56 h-56 flex items-center justify-center bg-bg-primary rounded-2xl border border-white/10 p-3 shadow-inner">
                           {/* Neon horizontal scanning indicator line */}
-                          <div className="absolute left-3 right-3 h-0.5 bg-gradient-to-r from-transparent via-orange-500 to-transparent animate-bounce top-1/2 z-10 pointer-events-none"></div>
+                          <div className="absolute left-3 right-3 h-0.5 bg-gradient-to-r from-transparent via-[var(--color-accent-main)] to-transparent animate-bounce top-1/2 z-10 pointer-events-none"></div>
                           
                           {/* Corner scanner alignment target paths */}
-                          <div className="absolute top-2 left-2 w-6 h-6 border-t-2 border-l-2 border-orange-500 rounded-tl-md"></div>
-                          <div className="absolute top-2 right-2 w-6 h-6 border-t-2 border-r-2 border-orange-500 rounded-tr-md"></div>
-                          <div className="absolute bottom-2 left-2 w-6 h-6 border-b-2 border-l-2 border-orange-500 rounded-bl-md"></div>
-                          <div className="absolute bottom-2 right-2 w-6 h-6 border-b-2 border-r-2 border-orange-500 rounded-br-md"></div>
+                          <div className="absolute top-2 left-2 w-6 h-6 border-t-2 border-l-2 border-[var(--color-accent-main)] rounded-tl-md"></div>
+                          <div className="absolute top-2 right-2 w-6 h-6 border-t-2 border-r-2 border-[var(--color-accent-main)] rounded-tr-md"></div>
+                          <div className="absolute bottom-2 left-2 w-6 h-6 border-b-2 border-l-2 border-[var(--color-accent-main)] rounded-bl-md"></div>
+                          <div className="absolute bottom-2 right-2 w-6 h-6 border-b-2 border-r-2 border-[var(--color-accent-main)] rounded-br-md"></div>
 
                           {/* Live high-fidelity local QR Canvas with center brand icon logo */}
                           <QRCodeCanvas
@@ -822,7 +823,7 @@ export default function ShowroomMiniSite({
                         </div>
 
                         <div className="space-y-1">
-                          <span className="text-[10px] font-mono font-black text-orange-500 uppercase tracking-widest block">Scan to Browse Inventory</span>
+                          <span className="text-[10px] font-mono font-black text-[var(--color-accent-main)] uppercase tracking-widest block">Scan to Browse Inventory</span>
                           <span className="text-[9px] text-[var(--color-text-muted)] font-mono uppercase block">{dealer.name} Official Portal</span>
                         </div>
                       </div>
@@ -841,17 +842,17 @@ export default function ShowroomMiniSite({
                               <span className="text-[10px] text-[var(--color-text-muted)] uppercase font-bold">QR Ink Contrast Theme</span>
                               <div className="flex flex-wrap gap-2">
                                 <button 
-                                  onClick={() => setQrColor('#F97316')}
+                                  onClick={() => setQrColor('#D4AF37')}
                                   className={`px-3 py-1.5 rounded-lg border text-[10px] uppercase font-black cursor-pointer transition-colors ${
-                                    qrColor === '#F97316' ? 'bg-orange-500 text-[var(--color-text-header)] border-orange-500' : 'bg-[var(--color-bg-primary)] text-[var(--color-text-muted)] border-[var(--color-border-main)] hover:text-[var(--color-text-main)]'
+                                    qrColor === '#D4AF37' ? 'bg-[var(--color-accent-main)] text-[#030712] border-[var(--color-accent-main)]' : 'bg-[var(--color-bg-primary)] text-[var(--color-text-muted)] border-[var(--color-border-main)] hover:text-[var(--color-text-main)]'
                                   }`}
                                 >
-                                  Electric Orange
+                                  Luxury Gold
                                 </button>
                                 <button 
                                   onClick={() => setQrColor('#38BDF8')}
                                   className={`px-3 py-1.5 rounded-lg border text-[10px] uppercase font-black cursor-pointer transition-colors ${
-                                    qrColor === '#38BDF8' ? 'bg-sky-500 text-[var(--color-text-header)] border-sky-500' : 'bg-[var(--color-bg-primary)] text-[var(--color-text-muted)] border-[var(--color-border-main)] hover:text-[var(--color-text-main)]'
+                                    qrColor === '#38BDF8' ? 'bg-sky-500 text-[#030712] border-sky-500' : 'bg-[var(--color-bg-primary)] text-[var(--color-text-muted)] border-[var(--color-border-main)] hover:text-[var(--color-text-main)]'
                                   }`}
                                 >
                                   Cobalt Blue
@@ -880,12 +881,12 @@ export default function ShowroomMiniSite({
                                   Polar White (Recommended for Prints)
                                 </button>
                                 <button 
-                                  onClick={() => setQrBg('#FFF5EB')}
+                                  onClick={() => setQrBg('#FDFBF7')}
                                   className={`px-3 py-1.5 rounded-lg border text-[10px] uppercase font-black cursor-pointer transition-colors ${
-                                    qrBg === '#FFF5EB' ? 'bg-orange-50 text-slate-900 border-orange-100' : 'bg-[var(--color-bg-primary)] text-[var(--color-text-muted)] border-[var(--color-border-main)]'
+                                    qrBg === '#FDFBF7' ? 'bg-[#FDFBF7] text-slate-900 border-white' : 'bg-[var(--color-bg-primary)] text-[var(--color-text-muted)] border-[var(--color-border-main)]'
                                   }`}
                                 >
-                                  Antique Cream
+                                  Warm Ivory
                                 </button>
                               </div>
                             </div>
@@ -894,7 +895,7 @@ export default function ShowroomMiniSite({
                             <div className="space-y-2">
                               <div className="flex justify-between items-center text-[10px] text-[var(--color-text-muted)] uppercase font-bold">
                                 <span>Output Image Size</span>
-                                <span className="text-[var(--color-text-main)]">{qrSize}x{qrSize} px</span>
+                                <span>{qrSize}x{qrSize} px</span>
                               </div>
                               <input 
                                 type="range" 
@@ -903,7 +904,7 @@ export default function ShowroomMiniSite({
                                 step="50"
                                 value={qrSize} 
                                 onChange={(e) => setQrSize(parseInt(e.target.value))}
-                                className="w-full accent-orange-500 h-1 bg-[var(--color-bg-primary)] rounded-lg appearance-none cursor-pointer border border-[var(--color-border-main)]"
+                                className="w-full accent-[var(--color-accent-main)] h-1 bg-[var(--color-bg-primary)] rounded-lg appearance-none cursor-pointer border border-[var(--color-border-main)]"
                               />
                             </div>
 
@@ -947,7 +948,7 @@ export default function ShowroomMiniSite({
                                   printWindow.document.close();
                                 }
                               }}
-                              className="flex-1 py-3 bg-[var(--color-bg-primary)] border border-[var(--color-border-main)] hover:text-orange-500 rounded-xl text-xs font-mono font-black uppercase tracking-widest transition-all cursor-pointer shadow flex items-center justify-center gap-2"
+                              className="flex-1 py-3 bg-[var(--color-bg-primary)] border border-[var(--color-border-main)] hover:text-[var(--color-accent-main)] rounded-xl text-xs font-mono font-black uppercase tracking-widest transition-all cursor-pointer shadow flex items-center justify-center gap-2"
                             >
                               <Printer size={14} /> Print Floor Sign
                             </button>
@@ -969,7 +970,7 @@ export default function ShowroomMiniSite({
                                   toast.error('Could not locate canvas element');
                                 }
                               }}
-                              className="flex-1 py-3 bg-orange-500 hover:bg-orange-600 text-[var(--color-text-header)] rounded-xl text-xs font-mono font-black uppercase tracking-widest transition-all cursor-pointer shadow-lg flex items-center justify-center gap-2"
+                              className="flex-1 py-3 bg-[var(--color-accent-main)] hover:bg-[var(--color-accent-hover)] text-[#030712] rounded-xl text-xs font-mono font-black uppercase tracking-widest transition-all cursor-pointer shadow-lg flex items-center justify-center gap-2"
                             >
                               <Download size={14} /> Download QR Code
                             </button>
@@ -1014,13 +1015,40 @@ export default function ShowroomMiniSite({
               {/* ======================================================== */}
               {activeTab === 'media' && (
                 <div className="space-y-8 text-left">
-                  <div className="border-b border-[var(--color-border-main)] pb-4">
-                    <h2 className="text-2xl font-black text-[var(--color-text-main)] font-display uppercase tracking-tight">
-                      Showroom Media Gallery
-                    </h2>
-                    <p className="text-xs text-[var(--color-text-muted)] mt-1">
-                      Explore virtual walkthrough videos, 360° interactive tours, and high-fidelity photos of {dealer.name}'s luxury floor.
-                    </p>
+                  <div className="border-b border-[var(--color-border-main)] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <h2 className="text-2xl font-black text-[var(--color-text-main)] font-display uppercase tracking-tight">
+                        Showroom Media Gallery
+                      </h2>
+                      <p className="text-xs text-[var(--color-text-muted)] mt-1">
+                        Explore virtual walkthrough videos, 360° interactive tours, and high-fidelity photos of {dealer.name}'s luxury floor.
+                      </p>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        const shareUrl = `${window.location.origin}/dealers/${dealer.id}?tab=media`;
+                        const shareData = {
+                          title: `${dealer.name} - Showroom Media Gallery`,
+                          text: `Check out the virtual walkthrough videos and physical facility gallery of ${dealer.name} on Bazar360!`,
+                          url: shareUrl,
+                        };
+                        try {
+                          if (navigator.share) {
+                            await navigator.share(shareData);
+                            toast.success('Gallery link shared successfully!');
+                          } else {
+                            await navigator.clipboard.writeText(shareUrl);
+                            toast.success('Gallery deep link copied to clipboard!');
+                          }
+                        } catch (err) {
+                          console.error('[ShowroomMiniSite] Error sharing gallery:', err);
+                        }
+                      }}
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--color-accent-main)] hover:bg-[var(--color-accent-hover)] text-[#030712] font-mono font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md shrink-0 select-none"
+                    >
+                      <Share2 size={14} />
+                      <span>Share Gallery</span>
+                    </button>
                   </div>
                   <React.Suspense fallback={
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 animate-pulse">

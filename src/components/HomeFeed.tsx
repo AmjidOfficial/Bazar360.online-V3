@@ -3,7 +3,6 @@ import { motion } from 'motion/react';
 import { CarListing, Dealer } from '../types';
 import { VehicleCard } from './VehicleCard';
 import MarketplaceHero from './MarketplaceHero';
-import { TopBrandsRail } from './homepage/TopBrandsRail';
 import { ShowroomsSection } from './homepage/ShowroomsSection';
 import { ServicesSection } from './homepage/ServicesSection';
 import { TrustSafetySection } from './homepage/TrustSafetySection';
@@ -43,7 +42,10 @@ export function HomeFeed({
   setSearchQuery
 }: HomeFeedProps) {
   const isUrdu = lang === 'ur';
-  const [activeTabFilter, setActiveTabFilter] = useState<'all' | 'recent' | 'certified' | 'budget' | 'suv'>('all');
+  const [categoryFilter, setCategoryFilter] = useState<'all' | 'suv'>('all');
+  const [verifiedOnly, setVerifiedOnly] = useState<boolean>(false);
+  const [under30Lakh, setUnder30Lakh] = useState<boolean>(false);
+  const [sortByNewest, setSortByNewest] = useState<boolean>(false);
   const [selectedBrand, setSelectedBrand] = useState<string>('');
   const [selectedCity, setSelectedCity] = useState<string>('');
   const [visibleCount, setVisibleCount] = useState(8);
@@ -63,16 +65,16 @@ export function HomeFeed({
       if (selectedCity && !((car.location || car.registrationCity || '').toLowerCase().includes(selectedCity.toLowerCase()))) {
         return false;
       }
-      if (activeTabFilter === 'certified') {
-        return car.verified || car.approved;
+      if (verifiedOnly && !(car.verified || car.approved)) {
+        return false;
       }
-      if (activeTabFilter === 'budget') {
-        return car.price <= 3000000;
+      if (under30Lakh && car.price > 3000000) {
+        return false;
       }
-      if (activeTabFilter === 'suv') {
+      if (categoryFilter === 'suv') {
         const titleLower = car.title?.toLowerCase() || '';
         const modelLower = car.model?.toLowerCase() || '';
-        return (
+        const isSuv = (
           car.tags?.includes('SUV') ||
           titleLower.includes('prado') ||
           titleLower.includes('fortuner') ||
@@ -82,17 +84,18 @@ export function HomeFeed({
           titleLower.includes('tucson') ||
           modelLower.includes('suv')
         );
+        if (!isSuv) return false;
       }
       return true;
     });
-  }, [listings, activeTabFilter, selectedBrand, selectedCity]);
+  }, [listings, categoryFilter, verifiedOnly, under30Lakh, selectedBrand, selectedCity]);
 
   const sortedListings = useMemo(() => {
-    if (activeTabFilter === 'recent') {
+    if (sortByNewest) {
       return [...filteredListings].sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
     }
     return filteredListings;
-  }, [filteredListings, activeTabFilter]);
+  }, [filteredListings, sortByNewest]);
 
   const displayedListings = useMemo(() => {
     return sortedListings.slice(0, visibleCount);
@@ -119,13 +122,6 @@ export function HomeFeed({
         setTab={setTab} 
         listings={listings}
         onSelectListing={onSelectListing}
-      />
-
-      {/* 2. Top Brands Rail */}
-      <TopBrandsRail
-        onSelectBrand={handleBrandSelect}
-        selectedBrand={selectedBrand}
-        lang={lang}
       />
 
       {/* 3. Featured Vehicles (Rendered ONLY when verified/featured listings exist) */}
@@ -184,27 +180,68 @@ export function HomeFeed({
               </h2>
             </div>
 
-            {/* Tab Filter Pills */}
-            <div className="flex flex-wrap items-center gap-1.5 p-1 bg-[var(--color-bg-secondary)] rounded-2xl border border-[var(--color-border-main)] shadow-xs">
-              {[
-                { id: 'all', label: 'All Cars' },
-                { id: 'recent', label: 'Newest' },
-                { id: 'certified', label: 'Verified Only' },
-                { id: 'budget', label: 'Under 30 Lakh' },
-                { id: 'suv', label: 'SUVs & 4x4' },
-              ].map(tab => (
+            {/* Filter controls */}
+            <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-4">
+              
+              {/* Category Segmented Control (Tabs) */}
+              <div className="flex items-center p-1 bg-[var(--color-bg-secondary)] rounded-xl border border-[var(--color-border-main)] shadow-xs">
                 <button
-                  key={tab.id}
-                  onClick={() => setActiveTabFilter(tab.id as any)}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold uppercase transition-all cursor-pointer ${
-                    activeTabFilter === tab.id
-                      ? 'bg-[var(--color-accent-main)] text-[#090D14] shadow-xs font-bold'
-                      : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] hover:bg-[var(--color-bg-tertiary)]'
+                  onClick={() => setCategoryFilter('all')}
+                  className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                    categoryFilter === 'all'
+                      ? 'bg-[var(--color-accent-main)] text-white shadow-xs'
+                      : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-header)]'
                   }`}
                 >
-                  {tab.label}
+                  All Vehicles
                 </button>
-              ))}
+                <button
+                  onClick={() => setCategoryFilter('suv')}
+                  className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                    categoryFilter === 'suv'
+                      ? 'bg-[var(--color-accent-main)] text-white shadow-xs'
+                      : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-header)]'
+                  }`}
+                >
+                  SUVs & 4x4
+                </button>
+              </div>
+
+              {/* Toggle Chips (Additive Filters & Sort) */}
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={() => setVerifiedOnly(!verifiedOnly)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold uppercase transition-all cursor-pointer border ${
+                    verifiedOnly
+                      ? 'bg-[var(--color-accent-secondary-subtle)] border-[var(--color-accent-secondary)] text-[var(--color-accent-secondary)]'
+                      : 'bg-transparent border-[var(--color-border-main)] text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] hover:bg-[var(--color-bg-secondary)]'
+                  }`}
+                >
+                  ✓ Verified Only
+                </button>
+
+                <button
+                  onClick={() => setUnder30Lakh(!under30Lakh)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold uppercase transition-all cursor-pointer border ${
+                    under30Lakh
+                      ? 'bg-[var(--color-accent-secondary-subtle)] border-[var(--color-accent-secondary)] text-[var(--color-accent-secondary)]'
+                      : 'bg-transparent border-[var(--color-border-main)] text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] hover:bg-[var(--color-bg-secondary)]'
+                  }`}
+                >
+                  Under 30 Lakh
+                </button>
+
+                <button
+                  onClick={() => setSortByNewest(!sortByNewest)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold uppercase transition-all cursor-pointer border ${
+                    sortByNewest
+                      ? 'bg-[var(--color-accent-subtle)] border-[var(--color-accent-main)] text-[var(--color-text-header)] font-bold'
+                      : 'bg-transparent border-[var(--color-border-main)] text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] hover:bg-[var(--color-bg-secondary)]'
+                  }`}
+                >
+                  ⚡ Newest First
+                </button>
+              </div>
             </div>
           </div>
 
@@ -260,16 +297,28 @@ export function HomeFeed({
               <p className="text-xs text-[var(--color-text-muted)] mt-1 max-w-md mx-auto">
                 No active listings match your current filters. Try resetting your selected filters or search for another vehicle.
               </p>
-              <button
-                onClick={() => {
-                  setActiveTabFilter('all');
-                  setSelectedBrand('');
-                  setSelectedCity('');
-                }}
-                className="mt-4 btn-gold-primary text-xs"
-              >
-                Reset All Filters
-              </button>
+              { (categoryFilter !== 'all' || verifiedOnly || under30Lakh || sortByNewest || selectedBrand || selectedCity) ? (
+                <button
+                  onClick={() => {
+                    setCategoryFilter('all');
+                    setVerifiedOnly(false);
+                    setUnder30Lakh(false);
+                    setSortByNewest(false);
+                    setSelectedBrand('');
+                    setSelectedCity('');
+                  }}
+                  className="mt-4 btn-gold-primary text-xs"
+                >
+                  Reset All Filters
+                </button>
+              ) : (
+                <button
+                  onClick={() => setTab('sell')}
+                  className="mt-4 btn-gold-primary text-xs"
+                >
+                  Post Your Vehicle
+                </button>
+              )}
             </div>
           )}
 

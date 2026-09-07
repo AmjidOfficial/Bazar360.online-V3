@@ -9,6 +9,7 @@ import Navbar from './Navbar';
 import BottomNavBar from './BottomNavBar';
 import SidebarDrawer from './SidebarDrawer';
 import { UserProfile } from '../lib/dbService';
+import Bazar360Logo from './Bazar360Logo';
 
 import { useTheme } from './ThemeContext';
 import { Menu, Sun, Moon, User, Heart } from 'lucide-react';
@@ -73,12 +74,12 @@ export default function RootLayout({
             <Menu size={18} />
           </button>
           
-          <button 
-            onClick={() => setTab('home')}
-            className="cursor-pointer font-black text-sm uppercase tracking-widest text-[var(--color-text-main)] flex items-center gap-1"
-          >
-            Bazar360 <span className="text-orange-500">.</span>
-          </button>
+          <Bazar360Logo 
+            variant="badge" 
+            size="sm" 
+            onClick={() => setTab('home')} 
+            className="scale-90" 
+          />
         </div>
 
         {/* Utilities on the right */}

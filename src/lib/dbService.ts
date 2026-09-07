@@ -197,15 +197,32 @@ export async function dbFetchDealerById(dealerId: string): Promise<Dealer | null
   }
 }
 
+const BLACKLISTED_LISTING_IDS = new Set([
+  'suzuki-wagon-r-2013',
+  'car-fortuner-legender',
+  'car-audi-rsq8',
+  'car-mercedes-g63',
+  'car-porsche-911-gt3',
+  'car-porsche-911-carrera',
+  'car-bmw-m4-comp'
+]);
+
 // 2. Fetch Listings (all approved, as well as unapproved if requestor has permission)
 export async function dbFetchListingById(idOrSlug: string): Promise<CarListing | null> {
   if (!idOrSlug) return null;
+  if (BLACKLISTED_LISTING_IDS.has(idOrSlug)) {
+    return null;
+  }
   try {
     // 1. Direct document ID lookup
     const docRef = doc(db, LISTINGS_COLLECTION, idOrSlug);
     const snap = await getDoc(docRef);
     if (snap.exists()) {
-      return mapListingDoc(snap.id, snap.data());
+      const mapped = mapListingDoc(snap.id, snap.data());
+      if (mapped && BLACKLISTED_LISTING_IDS.has(mapped.id)) {
+        return null;
+      }
+      return mapped;
     }
 
     // 2. Fallback: Search all listings in collection by slug, title-slug, or normalized title match
@@ -225,7 +242,7 @@ export async function dbFetchListingById(idOrSlug: string): Promise<CarListing |
       return false;
     });
 
-    if (matched) return matched;
+    if (matched && !BLACKLISTED_LISTING_IDS.has(matched.id)) return matched;
   } catch (err) {
     console.error('dbFetchListingById Error:', err);
   }
@@ -238,6 +255,9 @@ function cleanAndDeduplicateListings(listings: CarListing[]): CarListing[] {
 
   for (const car of listings) {
     if (!car) continue;
+    if (car.id && BLACKLISTED_LISTING_IDS.has(car.id)) {
+      continue;
+    }
     const titleLower = (car.title || '').toLowerCase();
     const descLower = (car.description || '').toLowerCase();
     const makeLower = (car.make || '').toLowerCase();

@@ -59,7 +59,7 @@ export default function BottomNavBar({
   ];
 
   return (
-    <nav className="md:hidden lg:hidden fixed bottom-0 left-0 right-0 w-full z-[99] bg-[var(--color-bg-secondary)]/95 backdrop-blur-2xl border-t border-[var(--color-border-main)] shadow-[0_-10px_30px_rgba(0,0,0,0.8)] px-1 py-1.5 transition-all">
+    <nav className="md:hidden lg:hidden fixed bottom-0 left-0 right-0 w-full z-[99] bg-[var(--color-bg-secondary)]/95 backdrop-blur-2xl border-t border-[var(--color-border-main)] shadow-[0_-4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_-10px_30px_rgba(0,0,0,0.8)] px-1 py-1.5 transition-all">
       <div className="max-w-md mx-auto flex justify-between items-center h-[54px] relative px-1">
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -80,7 +80,7 @@ export default function BottomNavBar({
                 <div className="absolute inset-0 bg-[var(--color-accent-main)]/30 rounded-full animate-ping pointer-events-none" />
                 
                 {/* Elevated Primary Action Container */}
-                <div className="relative flex items-center justify-center w-11 h-11 bg-gradient-to-tr from-[var(--color-accent-main)] via-amber-400 to-[var(--color-accent-hover)] rounded-2xl text-slate-950 shadow-lg shadow-[var(--color-accent-main)]/40 border-2 border-[#080C14] group-hover:scale-105 active:scale-95 transition-all duration-300">
+                <div className="relative flex items-center justify-center w-11 h-11 bg-gradient-to-tr from-[var(--color-accent-main)] via-amber-400 to-[var(--color-accent-hover)] rounded-2xl text-slate-950 shadow-lg shadow-[var(--color-accent-main)]/40 border-2 border-[var(--color-bg-primary)] group-hover:scale-105 active:scale-95 transition-all duration-300">
                   <Icon size={20} className="stroke-[2.8]" />
                 </div>
 

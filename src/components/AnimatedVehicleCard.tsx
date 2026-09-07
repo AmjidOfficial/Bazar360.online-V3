@@ -70,8 +70,19 @@ export function AnimatedVehicleCard({
   return (
     <>
       <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
+        variants={{
+          hidden: { opacity: 0, y: 32, scale: 0.96 },
+          show: { 
+            opacity: 1, 
+            y: 0,
+            scale: 1,
+            transition: {
+              type: 'spring',
+              stiffness: 140,
+              damping: 18
+            }
+          }
+        }}
         whileHover={{ 
           y: -12, 
           rotateX: 4,
@@ -82,11 +93,6 @@ export function AnimatedVehicleCard({
         }}
         whileTap={{ scale: 0.985 }}
         style={{ transformStyle: 'preserve-3d', perspective: 1000 }}
-        transition={{
-          duration: 0.45,
-          delay: Math.min(index * 0.07, 0.5),
-          ease: [0.21, 0.47, 0.32, 0.98],
-        }}
         onClick={handleCardClick}
         className={`w-full group/animated-card transition-all duration-300 ${className}`}
       >

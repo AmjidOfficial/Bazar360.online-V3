@@ -163,7 +163,7 @@ function NotFoundView({ onBack }: { onBack: () => void }) {
   return (
     <div className="min-h-screen bg-[var(--color-bg-primary)] flex items-center justify-center px-6">
       <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] rounded-3xl p-12 max-w-md w-full text-center shadow-2xl space-y-6">
-        <div className="w-20 h-20 bg-orange-500/10 rounded-full flex items-center justify-center mx-auto text-orange-500">
+        <div className="w-20 h-20 bg-[var(--color-accent-main)]/10 rounded-full flex items-center justify-center mx-auto text-[var(--color-accent-main)]">
           <ShieldCheck size={40} className="animate-pulse" />
         </div>
         <div className="space-y-2">
@@ -174,7 +174,7 @@ function NotFoundView({ onBack }: { onBack: () => void }) {
         </div>
         <button 
           onClick={onBack}
-          className="w-full bg-orange-600 hover:bg-orange-700 text-[var(--color-text-header)] font-black font-sans py-3.5 px-6 rounded-xl uppercase tracking-widest text-xs transition-all flex items-center justify-center gap-2 shadow-lg shadow-orange-600/20 cursor-pointer"
+          className="w-full bg-[var(--color-accent-main)] hover:bg-[var(--color-accent-hover)] text-[#030712] font-black font-sans py-3.5 px-6 rounded-xl uppercase tracking-widest text-xs transition-all flex items-center justify-center gap-2 shadow-lg shadow-[var(--color-accent-main)]/20 cursor-pointer"
         >
           <ArrowLeft size={16} />
           Return to Marketplace

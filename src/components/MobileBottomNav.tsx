@@ -19,7 +19,7 @@ export default function MobileBottomNav({ currentTab, setTab, lang }: MobileBott
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 w-full z-50 bg-white/95 border-t border-[#E2E8F0] shadow-[0_-8px_25px_rgba(15,23,42,0.08)] backdrop-blur-lg pb-safe">
+    <div className="md:hidden fixed bottom-0 left-0 w-full z-50 bg-[var(--color-bg-secondary)]/95 border-t border-[var(--color-border-main)] shadow-2xl backdrop-blur-lg pb-safe">
       <div className="grid grid-cols-5 items-center h-[64px] px-2 max-w-md mx-auto relative w-full">
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -33,10 +33,10 @@ export default function MobileBottomNav({ currentTab, setTab, lang }: MobileBott
                 onClick={() => setTab(tab.id)}
                 className="relative flex flex-col items-center justify-center -mt-6 cursor-pointer select-none group justify-self-center"
               >
-                <div className="flex items-center justify-center w-14 h-14 bg-[#F97316] hover:bg-[#EA580C] rounded-full text-white shadow-lg border-4 border-white active:scale-95 transition-all">
+                <div className="flex items-center justify-center w-14 h-14 bg-[var(--color-accent-main)] hover:bg-[var(--color-accent-hover)] rounded-full text-[#030712] shadow-lg border-4 border-[var(--color-bg-primary)] active:scale-95 transition-all">
                   <Icon size={24} className="stroke-[2.5]" />
                 </div>
-                <span className="text-[10px] font-bold mt-0.5 text-[#F97316]">
+                <span className="text-[10px] font-bold mt-0.5 text-[var(--color-accent-main)]">
                   {tab.label}
                 </span>
               </button>
@@ -50,11 +50,11 @@ export default function MobileBottomNav({ currentTab, setTab, lang }: MobileBott
               onClick={() => setTab(tab.id)}
               className="flex flex-col items-center justify-center h-full pt-1 cursor-pointer select-none transition-all justify-self-center"
             >
-              <div className={isActive ? 'text-[#F97316]' : 'text-[#64748B]'}>
+              <div className={isActive ? 'text-[var(--color-accent-main)]' : 'text-[var(--color-text-muted)]'}>
                 <Icon size={20} className={isActive ? 'stroke-[2.5]' : 'stroke-[2]'} />
               </div>
               <span className={`text-[10px] font-sans mt-0.5 ${
-                isActive ? 'text-[#F97316] font-bold' : 'text-[#64748B]'
+                isActive ? 'text-[var(--color-accent-main)] font-bold' : 'text-[var(--color-text-muted)]'
               }`}>
                 {tab.label}
               </span>

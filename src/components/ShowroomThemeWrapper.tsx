@@ -16,7 +16,7 @@ export function ShowroomThemeWrapper({ themeConfig, children }: ShowroomThemeWra
   useEffect(() => {
     const root = document.documentElement;
     // Set dynamic custom properties for components inside the wrapper to consume
-    const accentColor = themeConfig.primaryColor || '#38BDF8';
+    const accentColor = themeConfig.primaryColor || '#1E5B8C';
     root.style.setProperty('--dynamic-accent', accentColor);
     root.style.setProperty('--dynamic-accent-hover', accentColor);
     
@@ -28,10 +28,8 @@ export function ShowroomThemeWrapper({ themeConfig, children }: ShowroomThemeWra
   }, [themeConfig]);
 
   const bgStyleClass = 
-    themeConfig.bgStyle === 'light' ? 'bg-slate-50 text-slate-900' :
-    themeConfig.bgStyle === 'emerald' ? 'bg-[var(--color-bg-primary)] text-emerald-100' :
-    themeConfig.bgStyle === 'gold' ? 'bg-[var(--color-bg-primary)] text-zinc-100' :
-    'bg-bg-primary text-[var(--color-text-header)]'; // default to Space Cyber Dark background
+    themeConfig.bgStyle === 'light' ? 'bg-[var(--color-bg-primary)] text-[var(--color-text-main)]' :
+    'bg-[var(--color-bg-primary)] text-[var(--color-text-header)]';
 
   return (
     <div className={`min-h-screen ${bgStyleClass} transition-colors duration-300 pb-16`}>

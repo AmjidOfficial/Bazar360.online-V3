@@ -32,10 +32,10 @@ export function DiscoveryGrid({ lang, setTab, setSelectedCategory, setSearchQuer
 
   // Flat price bracket items
   const budgets = [
-    { label: 'Under 30 Lakh', count: 'Rs. 3.0M Max', query: '30 Lakh' },
-    { label: '30 - 50 Lakh', count: 'Rs. 3.0M - 5.0M', query: '50 Lakh' },
-    { label: '50 Lakh - 1 Crore', count: 'Rs. 5.0M - 10.0M', query: '1 Crore' },
-    { label: '1 - 2 Crore', count: 'Rs. 10.0M - 20.0M', query: '2 Crore' },
+    { label: 'Under 30 Lakh', count: 'Rs. 30 Lakh Max', query: '30 Lakh' },
+    { label: '30 - 50 Lakh', count: 'Rs. 30 - 50 Lakh', query: '50 Lakh' },
+    { label: '50 Lakh - 1 Crore', count: 'Rs. 50 Lakh - 1 Crore', query: '1 Crore' },
+    { label: '1 - 2 Crore', count: 'Rs. 1 - 2 Crore', query: '2 Crore' },
     { label: 'Above 2 Crore', count: 'Premium Stock', query: 'Above 2 Crore' }
   ];
 

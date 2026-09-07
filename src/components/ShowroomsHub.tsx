@@ -306,7 +306,7 @@ export default function ShowroomsHub({
                     
                     {/* Rating display */}
                     <div className="flex items-center gap-1 text-[10px] font-bold text-[#0F172A]">
-                      <Star size={11} className="fill-amber-400 text-amber-400" />
+                      <Star size={11} className="fill-amber-600 text-amber-600" />
                       <span>{dealer.rating}</span>
                       <span className="text-[#94A3B8]">/ 5</span>
                     </div>

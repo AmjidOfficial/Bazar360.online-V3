@@ -82,7 +82,7 @@ export function AutoChoiceValueProp({ setTab, lang = 'en' }: AutoChoiceValueProp
             viewport={{ once: true }}
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--color-bg-primary)] border border-[var(--color-border-main)] mb-3 shadow-sm"
           >
-            <Zap size={14} className="text-orange-500" />
+            <Zap size={14} className="text-[var(--color-accent-secondary)]" />
             <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--color-text-main)]">
               Bazar360 Ecosystem
             </span>
@@ -90,7 +90,7 @@ export function AutoChoiceValueProp({ setTab, lang = 'en' }: AutoChoiceValueProp
           
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-[var(--color-text-main)] tracking-tight mb-2 leading-tight">
             More Than Just A Marketplace. <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">Premium Automotive Services</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-accent-main)] to-[var(--color-accent-secondary)]">Premium Automotive Services</span>
           </h2>
           <p className="text-xs sm:text-sm text-[var(--color-text-muted)] font-medium max-w-xl mx-auto leading-relaxed">
             Experience all 5 flagship services in one dynamic interactive card. Click or swipe to inspect each specialized pillar.
@@ -99,7 +99,7 @@ export function AutoChoiceValueProp({ setTab, lang = 'en' }: AutoChoiceValueProp
 
         {/* Interactive Swiping Card for All Services */}
         <div 
-          className="relative bg-bg-primary/95 backdrop-blur-2xl border border-orange-500/30 rounded-3xl p-6 sm:p-8 text-[var(--color-text-header)] shadow-[0_20px_50px_rgba(249,115,22,0.15)] overflow-hidden transition-all duration-500"
+          className="relative bg-bg-primary/95 backdrop-blur-2xl border border-[var(--color-accent-main)]/20 rounded-3xl p-6 sm:p-8 text-[var(--color-text-header)] shadow-[0_20px_50px_rgba(30,91,140,0.15)] overflow-hidden transition-all duration-500"
           onMouseEnter={() => setIsServicePaused(true)}
           onMouseLeave={() => setIsServicePaused(false)}
           onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
@@ -114,7 +114,7 @@ export function AutoChoiceValueProp({ setTab, lang = 'en' }: AutoChoiceValueProp
           }}
         >
           {/* Ambient Glow */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-orange-500/20 via-amber-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-[var(--color-accent-main)]/10 via-[var(--color-accent-secondary)]/10 to-transparent rounded-full blur-3xl pointer-events-none" />
 
           {/* Top Pill Navigation */}
           <div className="relative z-10 flex items-center justify-between gap-2 p-1 bg-black/60 border border-white/10 rounded-xl mb-6 overflow-x-auto no-scrollbar">
@@ -127,7 +127,7 @@ export function AutoChoiceValueProp({ setTab, lang = 'en' }: AutoChoiceValueProp
                   onClick={() => setActiveServiceIdx(idx)}
                   className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all cursor-pointer shrink-0 ${
                     isActive 
-                      ? 'bg-orange-500 text-slate-950 shadow-lg scale-105' 
+                      ? 'bg-gradient-to-r from-[var(--color-accent-main)] to-[var(--color-accent-secondary)] text-white shadow-lg scale-105' 
                       : 'text-gray-400 hover:text-[var(--color-text-header)] hover:bg-white/5'
                   }`}
                 >
@@ -150,17 +150,17 @@ export function AutoChoiceValueProp({ setTab, lang = 'en' }: AutoChoiceValueProp
             >
               <div className="md:col-span-8 space-y-3 text-left">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-orange-500/20 border border-orange-500/40 text-orange-400 flex items-center justify-center shadow-inner shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--color-accent-main)]/15 border border-[var(--color-accent-main)]/30 text-[var(--color-accent-main)] flex items-center justify-center shadow-inner shrink-0">
                     <ServiceIcon size={24} className="stroke-[2.2]" />
                   </div>
                   <div>
-                    <span className="text-[9px] font-mono font-black uppercase tracking-widest text-orange-400 block">
+                    <span className="text-[9px] font-mono font-black uppercase tracking-widest text-[var(--color-accent-main)] block">
                       Service 0{activeServiceIdx + 1} / 0{specializedServices.length}
                     </span>
                     <h3 className="text-xl sm:text-2xl font-black text-[var(--color-text-header)] tracking-tight leading-snug">
                       {currentService.title}
                     </h3>
-                    <p className="text-xs font-bold text-orange-400">
+                    <p className="text-xs font-bold text-[var(--color-accent-secondary)]">
                       {currentService.subtext}
                     </p>
                   </div>
@@ -171,10 +171,10 @@ export function AutoChoiceValueProp({ setTab, lang = 'en' }: AutoChoiceValueProp
                 </p>
 
                 <div className="flex flex-wrap items-center gap-2 pt-1">
-                  <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-[var(--color-accent-main)] border border-[var(--color-accent-main)]/30 text-[9px] font-mono font-bold uppercase">
+                  <span className="px-2.5 py-0.5 rounded-full bg-white/5 text-[var(--color-accent-secondary)] border border-[var(--color-accent-secondary)]/30 text-[9px] font-mono font-bold uppercase">
                     ✓ Instant Booking Available
                   </span>
-                  <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-sky-400 border border-sky-500/30 text-[9px] font-mono font-bold uppercase">
+                  <span className="px-2.5 py-0.5 rounded-full bg-white/5 text-[var(--color-accent-main)] border border-[var(--color-accent-main)]/30 text-[9px] font-mono font-bold uppercase">
                     ★ Certified Technicians
                   </span>
                 </div>
@@ -183,7 +183,7 @@ export function AutoChoiceValueProp({ setTab, lang = 'en' }: AutoChoiceValueProp
               <div className="md:col-span-4 flex flex-col justify-center items-center md:items-end gap-3 pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-white/10 md:pl-6">
                 <button
                   onClick={() => setTab(currentService.targetTab)}
-                  className="w-full py-3 px-5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-slate-950 font-black text-xs uppercase tracking-widest shadow-lg shadow-orange-500/25 flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
+                  className="w-full py-3 px-5 rounded-xl bg-gradient-to-r from-[var(--color-accent-main)] to-[var(--color-accent-secondary)] hover:opacity-90 text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-[var(--color-accent-main)]/25 flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer border-none"
                 >
                   <span>Launch {currentService.pill}</span>
                   <ArrowRight size={14} />
@@ -208,7 +208,7 @@ export function AutoChoiceValueProp({ setTab, lang = 'en' }: AutoChoiceValueProp
                   key={i}
                   onClick={() => setActiveServiceIdx(i)}
                   className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                    i === activeServiceIdx ? 'w-6 bg-orange-500' : 'w-1.5 bg-white/20 hover:bg-white/40'
+                    i === activeServiceIdx ? 'w-6 bg-[var(--color-accent-secondary)]' : 'w-1.5 bg-white/20 hover:bg-white/40'
                   }`}
                 />
               ))}

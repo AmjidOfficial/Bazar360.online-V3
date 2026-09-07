@@ -222,23 +222,23 @@ export function VehicleCard({
 
           <div className="flex gap-1 flex-wrap items-center">
             {car.featured && (
-              <span className="bg-[var(--color-accent-main)] text-[#090D14] text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-lg">
+              <span className="bg-[var(--color-accent-main)] text-[#090D14] text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-lg whitespace-nowrap">
                 Featured
               </span>
             )}
-            <span className="bg-black/60 backdrop-blur-md text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border border-white/10">
+            <span className="bg-black/60 backdrop-blur-md text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border border-white/10 whitespace-nowrap">
               {car.condition}
             </span>
             {status === 'Sold' ? (
-              <span className="bg-rose-600 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-lg border border-rose-400/30">
+              <span className="bg-rose-600 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-lg border border-rose-400/30 whitespace-nowrap">
                 Sold
               </span>
             ) : status === 'Reserved' ? (
-              <span className="bg-amber-500 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-lg border border-amber-300/30">
+              <span className="bg-amber-500 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-lg border border-amber-300/30 whitespace-nowrap">
                 Reserved
               </span>
             ) : (
-              <span className="bg-emerald-600 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-lg border border-emerald-400/30">
+              <span className="bg-emerald-600 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-lg border border-emerald-400/30 whitespace-nowrap">
                 Available
               </span>
             )}

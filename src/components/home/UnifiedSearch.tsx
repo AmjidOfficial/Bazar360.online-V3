@@ -109,9 +109,9 @@ export function UnifiedSearch({ lang, setTab, setSelectedCategory, setSearchQuer
             className="w-full bg-transparent border-none outline-none text-xs font-sans font-semibold text-slate-700 dark:text-text-muted cursor-pointer focus:ring-0"
           >
             <option value="Any Price" className="bg-white dark:bg-bg-secondary text-slate-800 dark:text-text-main">Any Price</option>
-            <option value="Under 50 Lakh" className="bg-white dark:bg-bg-secondary text-slate-800 dark:text-text-main">Under 50 Lakh (Rs. 5M)</option>
-            <option value="Under 1 Crore" className="bg-white dark:bg-bg-secondary text-slate-800 dark:text-text-main">Under 1 Crore (Rs. 10M)</option>
-            <option value="Under 2 Crore" className="bg-white dark:bg-bg-secondary text-slate-800 dark:text-text-main">Under 2 Crore (Rs. 20M)</option>
+            <option value="Under 50 Lakh" className="bg-white dark:bg-bg-secondary text-slate-800 dark:text-text-main">Under 50 Lakh</option>
+            <option value="Under 1 Crore" className="bg-white dark:bg-bg-secondary text-slate-800 dark:text-text-main">Under 1 Crore</option>
+            <option value="Under 2 Crore" className="bg-white dark:bg-bg-secondary text-slate-800 dark:text-text-main">Under 2 Crore</option>
             <option value="Above 2 Crore" className="bg-white dark:bg-bg-secondary text-slate-800 dark:text-text-main">Above 2 Crore</option>
           </select>
         </div>

@@ -587,7 +587,7 @@ export function CustomerMyServices({ userPhoneOrUid, userName, lang = 'en' }: Cu
                   <div className="bg-[#0f172a]/50 p-5 rounded-2xl border border-white/5 space-y-4">
                     <div className="flex items-center justify-between border-b border-white/5 pb-2">
                       <h4 className="text-[10px] font-mono font-bold text-orange-400 uppercase tracking-widest flex items-center gap-1.5">
-                        <Star size={13} className="text-amber-400 fill-amber-400" />
+                        <Star size={13} className="text-amber-600 fill-amber-600" />
                         <span>Submit Storefront Performance Review</span>
                       </h4>
                       <span className="text-[9px] font-mono text-text-muted">Feedback index</span>
@@ -595,14 +595,17 @@ export function CustomerMyServices({ userPhoneOrUid, userName, lang = 'en' }: Cu
 
                     {selectedBooking.review ? (
                       <div className="space-y-2 text-left font-sans">
-                        <div className="flex items-center gap-1">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <Star 
-                              key={i} 
-                              size={12} 
-                              className={i < (selectedBooking.review.rating || 5) ? "text-amber-400 fill-amber-400" : "text-slate-700"} 
-                            />
-                          ))}
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <Star 
+                                key={i} 
+                                size={12} 
+                                className={i < (selectedBooking.review.rating || 5) ? "text-amber-600 fill-amber-600" : "text-slate-700"} 
+                              />
+                            ))}
+                          </div>
+                          <span className="text-xs font-bold text-[var(--color-text-main)]">({selectedBooking.review.rating || 5} / 5)</span>
                         </div>
                         <p className="text-text-muted italic text-xs font-serif">"{selectedBooking.review.comment}"</p>
                       </div>
@@ -616,14 +619,15 @@ export function CustomerMyServices({ userPhoneOrUid, userName, lang = 'en' }: Cu
                                 key={star}
                                 type="button"
                                 onClick={() => setUserRating(star)}
-                                className="text-amber-400 hover:scale-125 transition-transform"
+                                className="text-amber-600 hover:scale-125 transition-transform"
                               >
                                 <Star 
                                   size={18} 
-                                  className={star <= userRating ? "fill-amber-400 text-amber-400" : "text-slate-600"} 
+                                  className={star <= userRating ? "fill-amber-600 text-amber-600" : "text-slate-600"} 
                                 />
                               </button>
                             ))}
+                            <span className="text-xs font-bold text-[var(--color-text-main)] ml-1">({userRating} / 5)</span>
                           </div>
                         </div>
 

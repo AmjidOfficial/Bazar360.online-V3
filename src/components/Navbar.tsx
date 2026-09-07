@@ -13,6 +13,7 @@ import {
   MapPin
 } from 'lucide-react';
 import { UserProfile } from '../lib/dbService';
+import Bazar360Logo from './Bazar360Logo';
 
 interface NavbarProps {
   currentTab: string;
@@ -87,19 +88,16 @@ export default function Navbar({
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.4, type: "spring", stiffness: 260, damping: 20 }}
-        className="w-full max-w-7xl bg-[#0B192C]/95 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-[1.5rem] h-16 flex items-center justify-between px-4 sm:px-6 pointer-events-auto"
+        className="w-full max-w-7xl bg-[var(--color-bg-secondary)]/95 backdrop-blur-2xl border border-[var(--color-border-main)] shadow-2xl rounded-[1.5rem] h-16 flex items-center justify-between px-4 sm:px-6 pointer-events-auto"
       >
         
         {/* LEFT BRAND LOGO */}
         <div className="flex items-center gap-3 shrink-0">
-          <button 
-            type="button"
+          <Bazar360Logo 
+            variant="header" 
+            size="sm" 
             onClick={() => setTab('home')} 
-            className="cursor-pointer font-extrabold text-xl tracking-tight text-white hover:text-[#F97316] transition-colors flex items-center gap-1 group"
-          >
-            <span>Bazar360</span>
-            <span className="w-2 h-2 rounded-full bg-[#F97316] group-hover:scale-125 transition-transform" />
-          </button>
+          />
         </div>
 
         {/* CENTER LINKS */}
@@ -114,8 +112,8 @@ export default function Navbar({
                 onClick={() => setTab(link.id)}
                 className={`relative px-4 py-2 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer ${
                   isActive 
-                    ? 'text-white bg-[#1E293B] border border-[#F97316]/40 shadow-sm' 
-                    : 'text-[#94A3B8] hover:text-white hover:bg-[#1E293B]/60'
+                    ? 'text-white bg-[var(--color-bg-tertiary)] border border-[var(--color-accent-main)]/40 shadow-sm' 
+                    : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] hover:bg-[var(--color-bg-tertiary)]/60'
                 }`}
               >
                 <span>{link.label}</span>
@@ -131,13 +129,13 @@ export default function Navbar({
           <button
             type="button"
             onClick={() => setTab('inventory')}
-            className="relative p-2.5 rounded-xl text-[#94A3B8] hover:text-white hover:bg-[#1E293B] transition-all cursor-pointer border border-transparent hover:border-white/10"
+            className="relative p-2.5 rounded-xl text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] hover:bg-[var(--color-bg-tertiary)] transition-all cursor-pointer border border-transparent hover:border-[var(--color-border-main)]"
             title={t.favorites}
             aria-label="View Favorites"
           >
             <Heart size={18} className={favoritesCount > 0 ? "fill-rose-500 text-rose-500" : ""} />
             {favoritesCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-[#F97316] text-white font-mono font-bold text-[9px] w-4 h-4 rounded-full flex items-center justify-center border border-white/20">
+              <span className="absolute -top-1 -right-1 bg-[var(--color-accent-main)] text-[#030712] font-mono font-bold text-[9px] w-4 h-4 rounded-full flex items-center justify-center border border-[var(--color-border-main)]">
                 {favoritesCount}
               </span>
             )}
@@ -147,7 +145,7 @@ export default function Navbar({
           <button 
             type="button"
             onClick={onLanguageToggle}
-            className="hidden sm:flex items-center justify-center px-2.5 py-1.5 rounded-xl bg-[#1E293B] border border-white/10 text-xs font-bold text-[#94A3B8] hover:text-white hover:border-[#F97316]/40 transition-all cursor-pointer"
+            className="hidden sm:flex items-center justify-center px-2.5 py-1.5 rounded-xl bg-[var(--color-bg-tertiary)] border border-[var(--color-border-main)] text-xs font-bold text-[var(--color-text-muted)] hover:text-white hover:border-[var(--color-accent-main)]/40 transition-all cursor-pointer"
             title={isUrdu ? "Switch to English" : "اردو میں تبدیل کریں"}
           >
             <span>{isUrdu ? 'EN' : 'اردو'}</span>
@@ -157,7 +155,7 @@ export default function Navbar({
           <button
             type="button"
             onClick={() => setTab('sell')}
-            className="px-4 py-2 rounded-xl bg-[#F97316] hover:bg-[#EA580C] text-white text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer shadow-md transform active:scale-98"
+            className="px-4 py-2 rounded-xl bg-[var(--color-accent-main)] hover:bg-[var(--color-accent-hover)] text-[#030712] text-xs font-extrabold uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer shadow-md transform active:scale-98"
           >
             <PlusCircle size={15} />
             <span className="hidden sm:inline">{t.postCar}</span>
@@ -172,7 +170,7 @@ export default function Navbar({
               <button 
                 type="button"
                 onClick={() => setProfileOpen(!profileOpen)}
-                className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-xl border border-white/10 bg-[#1E293B] hover:border-[#F97316]/40 transition-all cursor-pointer group"
+                className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-xl border border-[var(--color-border-main)] bg-[var(--color-bg-tertiary)] hover:border-[var(--color-accent-main)]/40 transition-all cursor-pointer group"
               >
                 {currentUser.photoURL ? (
                   <img 
@@ -181,24 +179,24 @@ export default function Navbar({
                     className="w-6 h-6 rounded-full object-cover border border-white/20"
                   />
                 ) : (
-                  <div className="w-6 h-6 rounded-full bg-[#F97316] text-white flex items-center justify-center text-xs font-extrabold uppercase font-mono shadow-inner">
+                  <div className="w-6 h-6 rounded-full bg-[var(--color-accent-main)] text-[#030712] flex items-center justify-center text-xs font-extrabold uppercase font-mono shadow-inner">
                     {(currentUser.displayName || currentUser.email?.split('@')[0] || 'U').substring(0, 1)}
                   </div>
                 )}
                 <div className="hidden sm:block text-left">
-                  <p className="text-[11px] font-bold text-white group-hover:text-[#F97316] transition-colors truncate max-w-[80px]">
+                  <p className="text-[11px] font-bold text-white group-hover:text-[var(--color-accent-main)] transition-colors truncate max-w-[80px]">
                     {(currentUser.displayName || currentUser.email?.split('@')[0] || t.guest).split(' ')[0]}
                   </p>
                 </div>
-                <ChevronDown size={14} className="text-[#94A3B8] group-hover:text-white transition-colors" />
+                <ChevronDown size={14} className="text-[var(--color-text-muted)] group-hover:text-white transition-colors" />
               </button>
             ) : (
               <button
                 type="button"
                 onClick={onLoginClick}
-                className="flex items-center gap-1.5 px-3.5 py-2 bg-[#1E293B] hover:bg-[#1E293B]/80 text-white rounded-xl border border-white/10 text-xs font-bold tracking-wide transition-all hover:border-[#F97316]/40 cursor-pointer"
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-[var(--color-bg-tertiary)] hover:bg-[var(--color-bg-tertiary)]/80 text-[var(--color-text-header)] rounded-xl border border-[var(--color-border-main)] text-xs font-bold tracking-wide transition-all hover:border-[var(--color-accent-main)]/40 cursor-pointer"
               >
-                <User size={14} className="text-[#F97316]" />
+                <User size={14} className="text-[var(--color-accent-main)]" />
                 <span>{t.login}</span>
               </button>
             )}
@@ -211,20 +209,20 @@ export default function Navbar({
                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  className="absolute right-0 mt-3 w-56 bg-[#0F172A] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50 p-2"
+                  className="absolute right-0 mt-3 w-56 bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] rounded-2xl shadow-2xl overflow-hidden z-50 p-2"
                 >
-                  <div className="px-4 py-3 border-b border-white/10 mb-2">
-                    <p className="text-[10px] font-bold text-[#F97316] uppercase tracking-wider mb-1">{currentUser.role || 'Member'}</p>
-                    <p className="text-xs font-bold text-white truncate">{currentUser.displayName || 'User'}</p>
-                    <p className="text-[11px] text-[#94A3B8] truncate">{currentUser.email}</p>
+                  <div className="px-4 py-3 border-b border-[var(--color-border-main)] mb-2">
+                    <p className="text-[10px] font-bold text-[var(--color-accent-main)] uppercase tracking-wider mb-1">{currentUser.role || 'Member'}</p>
+                    <p className="text-xs font-bold text-[var(--color-text-header)] truncate">{currentUser.displayName || 'User'}</p>
+                    <p className="text-[11px] text-[var(--color-text-muted)] truncate">{currentUser.email}</p>
                   </div>
                   
                   <button
                     type="button"
                     onClick={() => { setProfileOpen(false); setTab('profile'); }}
-                    className="w-full text-left px-4 py-2 text-xs font-semibold text-slate-200 hover:bg-[#1E293B] rounded-xl flex items-center transition-colors cursor-pointer group"
+                    className="w-full text-left px-4 py-2 text-xs font-semibold text-[var(--color-text-header)] hover:bg-[var(--color-bg-tertiary)] rounded-xl flex items-center transition-colors cursor-pointer group"
                   >
-                    <User size={14} className="mr-2.5 text-[#94A3B8] group-hover:text-white transition-colors" />
+                    <User size={14} className="mr-2.5 text-[var(--color-text-muted)] group-hover:text-white transition-colors" />
                     {t.profile}
                   </button>
                   

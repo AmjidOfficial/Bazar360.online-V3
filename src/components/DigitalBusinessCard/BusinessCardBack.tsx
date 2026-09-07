@@ -13,19 +13,19 @@ export const BusinessCardBack: React.FC<BusinessCardBackProps> = ({ dealer, them
     <div className={`w-full aspect-[1.636] rounded-2xl border p-6 grid grid-cols-2 gap-4 items-center shadow-2xl backdrop-blur-md ${theme === 'dark' ? 'bg-slate-900/80 border-slate-700/50 text-white' : 'bg-white/80 border-slate-200/50 text-slate-900'}`}>
       <div className="space-y-4">
         <h3 className="text-xl font-bold uppercase tracking-tight">Contact</h3>
-        <div className="space-y-2 text-sm opacity-80">
-          <div className="flex items-center gap-3">
-              <Phone size={18} />
-              {dealer.phone}
+        <div className="space-y-2 text-xs sm:text-sm opacity-80 min-w-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+              <Phone size={16} className="shrink-0 text-[var(--color-accent-main)]" />
+              <span className="truncate">{dealer.phone || '+92 314 9198403'}</span>
           </div>
-          <div className="flex items-center gap-3">
-              <MapPin size={18} />
-              {dealer.location}
+          <div className="flex items-center gap-2.5 min-w-0" title={dealer.location}>
+              <MapPin size={16} className="shrink-0 text-[var(--color-accent-main)]" />
+              <span className="truncate">{dealer.location || 'Peshawar, KP'}</span>
           </div>
           {dealer.socials?.website && (
-              <div className="flex items-center gap-3">
-                  <Globe size={18} />
-                  {dealer.socials.website}
+              <div className="flex items-center gap-2.5 min-w-0" title={dealer.socials.website}>
+                  <Globe size={16} className="shrink-0 text-[var(--color-accent-main)]" />
+                  <span className="truncate">{dealer.socials.website}</span>
               </div>
           )}
         </div>

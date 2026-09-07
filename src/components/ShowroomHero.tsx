@@ -86,11 +86,11 @@ export const ShowroomHero: React.FC<ShowroomHeroProps> = ({ dealer }) => {
                 {categoryData.taglines[taglineIndex]}
               </h1>
               <div className="flex items-center justify-center gap-3">
-                <div className="h-[1px] w-8 bg-orange-500/50" />
-                <p className="text-xs md:text-sm font-sans text-orange-400 font-bold uppercase tracking-[0.2em] drop-shadow-md">
+                <div className="h-[1px] w-8 bg-[var(--color-accent-secondary)]/50" />
+                <p className="text-xs md:text-sm font-sans text-[var(--color-accent-secondary)] font-bold uppercase tracking-[0.2em] drop-shadow-md">
                   {dealer.subtitle || "Premium Automotive Partner"}
                 </p>
-                <div className="h-[1px] w-8 bg-orange-500/50" />
+                <div className="h-[1px] w-8 bg-[var(--color-accent-secondary)]/50" />
               </div>
             </motion.div>
           </AnimatePresence>

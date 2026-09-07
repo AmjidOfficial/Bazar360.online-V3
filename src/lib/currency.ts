@@ -11,7 +11,7 @@ export function formatPkrPrice(pkr: number): string {
   if (pkr >= 10000000) {
     const crores = pkr / 10000000;
     return `Rs. ${parseFloat(crores.toFixed(2))} Crore`;
-  } else if (pkr >= 1000000) {
+  } else if (pkr >= 100000) {
     const lakhs = pkr / 100000;
     return `Rs. ${parseFloat(lakhs.toFixed(2))} Lakh`;
   }
@@ -37,9 +37,9 @@ export function formatDualPrice(pkr: number, includeUsd = true): string {
 export function useCurrencyMode() {
   const [currencyMode, setCurrencyMode] = useState<'PKR' | 'USD' | 'DUAL'>(() => {
     try {
-      return (localStorage.getItem('bazar360-currency-preference') as 'PKR' | 'USD' | 'DUAL') || 'DUAL';
+      return (localStorage.getItem('bazar360-currency-preference') as 'PKR' | 'USD' | 'DUAL') || 'PKR';
     } catch(e) {
-      return 'DUAL';
+      return 'PKR';
     }
   });
 
