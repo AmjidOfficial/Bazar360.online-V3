@@ -5,9 +5,10 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Menu, Search, Bell, MessageSquare, User } from 'lucide-react';
+import { Menu, Search, Bell, MessageSquare, User, Sun, Moon } from 'lucide-react';
 import { UserProfile } from '../lib/dbService';
 import MobileSideDrawer from './MobileSideDrawer';
+import { useTheme } from './ThemeContext';
 
 interface NavigationAuditProps {
   currentTab: string;
@@ -34,6 +35,7 @@ export default function NavigationAudit({
   onSearchChange,
   children
 }: NavigationAuditProps) {
+  const { isDark, toggleTheme } = useTheme();
   const [searchVal, setSearchVal] = useState('');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
@@ -127,6 +129,23 @@ export default function NavigationAudit({
               <MessageSquare size={18} />
             </button>
 
+            {/* UNIQUE THEME SWITCHER */}
+            <button
+              onClick={toggleTheme}
+              className={`min-w-[40px] min-h-[40px] p-2.5 rounded-xl border transition-all duration-300 hover:scale-115 active:scale-90 cursor-pointer flex items-center justify-center shadow-xs ${
+                isDark 
+                  ? 'bg-amber-400/15 text-amber-400 border-amber-400/30 hover:bg-amber-400/25 hover:shadow-[0_0_15px_rgba(251,191,36,0.25)]' 
+                  : 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20 hover:bg-indigo-500/20 hover:shadow-[0_0_15px_rgba(79,70,229,0.15)]'
+              }`}
+              title={isDark ? 'Switch to Premium Light Theme' : 'Switch to Luxury Dark Theme'}
+            >
+              {isDark ? (
+                <Sun size={18} className="animate-pulse text-amber-400" />
+              ) : (
+                <Moon size={18} className="text-indigo-600" />
+              )}
+            </button>
+
             {/* 7. PROFILE AVATAR / SIGN IN */}
             {currentUser ? (
               <button
@@ -201,6 +220,23 @@ export default function NavigationAudit({
               title="Search Vehicles"
             >
               <Search size={16} />
+            </button>
+
+            {/* UNIQUE THEME SWITCHER MOBILE */}
+            <button
+              onClick={toggleTheme}
+              className={`min-w-[38px] min-h-[38px] p-2 rounded-xl border transition-all duration-300 active:scale-90 cursor-pointer flex items-center justify-center shadow-xs ${
+                isDark 
+                  ? 'bg-amber-400/15 text-amber-400 border-amber-400/30' 
+                  : 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20'
+              }`}
+              title={isDark ? 'Switch to Premium Light Theme' : 'Switch to Luxury Dark Theme'}
+            >
+              {isDark ? (
+                <Sun size={15} className="animate-pulse text-amber-400" />
+              ) : (
+                <Moon size={15} className="text-indigo-600" />
+              )}
             </button>
 
             {/* 5. PROFILE */}

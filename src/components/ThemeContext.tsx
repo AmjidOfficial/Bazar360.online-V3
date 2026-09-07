@@ -17,7 +17,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<ThemeType>(() => {
     const saved = localStorage.getItem('bazar360_theme') as ThemeType;
     if (saved === 'light' || saved === 'dark') return saved;
-    return 'dark'; // Default to dark luxury obsidian theme
+    return 'light'; // Default to light premium theme
   });
 
   const toggleTheme = () => {

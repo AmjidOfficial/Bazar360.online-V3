@@ -599,7 +599,7 @@ export const InventoryGrid: React.FC<InventoryGridProps> = ({
         <motion.div
           key={`inventory-grid-${selectedCategory}-${selectedTransmission}-${selectedFuel}-${selectedMileage}`}
           id="showroom-inventory-grid"
-          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 items-stretch w-full"
+          className="grid gap-4 md:gap-6 items-stretch w-full"
           variants={{
             hidden: { opacity: 0 },
             show: {

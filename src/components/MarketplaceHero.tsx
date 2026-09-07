@@ -116,7 +116,7 @@ export default function MarketplaceHero({ lang, onSearch, setTab, listings = [],
       <div className="relative z-10 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 w-full">
         <div className="flex flex-col lg:grid lg:grid-cols-12 gap-6 lg:gap-12 items-center">
           
-          {/* LEFT COLUMN: Headline, Subtitle & Luxury Search Console */}
+          {/* SIBLING 1 (LEFT TOP): Headline & Subtitle */}
           <div className="w-full lg:col-span-7 flex flex-col justify-center order-1">
             
             {/* Tagline Badge */}
@@ -154,6 +154,11 @@ export default function MarketplaceHero({ lang, onSearch, setTab, listings = [],
                 ? 'پاکستان بھر کے تصدیق شدہ شورومز اور براہ راست مالکان سے گاڑیاں خریدیں اور 60 سیکنڈ میں مفت اشتہار لگائیں۔'
                 : 'Connect with certified showrooms, browse inspected vehicles across Pakistan, and list your car in seconds.'}
             </motion.p>
+
+          </div>
+
+          {/* SIBLING 3 (LEFT BOTTOM): Luxury Search Console Container */}
+          <div className="w-full lg:col-span-7 order-3">
 
             {/* Luxury Search Console Container */}
             <motion.div
@@ -340,11 +345,10 @@ export default function MarketplaceHero({ lang, onSearch, setTab, listings = [],
                 </div>
               </form>
             </motion.div>
-
           </div>
 
-          {/* RIGHT COLUMN: Floating Live Inventory Showcase */}
-          <div className="w-full lg:col-span-5 relative flex flex-col items-center justify-center order-2 mt-4 lg:mt-0">
+          {/* SIBLING 2 (RIGHT): Floating Live Inventory Showcase */}
+          <div className="w-full lg:col-span-5 lg:row-span-2 relative flex flex-col items-center justify-center order-2 mb-6 lg:mb-0">
             
             <div 
               className="w-full space-y-3"
