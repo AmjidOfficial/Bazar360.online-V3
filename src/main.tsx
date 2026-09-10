@@ -9,7 +9,6 @@ import { toast as sonnerToast } from 'sonner';
 import './index.css';
 import './home-redesign.css';
 
-// Global toast interceptor to silence unnecessary success notifications
 if (typeof window !== 'undefined') {
   const forbiddenKeywords = [
     'success', 'saved', 'updated', 'published', 'changed', 'registered', 'uploaded',
@@ -51,23 +50,56 @@ if (typeof window !== 'undefined') {
     sonnerToast.success = (message, data) => {
       if (isForbidden(message)) {
         console.log('[Toast Interceptor] Silenced Sonner success:', message);
-        return '' as any;
+        return '';
       }
       return originalSonnerSuccess(message, data);
     };
   }
+
+  window.addEventListener('error', (event) => {
+    if (event.message === 'Script error.' || event.message === 'Script error') {
+      console.warn('[BAZAR360] Cross-origin script error handled gracefully:', event);
+      event.preventDefault();
+    }
+  });
+
+  window.addEventListener('unhandledrejection', (event) => {
+    console.warn('[BAZAR360] Unhandled promise rejection handled:', event.reason);
+    event.preventDefault();
+  });
 }
 
-const root = createRoot(document.getElementById('root')!);
+// Restore the real route when GitHub Pages redirects a deep link through 404.html.
+const queryParams = new URLSearchParams(window.location.search);
+const redirectPath = queryParams.get('p');
+if (redirectPath) {
+  let cleanPath = '/' + redirectPath.replace(/~and~/g, '&');
+  const redirectSearch = queryParams.get('q');
+  if (redirectSearch) cleanPath += '?' + redirectSearch.replace(/~and~/g, '&');
+  cleanPath += window.location.hash;
+  try {
+    window.history.replaceState(null, '', cleanPath);
+  } catch (e) {
+    console.warn('URL restoration bypassed in main.tsx:', e);
+  }
+}
 
-root.render(
+createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <HelmetProvider>
-      <ThemeProvider>
-        <ErrorBoundary>
+    <ErrorBoundary>
+      <HelmetProvider>
+        <ThemeProvider>
           <App />
-        </ErrorBoundary>
-      </ThemeProvider>
-    </HelmetProvider>
-  </StrictMode>
+        </ThemeProvider>
+      </HelmetProvider>
+    </ErrorBoundary>
+  </StrictMode>,
 );
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then((reg) => console.log('BAZAR360 PWA Service Worker active anytime:', reg.scope))
+      .catch((err) => console.warn('BAZAR360 PWA Service Worker registration note:', err));
+  });
+}
