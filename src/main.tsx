@@ -7,49 +7,22 @@ import { ThemeProvider } from './components/ThemeContext';
 import { toast as hotToast } from 'react-hot-toast';
 import { toast as sonnerToast } from 'sonner';
 import './index.css';
+import './home-redesign.css';
 
-// Global toast interceptor to silence unnecessary success notifications
 if (typeof window !== 'undefined') {
   const forbiddenKeywords = [
-    'success',
-    'saved',
-    'updated',
-    'published',
-    'changed',
-    'registered',
-    'uploaded',
-    'deleted',
-    'copied',
-    'downloaded',
-    'exported',
-    'added',
-    'removed',
-    'marked',
-    'sent',
-    'cleared',
-    'selected',
-    'applied',
-    'authenticated',
-    'logged',
-    'confirmed',
-    'verified',
-    'vcard',
-    'pdf',
-    'signage',
-    'clipboard',
-    'whatsapp',
-    'liked'
+    'success', 'saved', 'updated', 'published', 'changed', 'registered', 'uploaded',
+    'deleted', 'copied', 'downloaded', 'exported', 'added', 'removed', 'marked',
+    'sent', 'cleared', 'selected', 'applied', 'authenticated', 'logged', 'confirmed',
+    'verified', 'vcard', 'pdf', 'signage', 'clipboard', 'whatsapp', 'liked'
   ];
 
   const isForbidden = (msg: any): boolean => {
     if (!msg) return false;
     const msgStr = typeof msg === 'string' ? msg.toLowerCase() : String(msg).toLowerCase();
-    
-    // Silence any message matching our forbidden action verbs/nouns
     return forbiddenKeywords.some(keyword => msgStr.includes(keyword)) || msgStr.includes('✓') || msgStr.includes('★');
   };
 
-  // 1. Intercept react-hot-toast
   if (hotToast && typeof hotToast.success === 'function') {
     const originalHotSuccess = hotToast.success;
     hotToast.success = (message, options) => {
@@ -60,7 +33,6 @@ if (typeof window !== 'undefined') {
       return originalHotSuccess(message, options);
     };
 
-    // Also wrap the raw hotToast function if it's called with success properties
     const originalRawHotToast = (hotToast as any).original || hotToast;
     const wrappedHotToast = function(message: any, options: any) {
       if (options?.type === 'success' && isForbidden(message)) {
@@ -73,7 +45,6 @@ if (typeof window !== 'undefined') {
     (hotToast as any).original = originalRawHotToast;
   }
 
-  // 2. Intercept sonner
   if (sonnerToast && typeof sonnerToast.success === 'function') {
     const originalSonnerSuccess = sonnerToast.success;
     sonnerToast.success = (message, data) => {
@@ -84,10 +55,7 @@ if (typeof window !== 'undefined') {
       return originalSonnerSuccess(message, data);
     };
   }
-}
 
-// Global resilience handlers for cross-origin iframe sandboxes and unhandled promise rejections
-if (typeof window !== 'undefined') {
   window.addEventListener('error', (event) => {
     if (event.message === 'Script error.' || event.message === 'Script error') {
       console.warn('[BAZAR360] Cross-origin script error handled gracefully:', event);
@@ -101,15 +69,13 @@ if (typeof window !== 'undefined') {
   });
 }
 
-// Restore real URL path if redirected by GitHub Pages 404.html before React starts rendering
+// Restore the real route when GitHub Pages redirects a deep link through 404.html.
 const queryParams = new URLSearchParams(window.location.search);
 const redirectPath = queryParams.get('p');
 if (redirectPath) {
   let cleanPath = '/' + redirectPath.replace(/~and~/g, '&');
   const redirectSearch = queryParams.get('q');
-  if (redirectSearch) {
-    cleanPath += '?' + redirectSearch.replace(/~and~/g, '&');
-  }
+  if (redirectSearch) cleanPath += '?' + redirectSearch.replace(/~and~/g, '&');
   cleanPath += window.location.hash;
   try {
     window.history.replaceState(null, '', cleanPath);
@@ -130,16 +96,10 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>,
 );
 
-// Register Progressive Web App Service Worker ANYTIME
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
-      .then((reg) => {
-        console.log('BAZAR360 PWA Service Worker active anytime:', reg.scope);
-      })
-      .catch((err) => {
-        console.warn('BAZAR360 PWA Service Worker registration note:', err);
-      });
+      .then((reg) => console.log('BAZAR360 PWA Service Worker active anytime:', reg.scope))
+      .catch((err) => console.warn('BAZAR360 PWA Service Worker registration note:', err));
   });
 }
-
