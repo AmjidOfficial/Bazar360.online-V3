@@ -1053,7 +1053,7 @@ export default function SearchExplorerView({
           </div>
 
           {dbLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 md:gap-6">
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(min(280px,100%),1fr))] gap-5 md:gap-6">
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <VehicleSkeletonCard key={i} />
               ))}
@@ -1062,7 +1062,7 @@ export default function SearchExplorerView({
             <div className="space-y-8">
               <motion.div 
                 key={`search-page-${currentPage}`}
-                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 md:gap-6"
+                className="grid grid-cols-[repeat(auto-fit,minmax(min(280px,100%),1fr))] gap-5 md:gap-6"
                 variants={{
                   hidden: { opacity: 0 },
                   show: {

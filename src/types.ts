@@ -232,6 +232,17 @@ export interface RegisteredUserLog {
   queryDetails?: string;
 }
 
+export interface DealerSubscription {
+  id: string;
+  dealerId: string;
+  dealerName?: string;
+  subscriberId: string;
+  subscriberEmail?: string;
+  subscriberPhone?: string;
+  createdAt: string;
+  active: boolean;
+}
+
 export interface BargainOwnerLog {
   id: string;
   timestamp: string;

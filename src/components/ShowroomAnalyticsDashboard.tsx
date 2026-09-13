@@ -46,7 +46,10 @@ import {
   ShieldCheck,
   CheckCircle,
   FileSpreadsheet,
-  AlertCircle
+  AlertCircle,
+  Heart,
+  Eye,
+  Bookmark
 } from 'lucide-react';
 import { dbTrackShowroomEvent } from '../lib/dbService';
 
@@ -58,7 +61,7 @@ interface ShowroomAnalyticsDashboardProps {
 interface AnalyticsEvent {
   id: string;
   dealerId: string;
-  actionType: 'view' | 'whatsapp' | 'call' | 'lead';
+  actionType: 'view' | 'whatsapp' | 'call' | 'lead' | 'favorite';
   vehicleId: string;
   vehicleTitle: string;
   timestamp: string;
@@ -156,6 +159,7 @@ export function ShowroomAnalyticsDashboard({ showroom, inventory }: ShowroomAnal
   // Top metric aggregate card calculations
   const stats = useMemo(() => {
     const totalViews = filteredEvents.filter(e => e.actionType === 'view').length;
+    const totalFavorites = filteredEvents.filter(e => e.actionType === 'favorite').length;
     const totalWhatsApp = filteredEvents.filter(e => e.actionType === 'whatsapp').length;
     const totalCalls = filteredEvents.filter(e => e.actionType === 'call').length;
     const totalInquiries = filteredEvents.filter(e => e.actionType === 'lead').length;
@@ -164,11 +168,12 @@ export function ShowroomAnalyticsDashboard({ showroom, inventory }: ShowroomAnal
     const totalLeads = totalInquiries;
     const clickThroughs = totalWhatsApp + totalCalls;
 
-    // Conversion rate (Leads/Views)
-    const conversionRate = totalViews > 0 ? ((totalLeads / totalViews) * 100).toFixed(1) : '0.0';
+    // Conversion rate ((Leads + Direct Contacts)/Views)
+    const conversionRate = totalViews > 0 ? (((totalLeads + clickThroughs) / totalViews) * 100).toFixed(1) : '0.0';
 
     return {
       views: totalViews,
+      favorites: totalFavorites,
       whatsapp: totalWhatsApp,
       calls: totalCalls,
       leads: totalLeads,
@@ -245,7 +250,32 @@ export function ShowroomAnalyticsDashboard({ showroom, inventory }: ShowroomAnal
       .slice(0, 5); // Return top 5
   }, [filteredEvents]);
 
-  // Chart colors for pie slices
+  // Detailed Vehicle-by-Vehicle Visitor Performance Matrix
+  const detailedVehicleMatrix = useMemo(() => {
+    const map: Record<string, { id: string; title: string; price: number; imageUrl?: string; views: number; favorites: number; leads: number }> = {};
+
+    inventory.forEach(car => {
+      map[car.id] = {
+        id: car.id,
+        title: car.title,
+        price: car.price,
+        imageUrl: car.imageUrl || (car.images && car.images[0]),
+        views: 0,
+        favorites: 0,
+        leads: 0
+      };
+    });
+
+    filteredEvents.forEach(e => {
+      if (e.vehicleId && map[e.vehicleId]) {
+        if (e.actionType === 'view') map[e.vehicleId].views += 1;
+        else if (e.actionType === 'favorite') map[e.vehicleId].favorites += 1;
+        else map[e.vehicleId].leads += 1;
+      }
+    });
+
+    return Object.values(map).sort((a, b) => (b.views + b.favorites + b.leads) - (a.views + a.favorites + a.leads));
+  }, [inventory, filteredEvents]);
   const COLORS = ['#FF6B00', '#06B6D4', '#10B981', '#6366F1'];
 
   // CRM Active Leads filtered pipeline
@@ -293,78 +323,97 @@ export function ShowroomAnalyticsDashboard({ showroom, inventory }: ShowroomAnal
       </div>
 
       {/* Grid of KPI metric cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         
         {/* KPI 1: Vehicle Views */}
-        <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] rounded-2xl p-5 space-y-4 shadow-sm hover:border-orange-500/25 transition-all">
+        <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] rounded-2xl p-4 space-y-3 shadow-sm hover:border-orange-500/25 transition-all">
           <div className="flex justify-between items-center">
             <span className="text-[10px] font-mono font-black uppercase tracking-widest text-[var(--color-text-muted)]">Vehicle Views</span>
-            <div className="p-2.5 rounded-xl bg-orange-500/10 text-orange-500 border border-orange-500/20">
-              <Users size={16} />
+            <div className="p-2 rounded-xl bg-orange-500/10 text-orange-500 border border-orange-500/20">
+              <Eye size={15} />
             </div>
           </div>
           <div className="space-y-1">
-            <h3 className="text-2xl font-black font-sans text-[var(--color-text-main)] tracking-tight">
+            <h3 className="text-xl font-black font-sans text-[var(--color-text-main)] tracking-tight">
               {loading ? '---' : stats.views.toLocaleString()}
             </h3>
-            <p className="text-[10px] text-[var(--color-accent-main)] font-bold flex items-center gap-1">
-              <TrendingUp size={12} />
-              <span>+18.4% Week-over-Week</span>
+            <p className="text-[9px] text-[var(--color-accent-main)] font-bold flex items-center gap-1">
+              <TrendingUp size={11} />
+              <span>Catalog Impressions</span>
             </p>
           </div>
         </div>
 
-        {/* KPI 2: Direct Enquiries */}
-        <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] rounded-2xl p-5 space-y-4 shadow-sm hover:border-cyan-500/25 transition-all">
+        {/* KPI 2: Favorite Saves */}
+        <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] rounded-2xl p-4 space-y-3 shadow-sm hover:border-rose-500/25 transition-all">
+          <div className="flex justify-between items-center">
+            <span className="text-[10px] font-mono font-black uppercase tracking-widest text-[var(--color-text-muted)]">Favorite Saves</span>
+            <div className="p-2 rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/20">
+              <Heart size={15} />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <h3 className="text-xl font-black font-sans text-[var(--color-text-main)] tracking-tight">
+              {loading ? '---' : stats.favorites.toLocaleString()}
+            </h3>
+            <p className="text-[9px] text-rose-400 font-bold flex items-center gap-1">
+              <Bookmark size={11} />
+              <span>Shortlisted Vehicles</span>
+            </p>
+          </div>
+        </div>
+
+        {/* KPI 3: Direct Leads */}
+        <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] rounded-2xl p-4 space-y-3 shadow-sm hover:border-cyan-500/25 transition-all">
           <div className="flex justify-between items-center">
             <span className="text-[10px] font-mono font-black uppercase tracking-widest text-[var(--color-text-muted)]">Direct Leads</span>
-            <div className="p-2.5 rounded-xl bg-cyan-500/10 text-cyan-500 border border-cyan-500/20">
-              <Mail size={16} />
+            <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-500 border border-cyan-500/20">
+              <Mail size={15} />
             </div>
           </div>
           <div className="space-y-1">
-            <h3 className="text-2xl font-black font-sans text-[var(--color-text-main)] tracking-tight">
+            <h3 className="text-xl font-black font-sans text-[var(--color-text-main)] tracking-tight">
               {loading ? '---' : stats.leads.toLocaleString()}
             </h3>
-            <p className="text-[10px] text-[var(--color-accent-main)] font-bold flex items-center gap-1">
-              <TrendingUp size={12} />
-              <span>+12.1% Conversion Growth</span>
+            <p className="text-[9px] text-cyan-400 font-bold flex items-center gap-1">
+              <TrendingUp size={11} />
+              <span>Form Submissions</span>
             </p>
           </div>
         </div>
 
-        {/* KPI 3: WhatsApp Enquiries */}
-        <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] rounded-2xl p-5 space-y-4 shadow-sm hover:border-[var(--color-accent-main)]/25 transition-all">
+        {/* KPI 4: WhatsApp & Calls */}
+        <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] rounded-2xl p-4 space-y-3 shadow-sm hover:border-[var(--color-accent-main)]/25 transition-all">
           <div className="flex justify-between items-center">
-            <span className="text-[10px] font-mono font-black uppercase tracking-widest text-[var(--color-text-muted)]">WhatsApp Clicks</span>
-            <div className="p-2.5 rounded-xl bg-[var(--color-accent-main)]/10 text-[var(--color-accent-main)] border border-[var(--color-accent-main)]/20">
-              <MessageCircle size={16} />
+            <span className="text-[10px] font-mono font-black uppercase tracking-widest text-[var(--color-text-muted)]">WhatsApp & Calls</span>
+            <div className="p-2 rounded-xl bg-[var(--color-accent-main)]/10 text-[var(--color-accent-main)] border border-[var(--color-accent-main)]/20">
+              <MessageCircle size={15} />
             </div>
           </div>
           <div className="space-y-1">
-            <h3 className="text-2xl font-black font-sans text-[var(--color-text-main)] tracking-tight">
-              {loading ? '---' : stats.whatsapp.toLocaleString()}
+            <h3 className="text-xl font-black font-sans text-[var(--color-text-main)] tracking-tight">
+              {loading ? '---' : stats.conversions.toLocaleString()}
             </h3>
-            <p className="text-[10px] text-[var(--color-text-muted)] font-mono">
-              High intent local buyers
+            <p className="text-[9px] text-[var(--color-text-muted)] font-mono">
+              Direct Contact Clicks
             </p>
           </div>
         </div>
 
-        {/* KPI 4: Conversion Rate */}
-        <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] rounded-2xl p-5 space-y-4 shadow-sm hover:border-indigo-500/25 transition-all">
+        {/* KPI 5: Conversion Rate */}
+        <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] rounded-2xl p-4 space-y-3 shadow-sm hover:border-indigo-500/25 transition-all">
           <div className="flex justify-between items-center">
             <span className="text-[10px] font-mono font-black uppercase tracking-widest text-[var(--color-text-muted)]">Conversion Rate</span>
-            <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
-              <Award size={16} />
+            <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
+              <Award size={15} />
             </div>
           </div>
           <div className="space-y-1">
-            <h3 className="text-2xl font-black font-sans text-[var(--color-text-main)] tracking-tight">
+            <h3 className="text-xl font-black font-sans text-[var(--color-text-main)] tracking-tight">
               {loading ? '---' : `${stats.conversionRate}%`}
             </h3>
-            <p className="text-[10px] text-[var(--color-text-muted)] font-mono">
-              Total view-to-lead conversions
+            <p className="text-[9px] text-[var(--color-text-muted)] font-mono">
+              View to Lead Rate
             </p>
           </div>
         </div>
@@ -556,6 +605,82 @@ export function ShowroomAnalyticsDashboard({ showroom, inventory }: ShowroomAnal
           </div>
         </div>
 
+      </div>
+
+      {/* Per-Vehicle Visitor Insights & Performance Matrix Table */}
+      <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm text-left">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-dashed border-[var(--color-border-main)] pb-6">
+          <div className="space-y-1">
+            <h3 className="text-lg font-black font-display tracking-tight text-[var(--color-text-main)] flex items-center gap-2">
+              <Eye className="text-orange-500" /> Vehicle-by-Vehicle Visitor Insights
+            </h3>
+            <p className="text-xs text-[var(--color-text-muted)]">Granular views, favorite saves, and lead counts for all active vehicles in your inventory.</p>
+          </div>
+          <div className="text-xs font-mono font-bold text-[var(--color-accent-main)] bg-[var(--color-accent-main)]/10 px-3 py-1.5 rounded-xl border border-[var(--color-accent-main)]/20">
+            {detailedVehicleMatrix.length} Vehicles Tracked
+          </div>
+        </div>
+
+        {detailedVehicleMatrix.length === 0 ? (
+          <div className="p-8 text-center text-xs text-[var(--color-text-muted)] font-mono">
+            No active vehicle inventory found for this showroom.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="border-b border-[var(--color-border-main)] text-[10px] uppercase font-mono font-black text-[var(--color-text-muted)] tracking-widest">
+                  <th className="py-3 px-4">Vehicle Listing</th>
+                  <th className="py-3 px-4 text-center">Price</th>
+                  <th className="py-3 px-4 text-center">Views</th>
+                  <th className="py-3 px-4 text-center">Favorites</th>
+                  <th className="py-3 px-4 text-center">Leads Generated</th>
+                  <th className="py-3 px-4 text-right">Engagement Score</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--color-border-main)]/50">
+                {detailedVehicleMatrix.map(item => (
+                  <tr key={item.id} className="hover:bg-slate-100/30 dark:hover:bg-white/5 transition-colors">
+                    <td className="py-3 px-4 flex items-center gap-3">
+                      <div className="w-12 h-9 rounded-lg overflow-hidden bg-slate-800 shrink-0 border border-[var(--color-border-main)]">
+                        {item.imageUrl ? (
+                          <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-[10px] text-slate-500">Auto</div>
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-extrabold text-[var(--color-text-main)] text-xs line-clamp-1">{item.title}</p>
+                        <p className="text-[10px] text-[var(--color-text-muted)] font-mono">ID: {item.id}</p>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-center font-extrabold font-mono text-orange-500">
+                      {renderPrice(item.price)}
+                    </td>
+                    <td className="py-3 px-4 text-center font-mono font-bold text-[var(--color-text-main)]">
+                      <span className="inline-flex items-center gap-1 bg-orange-500/10 text-orange-500 px-2 py-1 rounded-lg">
+                        <Eye size={12} /> {item.views}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-center font-mono font-bold">
+                      <span className="inline-flex items-center gap-1 bg-rose-500/10 text-rose-500 px-2 py-1 rounded-lg">
+                        <Heart size={12} /> {item.favorites}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-center font-mono font-bold">
+                      <span className="inline-flex items-center gap-1 bg-cyan-500/10 text-cyan-500 px-2 py-1 rounded-lg">
+                        <MessageCircle size={12} /> {item.leads}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono font-bold text-[var(--color-accent-main)]">
+                      {item.views > 0 ? (((item.leads + item.favorites) / item.views) * 100).toFixed(1) : '0.0'}%
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* CRM active leads panel */}

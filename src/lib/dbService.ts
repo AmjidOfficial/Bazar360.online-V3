@@ -18,7 +18,7 @@ import {
 } from 'firebase/firestore';
 import { db, auth, handleFirestoreError, OperationType } from '../firebase';
 import { updateProfile } from 'firebase/auth';
-import { CarListing, Dealer, Review, Lead, SocialMedia, ServiceBooking, Conversation, DirectMessage, UserNotification, DetailedReview, NO_IMAGE_SVG } from '../types';
+import { CarListing, Dealer, Review, Lead, SocialMedia, ServiceBooking, Conversation, DirectMessage, UserNotification, DetailedReview, ShowroomMember, DealerSubscription, NO_IMAGE_SVG } from '../types';
 import { validateLead } from './leadValidator';
 
 import { toast } from 'react-hot-toast';
@@ -2165,7 +2165,7 @@ export async function dbUpdateLeadStatus(leadId: string, status: Lead['status'])
 export interface ShowroomAnalyticsEvent {
   id: string;
   dealerId: string;
-  actionType: 'view' | 'whatsapp' | 'call' | 'lead';
+  actionType: 'view' | 'whatsapp' | 'call' | 'lead' | 'favorite';
   vehicleId: string;
   vehicleTitle: string;
   timestamp: string;
@@ -2176,7 +2176,7 @@ export interface ShowroomAnalyticsEvent {
 // Track customer engagement events securely in Firestore
 export async function dbTrackShowroomEvent(
   dealerId: string, 
-  actionType: 'view' | 'whatsapp' | 'call' | 'lead',
+  actionType: 'view' | 'whatsapp' | 'call' | 'lead' | 'favorite',
   vehicleId?: string,
   vehicleTitle?: string
 ): Promise<void> {
@@ -2206,6 +2206,136 @@ export async function dbTrackShowroomEvent(
   } catch (err) {
     console.warn('[Analytics] Silent event track bypass:', err);
   }
+}
+
+// Dealer Inventory Subscription Services
+export async function dbToggleDealerSubscription(dealerId: string, dealerName: string, subscriberId: string, subscriberEmail?: string): Promise<boolean> {
+  const subDocId = `sub-${dealerId}-${subscriberId}`;
+  const subRef = doc(db, 'dealer_subscriptions', subDocId);
+
+  let isSubscribed = false;
+
+  try {
+    const existingSnap = await getDoc(subRef);
+    if (existingSnap.exists() && existingSnap.data()?.active) {
+      // Unsubscribe
+      await updateDoc(subRef, { active: false, updatedAt: new Date().toISOString() });
+      isSubscribed = false;
+    } else {
+      // Subscribe
+      await setDoc(subRef, {
+        id: subDocId,
+        dealerId,
+        dealerName: dealerName || 'Showroom',
+        subscriberId,
+        subscriberEmail: subscriberEmail || '',
+        createdAt: new Date().toISOString(),
+        active: true
+      }, { merge: true });
+      isSubscribed = true;
+    }
+
+    // Sync localStorage for instant offline state
+    try {
+      const currentSubs = JSON.parse(localStorage.getItem('bazar360_subscribed_dealers') || '[]');
+      if (isSubscribed) {
+        if (!currentSubs.includes(dealerId)) currentSubs.push(dealerId);
+      } else {
+        const filtered = currentSubs.filter((id: string) => id !== dealerId);
+        localStorage.setItem('bazar360_subscribed_dealers', JSON.stringify(filtered));
+        return false;
+      }
+      localStorage.setItem('bazar360_subscribed_dealers', JSON.stringify(currentSubs));
+    } catch {}
+
+    return isSubscribed;
+  } catch (err) {
+    console.warn('[Subscriptions] Firestore subscription error, using local state:', err);
+    try {
+      const currentSubs = JSON.parse(localStorage.getItem('bazar360_subscribed_dealers') || '[]');
+      const idx = currentSubs.indexOf(dealerId);
+      if (idx > -1) {
+        currentSubs.splice(idx, 1);
+        isSubscribed = false;
+      } else {
+        currentSubs.push(dealerId);
+        isSubscribed = true;
+      }
+      localStorage.setItem('bazar360_subscribed_dealers', JSON.stringify(currentSubs));
+    } catch {}
+    return isSubscribed;
+  }
+}
+
+export async function dbFetchDealerSubscriptionStatus(dealerId: string, subscriberId: string): Promise<boolean> {
+  try {
+    const subDocId = `sub-${dealerId}-${subscriberId}`;
+    const snap = await getDoc(doc(db, 'dealer_subscriptions', subDocId));
+    if (snap.exists()) {
+      return !!snap.data()?.active;
+    }
+    const currentSubs = JSON.parse(localStorage.getItem('bazar360_subscribed_dealers') || '[]');
+    return currentSubs.includes(dealerId);
+  } catch {
+    try {
+      const currentSubs = JSON.parse(localStorage.getItem('bazar360_subscribed_dealers') || '[]');
+      return currentSubs.includes(dealerId);
+    } catch {
+      return false;
+    }
+  }
+}
+
+// Showroom Staff & Team Management Services
+export async function dbSaveTeamMember(dealerId: string, member: ShowroomMember): Promise<ShowroomMember[]> {
+  const dealerRef = doc(db, 'dealers', dealerId);
+  const dealerSnap = await getDoc(dealerRef);
+  let team: ShowroomMember[] = [];
+
+  if (dealerSnap.exists()) {
+    team = dealerSnap.data()?.teamMembers || [];
+  }
+
+  const existingIdx = team.findIndex(m => m.id === member.id);
+  if (existingIdx > -1) {
+    team[existingIdx] = member;
+  } else {
+    team.push(member);
+  }
+
+  await updateDoc(dealerRef, {
+    teamMembers: team,
+    updatedAt: new Date().toISOString()
+  });
+
+  if (cachedDealers) {
+    cachedDealers = cachedDealers.map(d => d.id === dealerId ? { ...d, teamMembers: team } : d);
+  }
+
+  return team;
+}
+
+export async function dbDeleteTeamMember(dealerId: string, memberId: string): Promise<ShowroomMember[]> {
+  const dealerRef = doc(db, 'dealers', dealerId);
+  const dealerSnap = await getDoc(dealerRef);
+  let team: ShowroomMember[] = [];
+
+  if (dealerSnap.exists()) {
+    team = dealerSnap.data()?.teamMembers || [];
+  }
+
+  team = team.filter(m => m.id !== memberId);
+
+  await updateDoc(dealerRef, {
+    teamMembers: team,
+    updatedAt: new Date().toISOString()
+  });
+
+  if (cachedDealers) {
+    cachedDealers = cachedDealers.map(d => d.id === dealerId ? { ...d, teamMembers: team } : d);
+  }
+
+  return team;
 }
 
 // Silent auto-save service booking protocol & CRM lead generator

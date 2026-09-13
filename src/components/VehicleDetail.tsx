@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { Lightbox } from './Lightbox';
 import { dbFetchListingById } from '../lib/dbService';
 import VehicleARInspectorModal from './VehicleARInspectorModal';
+import { InspectionReportModal } from './InspectionReportModal';
 import { cinematicAudio } from '../lib/cinematicAudio';
 
 interface VehicleDetailProps {
@@ -79,6 +80,7 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [activeMedia, setActiveMedia] = useState<{ type: 'image' | 'video'; url: string } | null>(null);
   const [showARModal, setShowARModal] = useState<boolean>(false);
+  const [showInspectionModal, setShowInspectionModal] = useState<boolean>(false);
 
   useEffect(() => {
     setActiveMedia({
@@ -396,6 +398,13 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
                   <ShieldCheck size={14} /> Verified Listing
                 </span>
               )}
+              <button
+                type="button"
+                onClick={() => setShowInspectionModal(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-[10px] font-mono font-black uppercase tracking-widest cursor-pointer shadow-sm transition-all"
+              >
+                <ShieldCheck size={14} /> 200+ Point Inspection Report
+              </button>
               {car.dealerId === 'private' || car.sellerType === 'Individual' ? (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-sky-500/10 text-sky-400 rounded-md text-[10px] font-mono font-black uppercase tracking-widest border border-sky-500/20">
                   <span className="w-1.5 h-1.5 rounded-full bg-sky-400" /> Individual Seller
@@ -418,9 +427,18 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
             <p className="text-[10px] font-mono font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1">
               Asking Price
             </p>
-            <div className="text-3xl md:text-4xl font-black font-mono text-[var(--color-accent-main)]">
-              {renderPrice(car.price)}
+            <div className="text-3xl md:text-4xl font-black font-mono text-[var(--color-accent-main)] tabular-nums">
+              {car.price >= 10000000
+                ? `PKR ${(car.price / 10000000).toFixed(2)} Crore`
+                : car.price > 0
+                ? `PKR ${(car.price / 100000).toFixed(2)} Lakh`
+                : renderPrice(car.price)}
             </div>
+            {car.price > 0 && (
+              <p className="text-[11px] font-mono text-slate-500 mt-0.5 tabular-nums">
+                (PKR {Number(car.price).toLocaleString()})
+              </p>
+            )}
           </div>
         </div>
 
@@ -782,7 +800,9 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
                 
                 {formattedWhatsapp && (
                   <a 
-                    href={`https://wa.me/${formattedWhatsapp}?text=Hi, I am interested in your ${car.year} ${car.title} listed for ${renderPrice(car.price)} on Bazar360.`}
+                    href={`https://wa.me/${formattedWhatsapp}?text=${encodeURIComponent(
+                      `Hi, I am interested in ${car.title || `${car.year} ${car.make} ${car.model}`} listed on BAZAR360 (ID: #${car.id}). Is this available?`
+                    )}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => cinematicAudio.playClick()}
@@ -802,20 +822,34 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
                     <span className="text-xs font-mono font-black uppercase tracking-wider">360° Digital Inspection</span>
                   </div>
                   <p className="text-[11px] text-[var(--color-text-muted)] leading-relaxed">
-                    Get an official Bazar360 200+ point diagnostic check with UV light paint spectrum analysis for this vehicle before purchase.
+                    Official Bazar360 200+ point diagnostic check with UV light paint spectrum analysis for this vehicle.
                   </p>
-                  <button
-                    onClick={() => {
-                      cinematicAudio.playClick();
-                      if (window.dispatchEvent) {
-                        window.dispatchEvent(new CustomEvent('open-service-tab', { detail: car }));
-                      }
-                    }}
-                    className="w-full py-3 bg-[var(--color-accent-main)] hover:bg-[var(--color-accent-hover)] text-[#090D14] font-mono font-black text-xs uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md active:scale-95"
-                  >
-                    <Zap size={14} />
-                    <span>Book Inspection for this Car</span>
-                  </button>
+                  <div className="flex flex-col gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        cinematicAudio.playClick();
+                        setShowInspectionModal(true);
+                      }}
+                      className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-mono font-black text-xs uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md active:scale-95"
+                    >
+                      <ShieldCheck size={14} />
+                      <span>View 200+ Pt Report</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        cinematicAudio.playClick();
+                        if (window.dispatchEvent) {
+                          window.dispatchEvent(new CustomEvent('open-service-tab', { detail: car }));
+                        }
+                      }}
+                      className="w-full py-2.5 bg-[var(--color-accent-main)] hover:bg-[var(--color-accent-hover)] text-[#090D14] font-mono font-black text-xs uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md active:scale-95"
+                    >
+                      <Zap size={14} />
+                      <span>Book New Inspection</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -998,6 +1032,14 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
         <VehicleARInspectorModal
           car={car}
           onClose={() => setShowARModal(false)}
+        />
+      )}
+
+      {showInspectionModal && (
+        <InspectionReportModal
+          car={car}
+          isOpen={showInspectionModal}
+          onClose={() => setShowInspectionModal(false)}
         />
       )}
     </motion.div>

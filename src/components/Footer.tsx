@@ -7,6 +7,7 @@ interface FooterProps {
   lang?: 'en' | 'ur';
   setTab?: (tab: string) => void;
   onOpenSupportDrawer?: () => void;
+  onOpenShowroomLogin?: () => void;
 }
 
 export default function Footer({ lang = 'en', setTab }: FooterProps) {

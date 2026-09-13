@@ -1,10 +1,11 @@
 import { NO_IMAGE_SVG } from "../types";
 import React, { useState, useRef, useCallback } from 'react';
-import { MapPin, ArrowUpRight, ArrowRight, Heart, ChevronLeft, ChevronRight, Zap, Gauge, Flame, GitCompare, ShieldCheck, ChevronDown, Share2, Check, Phone, Fuel, Award } from 'lucide-react';
+import { MapPin, ArrowUpRight, ArrowRight, Heart, ChevronLeft, ChevronRight, Zap, Gauge, Flame, GitCompare, ShieldCheck, ChevronDown, Share2, Check, Phone, Fuel, Award, MessageCircle } from 'lucide-react';
 import { CarListing, Dealer } from '../types';
 import { getOptimizedUrl } from '../lib/cloudinaryService';
 import { motion, AnimatePresence } from 'motion/react';
 import { VehicleVerificationModal } from './VehicleVerificationModal';
+import { InspectionReportModal } from './InspectionReportModal';
 import { Lightbox } from './Lightbox';
 import { cinematicAudio } from '../lib/cinematicAudio';
 
@@ -60,6 +61,7 @@ export function VehicleCard({
       ];
 
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
+  const [isInspectionModalOpen, setIsInspectionModalOpen] = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -113,11 +115,20 @@ export function VehicleCard({
   };
 
   const formatPrice = (price: number) => {
+    if (!price || isNaN(price)) return 'Price on Call';
     if (price >= 10000000) {
       return `PKR ${(price / 10000000).toFixed(2)} Crore`;
     }
-    return `PKR ${(price / 100000).toFixed(1)} Lakh`;
+    return `PKR ${(price / 100000).toFixed(2)} Lakh`;
   };
+
+  const vehicleTitle = `${car.year} ${car.make} ${car.model}`;
+  const rawSellerPhone = car.sellerPhone || car.phone || (dealer && (dealer.whatsapp || dealer.phone)) || '923149198403';
+  const cleanPhone = rawSellerPhone.replace(/\D/g, '');
+  const whatsappMessage = encodeURIComponent(
+    `Hi, I am interested in ${vehicleTitle} listed on BAZAR360 (ID: #${car.id}). Is this available?`
+  );
+  const whatsappUrl = `https://wa.me/${cleanPhone}?text=${whatsappMessage}`;
 
   const isVideoUrl = (url: string) => {
     if (!url) return false;
@@ -169,9 +180,9 @@ export function VehicleCard({
         }}
       />
 
-      {/* 1. HERO MEDIA CANVAS */}
+      {/* 1. HERO MEDIA CANVAS (Locked 16:9 Aspect Ratio to Prevent Cumulative Layout Shift) */}
       <div 
-        className={`relative w-full ${variant === 'list' ? 'md:w-5/12 lg:w-4/12' : ''} aspect-[16/10] overflow-hidden bg-[#090D14] touch-pan-y shrink-0`}
+        className={`relative w-full ${variant === 'list' ? 'md:w-5/12 lg:w-4/12' : ''} aspect-[16/9] overflow-hidden bg-[#090D14] touch-pan-y shrink-0`}
         onClick={(e) => {
           const target = e.target as HTMLElement;
           if (target.closest('.custom-swiper-btn') || target.closest('.swiper-pagination')) {
@@ -202,7 +213,7 @@ export function VehicleCard({
                   <img
                     src={getOptimizedUrl(imgUrl, {
                       width: 800,
-                      height: 500,
+                      height: 450,
                       crop: 'fill',
                       quality: 'auto',
                       format: 'auto',
@@ -262,7 +273,7 @@ export function VehicleCard({
         {/* Condition & Showroom Overlays */}
         <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-20 text-left items-start max-w-[70%]">
           {dealer && (dealer.logoUrl || dealer.logo) && (
-            <div className="flex items-center gap-1.5 bg-[#090D14]/85 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/15 shadow-lg">
+            <div className="flex items-center gap-1.5 bg-[#0F172A]/90 backdrop-blur-md px-2.5 py-1 rounded-full border border-blue-500/30 shadow-lg">
               <img 
                 src={getOptimizedUrl(dealer.logoUrl || dealer.logo, { width: 120, quality: 'auto:best' })} 
                 alt={dealer.name || 'Showroom Logo'} 
@@ -275,8 +286,8 @@ export function VehicleCard({
 
           <div className="flex gap-1 flex-wrap items-center">
             {car.featured && (
-              <span className="badge-metallic-gold text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-lg whitespace-nowrap">
-                Featured
+              <span className="bg-[#EA580C] text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-lg whitespace-nowrap">
+                Featured Deal
               </span>
             )}
             <span className="badge-metallic-carbon text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full whitespace-nowrap">
@@ -350,8 +361,8 @@ export function VehicleCard({
           )}
         </div>
 
-        {/* Model Year & Verification Badge */}
-        <div className="absolute bottom-3 left-3 flex items-center gap-1.5 z-20">
+        {/* Model Year & Verification Badges */}
+        <div className="absolute bottom-3 left-3 flex items-center gap-1.5 z-20 flex-wrap">
           <div className="badge-metallic-carbon px-2.5 py-1 rounded-full text-[9px] font-bold text-white tracking-widest">
             {car.year}
           </div>
@@ -360,27 +371,29 @@ export function VehicleCard({
               {car.assemblyType}
             </div>
           )}
-          {car.verified && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                cinematicAudio.playLuxuryChime();
-                setIsVerifyModalOpen(true);
-              }}
-              className="badge-metallic-gold text-[8px] font-sans font-bold uppercase tracking-widest px-2.5 py-1 rounded-full flex items-center gap-1 shadow-lg active:scale-95 transition-all cursor-pointer"
-            >
-              <ShieldCheck size={10} className="stroke-[3]" />
-              <span>Verified</span>
-            </button>
-          )}
+          {/* 200+ Point Inspection Badge */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              cinematicAudio.playLuxuryChime();
+              setIsInspectionModalOpen(true);
+            }}
+            className="bg-[#2563EB] hover:bg-blue-600 text-white text-[8px] font-sans font-bold uppercase tracking-wider px-2.5 py-1 rounded-full flex items-center gap-1 shadow-lg active:scale-95 transition-all cursor-pointer border border-blue-400/40"
+          >
+            <ShieldCheck size={11} className="stroke-[2.5]" />
+            <span>200+ Pt Report</span>
+          </button>
         </div>
       </div>
 
       {/* 2. PRIMARY DETAILS SECTION */}
       <div className="p-3.5 sm:p-4 flex flex-col justify-between flex-grow bg-[var(--color-bg-secondary)] z-30">
         <div>
-          <span className="text-[9px] font-bold uppercase text-[var(--color-accent-main)] tracking-[0.15em] block leading-none">{car.make}</span>
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-[9px] font-bold uppercase text-[var(--color-accent-main)] tracking-[0.15em] block leading-none">{car.make}</span>
+            <span className="text-[8px] font-mono text-[var(--color-text-muted)]">ID: #{car.id.slice(0, 6)}</span>
+          </div>
           <h3 className="text-sm sm:text-base font-bold text-[var(--color-text-header)] mt-1 leading-tight line-clamp-1">
             {car.model}
           </h3>
@@ -388,62 +401,107 @@ export function VehicleCard({
             {car.transmission} • {car.fuelType} • {car.engineCC ? `${car.engineCC}cc` : '1.5L'}
           </p>
 
-          {/* Specs Mini-Grid */}
-          <div className="grid grid-cols-3 gap-1 mt-2.5 py-1.5 border-y border-[var(--color-border-main)] text-center">
-            <div className="flex flex-col items-center justify-center">
-              <Zap size={11} className="text-[var(--color-accent-main)] mb-0.5" />
-              <span className="text-[9px] font-bold text-[var(--color-text-main)] leading-none truncate">{calculatedHP}</span>
+          {/* Standard Specs Grid: 2x2 on mobile, 1x4 on desktop (≥768px) */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5 mt-2.5 py-2 border-y border-[var(--color-border-main)] text-left">
+            <div className="flex items-center gap-1.5 bg-[var(--color-bg-tertiary)]/60 px-2 py-1.5 rounded-lg border border-[var(--color-border-main)]/50">
+              <Gauge size={12} className="text-[var(--color-accent-main)] shrink-0" />
+              <div className="min-w-0">
+                <span className="text-[8px] text-[var(--color-text-muted)] uppercase font-semibold block leading-none">Mileage</span>
+                <span className="text-[10px] font-mono tabular-nums font-bold text-[var(--color-text-header)] truncate block mt-0.5">
+                  {car.mileage ? `${(car.mileage / 1000).toFixed(0)}k km` : 'Unregistered'}
+                </span>
+              </div>
             </div>
-            <div className="flex flex-col items-center justify-center border-x border-[var(--color-border-main)]">
-              <Gauge size={11} className="text-[var(--color-accent-main)] mb-0.5" />
-              <span className="text-[9px] font-bold text-[var(--color-text-main)] leading-none truncate">
-                {car.mileage ? `${(car.mileage / 1000).toFixed(0)}k km` : 'Unreg.'}
-              </span>
+
+            <div className="flex items-center gap-1.5 bg-[var(--color-bg-tertiary)]/60 px-2 py-1.5 rounded-lg border border-[var(--color-border-main)]/50">
+              <Zap size={12} className="text-[var(--color-accent-main)] shrink-0" />
+              <div className="min-w-0">
+                <span className="text-[8px] text-[var(--color-text-muted)] uppercase font-semibold block leading-none">Gearbox</span>
+                <span className="text-[10px] font-sans font-bold text-[var(--color-text-header)] truncate block mt-0.5">
+                  {car.transmission || 'Automatic'}
+                </span>
+              </div>
             </div>
-            <div className="flex flex-col items-center justify-center">
-              <MapPin size={11} className="text-[var(--color-accent-main)] mb-0.5" />
-              <span className="text-[9px] font-bold text-[var(--color-text-main)] leading-none truncate">
-                {car.registrationCity || car.location || 'Pakistan'}
-              </span>
+
+            <div className="flex items-center gap-1.5 bg-[var(--color-bg-tertiary)]/60 px-2 py-1.5 rounded-lg border border-[var(--color-border-main)]/50">
+              <Fuel size={12} className="text-[var(--color-accent-main)] shrink-0" />
+              <div className="min-w-0">
+                <span className="text-[8px] text-[var(--color-text-muted)] uppercase font-semibold block leading-none">Engine</span>
+                <span className="text-[10px] font-mono tabular-nums font-bold text-[var(--color-text-header)] truncate block mt-0.5">
+                  {car.engineCC ? `${car.engineCC}cc` : (car.fuelType || 'Petrol')}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5 bg-[var(--color-bg-tertiary)]/60 px-2 py-1.5 rounded-lg border border-[var(--color-border-main)]/50">
+              <MapPin size={12} className="text-[var(--color-accent-main)] shrink-0" />
+              <div className="min-w-0">
+                <span className="text-[8px] text-[var(--color-text-muted)] uppercase font-semibold block leading-none">City</span>
+                <span className="text-[10px] font-sans font-bold text-[var(--color-text-header)] truncate block mt-0.5">
+                  {car.registrationCity || car.location || 'Pakistan'}
+                </span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Price & Actions Row */}
-        <div className="pt-3 flex flex-col gap-1.5 mt-auto">
+        <div className="pt-3 flex flex-col gap-2 mt-auto">
           <div className="flex items-center justify-between gap-1 w-full">
-            <span className="text-sm sm:text-base font-extrabold text-[var(--color-accent-main)] font-sans leading-tight whitespace-nowrap truncate">
-              {formatPrice(car.price)}
-            </span>
-            <div className="flex items-center gap-1.5 shrink-0">
-              <button
-                type="button"
-                title={isExpanded ? 'Collapse Specs' : 'Expand Specs'}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  cinematicAudio.playTick();
-                  setIsExpanded(!isExpanded);
-                }}
-                className="px-2 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all bg-[var(--color-bg-tertiary)] hover:bg-[var(--color-border-main)] text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] cursor-pointer flex items-center gap-0.5 border border-[var(--color-border-main)]"
-              >
-                <span>Specs</span>
-                <ChevronDown 
-                  size={10} 
-                  className={`transition-transform duration-200 ${isExpanded ? 'rotate-180' : 'rotate-0'}`} 
-                />
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  cinematicAudio.playClick();
-                  onSelect(car);
-                }}
-                className="btn-gold-primary py-1 px-3 text-[9px] rounded-lg"
-              >
-                <span>View</span>
-                <ArrowUpRight size={11} />
-              </button>
+            <div>
+              <span className="text-[9px] font-mono uppercase tracking-wider text-[var(--color-text-muted)] block leading-none">Price Demand</span>
+              <span className="text-base sm:text-lg font-black text-[var(--color-accent-main)] font-mono tabular-nums leading-tight mt-0.5 block">
+                {formatPrice(car.price)}
+              </span>
             </div>
+            
+            <button
+              type="button"
+              title={isExpanded ? 'Collapse Specs' : 'Expand Specs'}
+              onClick={(e) => {
+                e.stopPropagation();
+                cinematicAudio.playTick();
+                setIsExpanded(!isExpanded);
+              }}
+              className="px-2 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all bg-[var(--color-bg-tertiary)] hover:bg-[var(--color-border-main)] text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] cursor-pointer flex items-center gap-0.5 border border-[var(--color-border-main)] shrink-0"
+            >
+              <span>Specs</span>
+              <ChevronDown 
+                size={10} 
+                className={`transition-transform duration-200 ${isExpanded ? 'rotate-180' : 'rotate-0'}`} 
+              />
+            </button>
+          </div>
+
+          {/* Primary Conversion CTAs: WhatsApp (Emerald #10B981) + View Details (42px touch target) */}
+          <div className="grid grid-cols-2 gap-2 pt-1">
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => {
+                e.stopPropagation();
+                cinematicAudio.playClick();
+              }}
+              aria-label={`WhatsApp chat about ${vehicleTitle}`}
+              className="min-h-[42px] px-3 rounded-xl bg-[#10B981] hover:bg-emerald-600 active:scale-[0.98] text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-md shadow-emerald-500/20 transition-all cursor-pointer select-none"
+            >
+              <MessageCircle size={15} className="shrink-0" />
+              <span className="truncate">WhatsApp</span>
+            </a>
+
+            <button
+              type="button"
+              onClick={() => {
+                cinematicAudio.playClick();
+                onSelect(car);
+              }}
+              aria-label={`View details of ${vehicleTitle}`}
+              className="min-h-[42px] px-3 rounded-xl bg-[#0F172A] hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 active:scale-[0.98] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer select-none border border-slate-700/50 dark:border-transparent"
+            >
+              <span>View Details</span>
+              <ArrowUpRight size={14} className="shrink-0" />
+            </button>
           </div>
         </div>
 
@@ -500,7 +558,7 @@ export function VehicleCard({
                     </span>
                   </div>
                   <a
-                    href={`https://wa.me/${(car.sellerPhone || car.phone || '923149198403').replace(/\D/g, '')}?text=${encodeURIComponent(`Hi, I am inquiring about the ${car.year} ${car.make} ${car.model} on Bazar360.`)}`}
+                    href={whatsappUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => {
@@ -517,6 +575,12 @@ export function VehicleCard({
           )}
         </AnimatePresence>
       </div>
+
+      <InspectionReportModal
+        car={car}
+        isOpen={isInspectionModalOpen}
+        onClose={() => setIsInspectionModalOpen(false)}
+      />
 
       <VehicleVerificationModal 
         car={car} 

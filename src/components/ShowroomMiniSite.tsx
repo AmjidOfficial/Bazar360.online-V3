@@ -28,7 +28,9 @@ import {
   PhoneCall,
   Building2,
   Megaphone,
-  MapPin
+  MapPin,
+  BarChart3,
+  Bell
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ShowroomHero } from './ShowroomHero';
@@ -41,6 +43,10 @@ import { DigitalBusinessCard } from './DigitalBusinessCard/DigitalBusinessCard';
 import { ShowroomAnnouncementsFeed } from './ShowroomAnnouncementsFeed';
 import { ShowroomMediaManager } from './ShowroomMediaManager';
 import { ShowroomShareQR } from './ShowroomShareQR';
+import { ShowroomTeamManager } from './ShowroomTeamManager';
+import { ShowroomFacilityGallery } from './ShowroomFacilityGallery';
+import { ShowroomAnalyticsDashboard } from './ShowroomAnalyticsDashboard';
+import { ShowroomSubscriptionToggle } from './ShowroomSubscriptionToggle';
 import { cinematicAudio } from '../lib/cinematicAudio';
 
 // Performance optimization: Lazy load non-critical sections to reduce initial bundle evaluation
@@ -189,12 +195,16 @@ export default function ShowroomMiniSite({
 
   const tabs = [
     { id: 'home', label: 'Home', icon: <Info size={16} /> },
-    { id: 'about', label: 'About', icon: <Newspaper size={16} /> },
     { id: 'inventory', label: 'Inventory', icon: <LayoutGrid size={16} /> },
-    { id: 'media', label: 'Showroom Gallery', icon: <ImageIcon size={16} /> },
+    { id: 'team', label: 'Staff & Team', icon: <Users size={16} /> },
+    { id: 'media', label: 'Premises & Gallery', icon: <Building2 size={16} /> },
     { id: 'community', label: 'Posts/Community', icon: <Megaphone size={16} /> },
+    { id: 'about', label: 'About', icon: <Newspaper size={16} /> },
     { id: 'businesscard', label: 'Digital Business Card', icon: <QrCode size={16} /> },
-    ...(isOwner ? [{ id: 'mediamanager', label: 'Logo & Cover Manager', icon: <ImageIcon size={16} /> }] : [])
+    ...(isOwner ? [
+      { id: 'analytics', label: 'Visitor Insights', icon: <BarChart3 size={16} /> },
+      { id: 'mediamanager', label: 'Logo & Cover Manager', icon: <ImageIcon size={16} /> }
+    ] : [])
   ];
 
   return (
@@ -549,8 +559,21 @@ export default function ShowroomMiniSite({
                       </div>
                     </div>
 
-                    {/* SHARE DIGITAL SHOWROOM COGNITIVE CARD */}
-                    <div className="lg:col-span-4">
+                    {/* SHARE DIGITAL SHOWROOM COGNITIVE CARD & SUBSCRIPTION TOGGLE */}
+                    <div className="lg:col-span-4 space-y-6">
+                      
+                      {/* Subscription Toggle Card */}
+                      <div className="bg-[var(--color-bg-secondary)] p-6 rounded-3xl border border-[var(--color-border-main)] shadow-xl text-left space-y-4">
+                        <div className="flex items-center gap-2 text-orange-500 font-extrabold text-sm font-display">
+                          <Bell size={18} />
+                          <span>Inventory Notifications</span>
+                        </div>
+                        <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
+                          Subscribe to receive instant push and email alerts whenever {dealer.name} posts a new vehicle listing or reduces prices.
+                        </p>
+                        <ShowroomSubscriptionToggle dealer={dealer} currentUser={currentUser} className="w-full" />
+                      </div>
+
                       <div className="bg-[var(--color-bg-secondary)] p-8 rounded-3xl border border-[var(--color-border-main)] shadow-2xl relative overflow-hidden group text-left">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--color-accent-main)]/10 rounded-full blur-3xl group-hover:bg-[var(--color-accent-main)]/20 transition-all pointer-events-none" />
                         <h3 className="text-lg font-black text-[var(--color-text-header)] font-display mb-4 flex items-center gap-2">
@@ -1019,98 +1042,40 @@ export default function ShowroomMiniSite({
               )}
 
               {/* ======================================================== */}
-              {/* TAB 4: SHOWROOM MEDIA GALLERY TAB */}
+              {/* TAB 8: STAFF & TEAM MANAGEMENT TAB */}
+              {/* ======================================================== */}
+              {activeTab === 'team' && (
+                <div className="space-y-8 text-left">
+                  <ShowroomTeamManager
+                    dealer={dealer}
+                    isOwner={isOwner}
+                    onUpdateDealer={(updated) => setDealer(updated)}
+                  />
+                </div>
+              )}
+
+              {/* ======================================================== */}
+              {/* TAB 9: VISITOR INSIGHTS ANALYTICS DASHBOARD */}
+              {/* ======================================================== */}
+              {activeTab === 'analytics' && isOwner && (
+                <div className="space-y-8 text-left">
+                  <ShowroomAnalyticsDashboard
+                    showroom={dealer}
+                    inventory={listings}
+                  />
+                </div>
+              )}
+
+              {/* ======================================================== */}
+              {/* TAB 4: SHOWROOM MEDIA & FACILITY GALLERY TAB */}
               {/* ======================================================== */}
               {activeTab === 'media' && (
                 <div className="space-y-8 text-left">
-                  <div className="border-b border-[var(--color-border-main)] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div>
-                      <h2 className="text-2xl font-black text-[var(--color-text-main)] font-display uppercase tracking-tight">
-                        Showroom Media Gallery
-                      </h2>
-                      <p className="text-xs text-[var(--color-text-muted)] mt-1">
-                        Explore virtual walkthrough videos, 360° interactive tours, and high-fidelity photos of {dealer.name}'s luxury floor.
-                      </p>
-                    </div>
-                    <button
-                      onClick={async () => {
-                        const shareUrl = `${window.location.origin}/dealers/${dealer.id}?tab=media`;
-                        const shareData = {
-                          title: `${dealer.name} - Showroom Media Gallery`,
-                          text: `Check out the virtual walkthrough videos and physical facility gallery of ${dealer.name} on Bazar360!`,
-                          url: shareUrl,
-                        };
-                        try {
-                          if (navigator.share) {
-                            await navigator.share(shareData);
-                            toast.success('Gallery link shared successfully!');
-                          } else {
-                            await navigator.clipboard.writeText(shareUrl);
-                            toast.success('Gallery deep link copied to clipboard!');
-                          }
-                        } catch (err) {
-                          console.error('[ShowroomMiniSite] Error sharing gallery:', err);
-                        }
-                      }}
-                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--color-accent-main)] hover:bg-[var(--color-accent-hover)] text-[#030712] font-mono font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md shrink-0 select-none"
-                    >
-                      <Share2 size={14} />
-                      <span>Share Gallery</span>
-                    </button>
-                  </div>
-                  <React.Suspense fallback={
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 animate-pulse">
-                      {[1, 2, 3, 4, 5, 6].map(n => (
-                        <div key={n} className="bg-bg-secondary/50 rounded-2xl h-44 border border-white/5" />
-                      ))}
-                    </div>
-                  }>
-                    <MediaGallery 
-                      media={dealer.gallery || []} 
-                      isOwner={isOwner} 
-                      onAddMedia={async (url) => {
-                        console.log('[ShowroomMiniSite] Gallery onAddMedia triggered:', url);
-                        // 1. Immediately update local state for real-time visual responsiveness
-                        const updated = { 
-                          ...dealer, 
-                          gallery: [...(dealer.gallery || []), url],
-                          media: [...(dealer.media || []), url]
-                        };
-                        setDealer(updated);
-
-                        // 2. Perform durable Firestore update with safe arrayUnion
-                        try {
-                          await dbSaveShowroomMedia(dealer.id, url);
-                          console.log('[ShowroomMiniSite] dbSaveShowroomMedia successful for:', url);
-                        } catch (err: any) {
-                          console.error('[ShowroomMiniSite] Error saving showroom media:', err);
-                          toast.error('Failed to save showroom media to database.');
-                        }
-                      }} 
-                      onRemoveMedia={async (idx) => {
-                        const url = (dealer.gallery || [])[idx];
-                        if (!url) return;
-                        console.log('[ShowroomMiniSite] Gallery onRemoveMedia triggered for index:', idx, url);
-
-                        // 1. Immediately update local state for real-time visual responsiveness
-                        const updated = { 
-                          ...dealer, 
-                          gallery: (dealer.gallery || []).filter((_, i) => i !== idx),
-                          media: (dealer.media || []).filter(item => item !== url)
-                        };
-                        setDealer(updated);
-
-                        // 2. Perform durable Firestore deletion with arrayRemove
-                        try {
-                          await dbRemoveShowroomMedia(dealer.id, url);
-                          console.log('[ShowroomMiniSite] dbRemoveShowroomMedia successful for:', url);
-                        } catch (err: any) {
-                          console.error('[ShowroomMiniSite] Error removing showroom media:', err);
-                          toast.error('Failed to remove showroom media from database.');
-                        }
-                      }} 
-                    />
-                  </React.Suspense>
+                  <ShowroomFacilityGallery
+                    dealer={dealer}
+                    isOwner={isOwner}
+                    onUpdateDealer={(updated) => setDealer(updated)}
+                  />
                 </div>
               )}
 
