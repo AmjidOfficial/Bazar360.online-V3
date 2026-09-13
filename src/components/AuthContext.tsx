@@ -145,7 +145,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
           
           setCurrentUser(profile);
-          localStorage.setItem('bazar360_user', JSON.stringify(profile));
+          try { localStorage.setItem('bazar360_user', JSON.stringify(profile)); } catch {}
 
           // Load profile's saved attributes if stored in Firestore
           // (Can integrate with DB favorites/alerts)
@@ -154,7 +154,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } else {
         setCurrentUser(null);
-        localStorage.removeItem('bazar360_user');
+        try { localStorage.removeItem('bazar360_user'); } catch {}
       }
       setLoading(false);
     });
@@ -190,7 +190,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await signOut(auth);
       setCurrentUser(null);
       setFirebaseUser(null);
-      localStorage.removeItem('bazar360_user');
+      try { localStorage.removeItem('bazar360_user'); } catch {}
     } catch (err) {
       console.error('[AuthContext] Log out failed:', err);
       throw err;
@@ -209,7 +209,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await dbSaveUserProfile(updatedProfile);
       setCurrentUser(updatedProfile);
-      localStorage.setItem('bazar360_user', JSON.stringify(updatedProfile));
+      try { localStorage.setItem('bazar360_user', JSON.stringify(updatedProfile)); } catch {}
     } catch (err) {
       console.error('[AuthContext] Update profile failed:', err);
       throw err;
@@ -227,7 +227,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     
     setFavorites(updated);
-    localStorage.setItem('bazar360_favorites', JSON.stringify(updated));
+    try { localStorage.setItem('bazar360_favorites', JSON.stringify(updated)); } catch {}
 
     if (currentUser) {
       try {
@@ -295,7 +295,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (alerts.includes(alertQuery)) return;
     const updated = [alertQuery, ...alerts];
     setAlerts(updated);
-    localStorage.setItem('bazar360_alerts', JSON.stringify(updated));
+    try { localStorage.setItem('bazar360_alerts', JSON.stringify(updated)); } catch {}
 
     if (currentUser) {
       try {
@@ -315,7 +315,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const removeAlert = async (alertQuery: string) => {
     const updated = alerts.filter((a) => a !== alertQuery);
     setAlerts(updated);
-    localStorage.setItem('bazar360_alerts', JSON.stringify(updated));
+    try { localStorage.setItem('bazar360_alerts', JSON.stringify(updated)); } catch {}
 
     if (currentUser) {
       try {

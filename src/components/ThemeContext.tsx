@@ -15,8 +15,12 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<ThemeType>(() => {
-    const saved = localStorage.getItem('bazar360_theme') as ThemeType;
-    if (saved === 'light' || saved === 'dark') return saved;
+    try {
+      const saved = localStorage.getItem('bazar360_theme') as ThemeType;
+      if (saved === 'light' || saved === 'dark') return saved;
+    } catch {
+      // Storage restricted in sandbox iframe
+    }
     return 'light'; // Default to light premium theme
   });
 
@@ -34,7 +38,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const root = document.documentElement;
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
-    localStorage.setItem('bazar360_theme', theme);
+    try {
+      localStorage.setItem('bazar360_theme', theme);
+    } catch {
+      // Storage restricted in sandbox iframe
+    }
   }, [theme]);
 
   return (

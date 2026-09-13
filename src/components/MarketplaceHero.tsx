@@ -17,9 +17,15 @@ import {
   MapPin,
   Flame,
   RefreshCw,
-  Award
+  Award,
+  Volume2,
+  VolumeX,
+  Zap,
+  Gauge
 } from 'lucide-react';
 import { CarListing } from '../types';
+import { getEligibleListings } from '../lib/dbService';
+import { cinematicAudio } from '../lib/cinematicAudio';
 
 interface MarketplaceHeroProps {
   lang: 'en' | 'ur';
@@ -54,15 +60,10 @@ export default function MarketplaceHero({ lang, onSearch, setTab, listings = [],
   const [selectedHeroIndex, setSelectedHeroIndex] = useState(0);
   const [isAutoplay, setIsAutoplay] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
+  const [isMuted, setIsMuted] = useState(() => cinematicAudio.getMuted());
 
-  // Filter valid live inventory from backend Firestore listings, sorted latest uploaded first
-  const validPropListings = (listings || [])
-    .filter(item => item && (item.images?.length > 0 || item.imageUrl || item.title || item.make))
-    .sort((a, b) => {
-      const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-      const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-      return timeB - timeA;
-    });
+  // Filter valid live inventory from backend Firestore listings using standardized eligibility utility
+  const validPropListings = getEligibleListings(listings, true);
   
   const heroVehicles = validPropListings;
   const activeHeroCar = heroVehicles.length > 0 ? (heroVehicles[selectedHeroIndex % heroVehicles.length] || heroVehicles[0]) : null;
@@ -72,7 +73,11 @@ export default function MarketplaceHero({ lang, onSearch, setTab, listings = [],
     if (!isAutoplay || isHovered || heroVehicles.length <= 1) return;
     
     const interval = setInterval(() => {
-      setSelectedHeroIndex((prev) => (prev + 1) % heroVehicles.length);
+      setSelectedHeroIndex((prev) => {
+        const next = (prev + 1) % heroVehicles.length;
+        cinematicAudio.playStagePulse();
+        return next;
+      });
     }, 4500);
 
     return () => clearInterval(interval);
@@ -80,12 +85,22 @@ export default function MarketplaceHero({ lang, onSearch, setTab, listings = [],
 
   const handleNextHero = () => {
     if (heroVehicles.length === 0) return;
+    cinematicAudio.playStagePulse();
     setSelectedHeroIndex((prev) => (prev + 1) % heroVehicles.length);
   };
 
   const handlePrevHero = () => {
     if (heroVehicles.length === 0) return;
+    cinematicAudio.playStagePulse();
     setSelectedHeroIndex((prev) => (prev - 1 + heroVehicles.length) % heroVehicles.length);
+  };
+
+  const handleToggleMute = () => {
+    const nextMuted = cinematicAudio.toggleMute();
+    setIsMuted(nextMuted);
+    if (!nextMuted) {
+      cinematicAudio.playLuxuryChime();
+    }
   };
 
   const handleCombinedSearch = (e: React.FormEvent) => {
@@ -364,12 +379,22 @@ export default function MarketplaceHero({ lang, onSearch, setTab, listings = [],
                   </span>
                   <span className="text-xs font-bold text-[var(--color-text-header)] tracking-wider uppercase flex items-center gap-1.5">
                     <Award size={13} className="text-[var(--color-accent-main)]" />
-                    <span>{isUrdu ? 'لائیو گاڑی شوکیس' : 'Live Showcase Inventory'}</span>
+                    <span>{isUrdu ? 'لائیو ورچوئل شوکیس' : 'Virtual Showroom Stage'}</span>
                   </span>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-mono font-bold text-[var(--color-text-muted)] bg-[var(--color-bg-tertiary)] px-2.5 py-1 rounded-lg border border-[var(--color-border-main)] shadow-sm">
+                <div className="flex items-center gap-1.5">
+                  {/* Sound FX Audio Mute / Unmute Button */}
+                  <button
+                    type="button"
+                    onClick={handleToggleMute}
+                    title={isMuted ? 'Unmute Cinematic Sound' : 'Mute Cinematic Sound'}
+                    className="p-1.5 rounded-lg bg-[var(--color-bg-tertiary)] hover:bg-[var(--color-bg-secondary)] text-[var(--color-text-muted)] hover:text-[var(--color-accent-main)] hover:border-[var(--color-accent-main)] transition-all cursor-pointer border border-[var(--color-border-main)] flex items-center justify-center w-7 h-7"
+                  >
+                    {isMuted ? <VolumeX size={13} /> : <Volume2 size={13} className="text-[var(--color-accent-main)]" />}
+                  </button>
+
+                  <span className="text-[10px] font-mono font-bold text-[var(--color-text-muted)] bg-[var(--color-bg-tertiary)] px-2 py-1 rounded-lg border border-[var(--color-border-main)] shadow-sm">
                     {(() => {
                       const totalCount = heroVehicles?.length || 0;
                       const activeNum = totalCount === 0 ? 0 : ((selectedHeroIndex || 0) % totalCount) + 1;
@@ -378,16 +403,19 @@ export default function MarketplaceHero({ lang, onSearch, setTab, listings = [],
                   </span>
                   <button
                     type="button"
-                    onClick={() => setIsAutoplay(!isAutoplay)}
+                    onClick={() => {
+                      cinematicAudio.playClick();
+                      setIsAutoplay(!isAutoplay);
+                    }}
                     title={isAutoplay ? 'Pause auto rotation' : 'Start auto rotation'}
-                    className="p-1.5 rounded-lg bg-[var(--color-bg-tertiary)] hover:bg-[var(--color-bg-secondary)] text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] hover:border-[var(--color-accent-main)] transition-all cursor-pointer border border-[var(--color-border-main)]"
+                    className="p-1.5 rounded-lg bg-[var(--color-bg-tertiary)] hover:bg-[var(--color-bg-secondary)] text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] hover:border-[var(--color-accent-main)] transition-all cursor-pointer border border-[var(--color-border-main)] flex items-center justify-center w-7 h-7"
                   >
                     {isAutoplay ? <Pause size={12} /> : <Play size={12} />}
                   </button>
                 </div>
               </div>
 
-              {/* Main Showcase Vehicle Card */}
+              {/* Main Showcase Vehicle Card with Virtual Showroom Stage */}
               {heroVehicles.length === 0 ? (
                 <div className="relative w-full rounded-2xl overflow-hidden border border-[var(--color-border-main)] shadow-2xl bg-[var(--color-bg-secondary)] p-8 text-center space-y-4">
                   <div className="w-12 h-12 rounded-full bg-[var(--color-accent-subtle)] border border-[var(--color-accent-main)] flex items-center justify-center mx-auto text-[var(--color-accent-main)]">
@@ -408,7 +436,7 @@ export default function MarketplaceHero({ lang, onSearch, setTab, listings = [],
                 </div>
               ) : activeHeroCar ? (
                 <div className="space-y-3">
-                  <div className="relative w-full rounded-2xl overflow-hidden border border-[var(--color-border-main)] shadow-2xl bg-[var(--color-bg-secondary)] group flex flex-col transition-all duration-400">
+                  <div className="relative w-full rounded-2xl overflow-hidden border border-[var(--color-border-main)] shadow-2xl bg-[var(--color-bg-secondary)] group flex flex-col transition-all duration-400 hover:border-[var(--color-accent-main)]/60">
                   
                   {/* Auto Rotation Progress Bar */}
                   {isAutoplay && !isHovered && heroVehicles.length > 1 && (
@@ -423,30 +451,39 @@ export default function MarketplaceHero({ lang, onSearch, setTab, listings = [],
                     </div>
                   )}
 
-                  {/* Vehicle Image Canvas */}
-                  <div className="relative w-full aspect-[16/9] bg-[var(--color-bg-primary)] overflow-hidden">
+                  {/* Vehicle Image Canvas with Showroom Stage Lighting */}
+                  <div className="relative w-full aspect-[16/9] bg-[#090D14] overflow-hidden showroom-stage-pedestal">
+                    {/* Top ambient spotlight beam */}
+                    <div className="absolute inset-0 showroom-spotlight-beam pointer-events-none z-10" />
+
                     <AnimatePresence mode="wait">
                       <motion.img
                         key={activeHeroCar.id || selectedHeroIndex}
                         src={activeHeroCar.images?.[0] || activeHeroCar.imageUrl || NO_IMAGE_SVG}
                         alt={activeHeroCar.title || `${activeHeroCar.make} ${activeHeroCar.model}`}
-                        initial={{ opacity: 0, scale: 1.02 }}
+                        initial={{ opacity: 0, scale: 1.04 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.98 }}
-                        transition={{ duration: 0.35 }}
-                        className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
+                        exit={{ opacity: 0, scale: 0.97 }}
+                        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                        className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 relative z-5"
                       />
                     </AnimatePresence>
 
+                    {/* Dynamic Specular Sheen Glare */}
+                    <div className="sheen-glare-effect z-15" />
+
+                    {/* Stage Floor Reflection Gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#090D14] via-transparent to-transparent pointer-events-none z-10" />
+
                     {/* Top Floating Badges */}
                     <div className="absolute top-3 left-3 z-20 flex flex-wrap items-center gap-1.5">
-                      <div className="bg-[var(--color-bg-primary)]/95 backdrop-blur-md border border-[var(--color-border-main)] px-2.5 py-1 rounded-xl flex items-center gap-1.5 text-[11px] font-bold text-[var(--color-text-header)] shadow-lg">
-                        <ShieldCheck size={14} className="text-[var(--color-accent-main)]" />
+                      <div className="badge-metallic-gold px-2.5 py-1 rounded-xl flex items-center gap-1.5 text-[11px] font-bold shadow-lg backdrop-blur-md">
+                        <ShieldCheck size={14} className="text-[var(--color-accent-main)] stroke-[2.5]" />
                         <span>Verified Stock</span>
                       </div>
 
                       {activeHeroCar.condition && (
-                        <div className="bg-[var(--color-accent-main)] text-white px-2.5 py-1 rounded-xl text-[10px] font-extrabold uppercase shadow-sm">
+                        <div className="badge-metallic-carbon px-2.5 py-1 rounded-xl text-[10px] font-extrabold uppercase shadow-sm">
                           {activeHeroCar.condition}
                         </div>
                       )}
@@ -454,7 +491,7 @@ export default function MarketplaceHero({ lang, onSearch, setTab, listings = [],
 
                     {/* Top Right Model Year */}
                     <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5">
-                      <div className="bg-[var(--color-bg-primary)]/95 backdrop-blur-md border border-[var(--color-border-main)] px-2.5 py-1 rounded-xl text-xs font-mono font-bold text-[var(--color-text-header)] shadow-lg">
+                      <div className="badge-metallic-silver px-2.5 py-1 rounded-xl text-xs font-mono font-bold shadow-lg backdrop-blur-md">
                         {activeHeroCar.year} Model
                       </div>
                     </div>
@@ -465,7 +502,7 @@ export default function MarketplaceHero({ lang, onSearch, setTab, listings = [],
                         <button
                           type="button"
                           onClick={handlePrevHero}
-                          className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-[var(--color-bg-primary)]/85 hover:bg-[var(--color-accent-main)] hover:text-white text-[var(--color-text-header)] border border-[var(--color-border-main)] flex items-center justify-center transition-all opacity-80 group-hover:opacity-100 cursor-pointer shadow-xl active:scale-95"
+                          className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/60 hover:bg-[var(--color-accent-main)] hover:text-[#090D14] text-white border border-white/20 flex items-center justify-center transition-all opacity-80 group-hover:opacity-100 cursor-pointer shadow-xl active:scale-95 backdrop-blur-sm"
                           aria-label="Previous vehicle"
                         >
                           <ChevronLeft size={18} />
@@ -473,7 +510,7 @@ export default function MarketplaceHero({ lang, onSearch, setTab, listings = [],
                         <button
                           type="button"
                           onClick={handleNextHero}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-[var(--color-bg-primary)]/85 hover:bg-[var(--color-accent-main)] hover:text-white text-[var(--color-text-header)] border border-[var(--color-border-main)] flex items-center justify-center transition-all opacity-80 group-hover:opacity-100 cursor-pointer shadow-xl active:scale-95"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/60 hover:bg-[var(--color-accent-main)] hover:text-[#090D14] text-white border border-white/20 flex items-center justify-center transition-all opacity-80 group-hover:opacity-100 cursor-pointer shadow-xl active:scale-95 backdrop-blur-sm"
                           aria-label="Next vehicle"
                         >
                           <ChevronRight size={18} />
@@ -524,29 +561,35 @@ export default function MarketplaceHero({ lang, onSearch, setTab, listings = [],
                     {/* Row 3: Key Specs Grid */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
                       <div className="bg-[var(--color-bg-tertiary)]/80 p-2 rounded-xl border border-[var(--color-border-subtle)] flex flex-col justify-center">
-                        <span className="text-[9px] font-mono text-[var(--color-text-muted)] uppercase">Mileage</span>
-                        <span className="text-xs font-bold text-[var(--color-text-header)] font-mono truncate">
+                        <span className="text-[9px] font-mono text-[var(--color-text-muted)] uppercase flex items-center justify-center gap-0.5">
+                          <Gauge size={10} className="text-[var(--color-accent-main)]" />
+                          Mileage
+                        </span>
+                        <span className="text-xs font-bold text-[var(--color-text-header)] font-mono truncate mt-0.5">
                           {activeHeroCar.mileage ? `${(activeHeroCar.mileage / 1000).toFixed(1)}k km` : 'Unreg.'}
                         </span>
                       </div>
 
                       <div className="bg-[var(--color-bg-tertiary)]/80 p-2 rounded-xl border border-[var(--color-border-subtle)] flex flex-col justify-center">
-                        <span className="text-[9px] font-mono text-[var(--color-text-muted)] uppercase">Engine</span>
-                        <span className="text-xs font-bold text-[var(--color-text-header)] font-mono truncate">
+                        <span className="text-[9px] font-mono text-[var(--color-text-muted)] uppercase flex items-center justify-center gap-0.5">
+                          <Zap size={10} className="text-[var(--color-accent-main)]" />
+                          Engine
+                        </span>
+                        <span className="text-xs font-bold text-[var(--color-text-header)] font-mono truncate mt-0.5">
                           {activeHeroCar.specs?.engineSize || (activeHeroCar.engineCC ? `${activeHeroCar.engineCC} CC` : 'N/A')}
                         </span>
                       </div>
 
                       <div className="bg-[var(--color-bg-tertiary)]/80 p-2 rounded-xl border border-[var(--color-border-subtle)] flex flex-col justify-center">
                         <span className="text-[9px] font-mono text-[var(--color-text-muted)] uppercase">Trans.</span>
-                        <span className="text-xs font-bold text-[var(--color-text-header)] truncate">
+                        <span className="text-xs font-bold text-[var(--color-text-header)] truncate mt-0.5">
                           {activeHeroCar.transmission || 'Auto'}
                         </span>
                       </div>
 
                       <div className="bg-[var(--color-bg-tertiary)]/80 p-2 rounded-xl border border-[var(--color-border-subtle)] flex flex-col justify-center">
                         <span className="text-[9px] font-mono text-[var(--color-text-muted)] uppercase">Fuel</span>
-                        <span className="text-xs font-bold text-[var(--color-text-header)] truncate">
+                        <span className="text-xs font-bold text-[var(--color-text-header)] truncate mt-0.5">
                           {activeHeroCar.fuelType || 'Petrol'}
                         </span>
                       </div>
@@ -557,6 +600,7 @@ export default function MarketplaceHero({ lang, onSearch, setTab, listings = [],
                       <button
                         type="button"
                         onClick={() => {
+                          cinematicAudio.playClick();
                           if (onSelectListing) {
                             onSelectListing(activeHeroCar);
                           } else {
@@ -573,6 +617,7 @@ export default function MarketplaceHero({ lang, onSearch, setTab, listings = [],
                         href={`https://wa.me/${activeHeroCar.sellerWhatsApp || activeHeroCar.sellerPhone || '923159085086'}?text=${encodeURIComponent(`Hi, I am interested in your ${activeHeroCar.year} ${activeHeroCar.make} ${activeHeroCar.model} listed on Bazar360.`)}`}
                         target="_blank"
                         rel="noopener noreferrer"
+                        onClick={() => cinematicAudio.playClick()}
                         className="px-3.5 py-2.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-bold flex items-center justify-center gap-1 transition-all cursor-pointer shrink-0"
                         title="Contact Seller on WhatsApp"
                       >
@@ -604,6 +649,7 @@ export default function MarketplaceHero({ lang, onSearch, setTab, listings = [],
                             key={car.id || idx}
                             type="button"
                             onClick={() => {
+                              cinematicAudio.playTick();
                               setSelectedHeroIndex(idx);
                               setIsAutoplay(false);
                             }}

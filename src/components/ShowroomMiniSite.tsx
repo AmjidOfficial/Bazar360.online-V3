@@ -41,6 +41,7 @@ import { DigitalBusinessCard } from './DigitalBusinessCard/DigitalBusinessCard';
 import { ShowroomAnnouncementsFeed } from './ShowroomAnnouncementsFeed';
 import { ShowroomMediaManager } from './ShowroomMediaManager';
 import { ShowroomShareQR } from './ShowroomShareQR';
+import { cinematicAudio } from '../lib/cinematicAudio';
 
 // Performance optimization: Lazy load non-critical sections to reduce initial bundle evaluation
 const InventoryGrid = React.lazy(() => import('./InventoryGrid').then(module => ({ default: module.InventoryGrid })));
@@ -122,6 +123,11 @@ export default function ShowroomMiniSite({
     try {
       const currentCount = dealer.likes_count || dealer.likesCount || 0;
       const newCount = newIsLiked ? currentCount + 1 : Math.max(0, currentCount - 1);
+      if (newIsLiked) {
+        cinematicAudio.playLuxuryChime();
+      } else {
+        cinematicAudio.playClick();
+      }
       await dbUpdateDealer(dealer.id, { likesCount: newCount, likes_count: newCount });
       setDealer(prev => ({ ...prev, likesCount: newCount, likes_count: newCount }));
     } catch (err) {
@@ -130,6 +136,7 @@ export default function ShowroomMiniSite({
   };
 
   const handleTabClick = (tabId: string) => {
+    cinematicAudio.playClick();
     setActiveTab(tabId);
     setIsMobileMenuOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -146,6 +153,7 @@ export default function ShowroomMiniSite({
   }, [currentUser, dealer]);
 
   const handleShareShowroom = async () => {
+    cinematicAudio.playClick();
     const shareUrl = `${window.location.origin}/dealers/${dealer.id}`;
     const mapLink = `https://maps.google.com/?q=${encodeURIComponent(dealer.location || dealer.name)}`;
       

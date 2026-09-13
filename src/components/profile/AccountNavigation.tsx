@@ -3,6 +3,7 @@ import {
   User, Car, Heart, Search, Eye, MessageSquare, Bell, 
   History, ShieldCheck, Settings, Sliders
 } from 'lucide-react';
+import { cinematicAudio } from '../../lib/cinematicAudio';
 
 export type ProfileTab = 
   | 'overview' 
@@ -50,18 +51,21 @@ export const AccountNavigation: React.FC<AccountNavigationProps> = ({
   return (
     <nav className="w-full">
       {/* Mobile Horizontal Scrollable Tab Pill Bar */}
-      <div className="lg:hidden flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none border-b border-[var(--color-border)] mb-4 px-1">
+      <div className="lg:hidden flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none border-b border-[var(--color-border-main)] mb-4 px-1">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
           return (
             <button
               key={item.id}
-              onClick={() => onSelectTab(item.id)}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer font-sans shrink-0 ${
+              onClick={() => {
+                cinematicAudio.playClick();
+                onSelectTab(item.id);
+              }}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all cursor-pointer font-sans shrink-0 ${
                 isActive
-                  ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-[var(--color-text-header)] shadow-md'
-                  : 'bg-[var(--color-bg-secondary)] text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-bg-tertiary)] border border-[var(--color-border)]'
+                  ? 'bg-[var(--color-accent-main)] text-[#090D14] shadow-md shadow-[var(--color-accent-main)]/20'
+                  : 'bg-[var(--color-bg-secondary)] text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] hover:bg-[var(--color-bg-primary)] border border-[var(--color-border-main)]'
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
@@ -69,10 +73,10 @@ export const AccountNavigation: React.FC<AccountNavigationProps> = ({
               {item.count !== undefined && item.count > 0 && (
                 <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold ${
                   isActive 
-                    ? 'bg-white/20 text-[var(--color-text-header)]' 
+                    ? 'bg-[#090D14]/20 text-[#090D14]' 
                     : item.highlightBadge 
-                      ? 'bg-amber-500 text-slate-950' 
-                      : 'bg-slate-700 text-zinc-300'
+                      ? 'bg-[var(--color-accent-main)] text-[#090D14]' 
+                      : 'bg-[var(--color-bg-primary)] text-[var(--color-text-muted)] border border-[var(--color-border-main)]'
                 }`}>
                   {item.count}
                 </span>
@@ -83,8 +87,8 @@ export const AccountNavigation: React.FC<AccountNavigationProps> = ({
       </div>
 
       {/* Desktop Vertical Sidebar Menu */}
-      <div className="hidden lg:flex flex-col gap-1 w-full bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-2xl p-2.5 shadow-sm">
-        <div className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)] font-mono border-b border-[var(--color-border)] mb-1">
+      <div className="hidden lg:flex flex-col gap-1 w-full bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] rounded-2xl p-2.5 shadow-md">
+        <div className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)] font-mono border-b border-[var(--color-border-main)] mb-1">
           Account Navigation
         </div>
         {navItems.map((item) => {
@@ -93,24 +97,27 @@ export const AccountNavigation: React.FC<AccountNavigationProps> = ({
           return (
             <button
               key={item.id}
-              onClick={() => onSelectTab(item.id)}
+              onClick={() => {
+                cinematicAudio.playClick();
+                onSelectTab(item.id);
+              }}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer font-sans ${
                 isActive
-                  ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-[var(--color-text-header)] shadow-md'
-                  : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-bg-tertiary)]'
+                  ? 'bg-[var(--color-accent-main)] text-[#090D14] font-black shadow-md shadow-[var(--color-accent-main)]/20'
+                  : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] hover:bg-[var(--color-bg-primary)]'
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <Icon className={`w-4 h-4 ${isActive ? 'text-[var(--color-text-header)]' : 'text-sky-400'}`} />
+                <Icon className={`w-4 h-4 ${isActive ? 'text-[#090D14]' : 'text-[var(--color-accent-main)]'}`} />
                 <span>{item.label}</span>
               </div>
               {item.count !== undefined && (
                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
                   isActive 
-                    ? 'bg-white/20 text-[var(--color-text-header)]' 
+                    ? 'bg-[#090D14]/20 text-[#090D14]' 
                     : item.highlightBadge 
-                      ? 'bg-amber-500 text-slate-950 font-black' 
-                      : 'bg-[var(--color-bg-primary)] text-[var(--color-text-muted)] border border-[var(--color-border)]'
+                      ? 'bg-[var(--color-accent-main)] text-[#090D14] font-black' 
+                      : 'bg-[var(--color-bg-primary)] text-[var(--color-text-muted)] border border-[var(--color-border-main)]'
                 }`}>
                   {item.count}
                 </span>

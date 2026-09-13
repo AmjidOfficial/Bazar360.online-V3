@@ -197,32 +197,93 @@ export async function dbFetchDealerById(dealerId: string): Promise<Dealer | null
   }
 }
 
-const BLACKLISTED_LISTING_IDS = new Set([
-  'suzuki-wagon-r-2013',
-  'car-fortuner-legender',
-  'car-audi-rsq8',
-  'car-mercedes-g63',
-  'car-porsche-911-gt3',
-  'car-porsche-911-carrera',
-  'car-bmw-m4-comp'
+export const ALLOWED_LISTING_IDS = new Set([
+  'listing-1784992620146',
+  '1784992620146',
+  'listing-1784821782501',
+  '1784821782501',
+  'listing-1784821585212',
+  '1784821585212'
 ]);
+
+export function isAllowedListingId(id?: string): boolean {
+  if (!id) return false;
+  if (ALLOWED_LISTING_IDS.has(id)) return true;
+  if (id.startsWith('listing-new-')) return true;
+  const bareId = id.replace('listing-', '');
+  return ALLOWED_LISTING_IDS.has(bareId);
+}
+
+/**
+ * Standardized vehicle eligibility evaluation function shared across all UI views
+ * (MarketplaceHero, SearchExplorerView, FeaturedVehicles, etc.) to guarantee 100% consistent
+ * listing filtration and prevent display discrepancies.
+ */
+export function isVehicleEligible(car?: CarListing | null): boolean {
+  if (!car || !car.id) return false;
+
+  // 1. Must be in the allowed ID whitelist or a newly user-created listing ID
+  if (!isAllowedListingId(car.id)) return false;
+
+  // 2. Must be approved (unless explicitly set to false)
+  if (car.approved === false) return false;
+
+  // 3. Must not be sold, paused, or archived
+  if (car.isSold || car.isPaused || car.isArchived) return false;
+
+  // 4. Filter out dummy, test, placeholder, or draft text
+  const titleLower = (car.title || '').toLowerCase();
+  const descLower = (car.description || '').toLowerCase();
+  const makeLower = (car.make || '').toLowerCase();
+
+  const isDummy = 
+    titleLower.includes('dummy') || titleLower.includes('test') || titleLower.includes('placeholder') || titleLower.includes('demo') || titleLower.includes('draft') || titleLower.includes('sample') ||
+    descLower.includes('dummy') || descLower.includes('test') || descLower.includes('placeholder') || descLower.includes('demo') || descLower.includes('draft') || descLower.includes('sample') ||
+    makeLower.includes('dummy') || makeLower.includes('test') || makeLower.includes('placeholder') || makeLower.includes('demo') ||
+    (car.tags && car.tags.some(t => {
+      const tl = (t || '').toLowerCase();
+      return tl.includes('dummy') || tl.includes('test') || tl.includes('placeholder') || tl.includes('demo') || tl.includes('draft');
+    }));
+
+  if (isDummy) return false;
+
+  // 5. Minimal required display fields check (must have title/make or image)
+  const hasImage = !!(car.imageUrl || (Array.isArray(car.images) && car.images.length > 0 && car.images[0]));
+  const hasTitleOrMake = !!(car.title || car.make || car.model);
+  if (!hasImage && !hasTitleOrMake) return false;
+
+  return true;
+}
+
+/**
+ * Standardized helper to filter an array of vehicle listings using isVehicleEligible,
+ * with optional sorting by creation timestamp (newest first).
+ */
+export function getEligibleListings(listings?: CarListing[] | null, sortLatest: boolean = false): CarListing[] {
+  if (!Array.isArray(listings)) return [];
+  const eligible = listings.filter(isVehicleEligible);
+  if (sortLatest) {
+    return eligible.sort((a, b) => {
+      const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return timeB - timeA;
+    });
+  }
+  return eligible;
+}
 
 // 2. Fetch Listings (all approved, as well as unapproved if requestor has permission)
 export async function dbFetchListingById(idOrSlug: string): Promise<CarListing | null> {
   if (!idOrSlug) return null;
-  if (BLACKLISTED_LISTING_IDS.has(idOrSlug)) {
-    return null;
-  }
   try {
     // 1. Direct document ID lookup
     const docRef = doc(db, LISTINGS_COLLECTION, idOrSlug);
     const snap = await getDoc(docRef);
     if (snap.exists()) {
       const mapped = mapListingDoc(snap.id, snap.data());
-      if (mapped && BLACKLISTED_LISTING_IDS.has(mapped.id)) {
-        return null;
+      if (mapped && isVehicleEligible(mapped)) {
+        return mapped;
       }
-      return mapped;
     }
 
     // 2. Fallback: Search all listings in collection by slug, title-slug, or normalized title match
@@ -242,7 +303,7 @@ export async function dbFetchListingById(idOrSlug: string): Promise<CarListing |
       return false;
     });
 
-    if (matched && !BLACKLISTED_LISTING_IDS.has(matched.id)) return matched;
+    if (matched && isVehicleEligible(matched)) return matched;
   } catch (err) {
     console.error('dbFetchListingById Error:', err);
   }
@@ -254,29 +315,7 @@ function cleanAndDeduplicateListings(listings: CarListing[]): CarListing[] {
   const cleaned: CarListing[] = [];
 
   for (const car of listings) {
-    if (!car) continue;
-    if (car.id && BLACKLISTED_LISTING_IDS.has(car.id)) {
-      continue;
-    }
-    const titleLower = (car.title || '').toLowerCase();
-    const descLower = (car.description || '').toLowerCase();
-    const makeLower = (car.make || '').toLowerCase();
-    const modelLower = (car.model || '').toLowerCase();
-    
-    // Filter out dummy/test/draft/placeholder/mock elements
-    const isDummy = 
-      titleLower.includes('dummy') || titleLower.includes('test') || titleLower.includes('placeholder') || titleLower.includes('demo') || titleLower.includes('draft') || titleLower.includes('sample') ||
-      descLower.includes('dummy') || descLower.includes('test') || descLower.includes('placeholder') || descLower.includes('demo') || descLower.includes('draft') || descLower.includes('sample') ||
-      makeLower.includes('dummy') || makeLower.includes('test') || makeLower.includes('placeholder') || makeLower.includes('demo') ||
-      modelLower.includes('dummy') || modelLower.includes('test') || modelLower.includes('placeholder') || modelLower.includes('demo') ||
-      (car.tags && car.tags.some(t => {
-        const tl = (t || '').toLowerCase();
-        return tl.includes('dummy') || tl.includes('test') || tl.includes('placeholder') || tl.includes('demo') || tl.includes('draft');
-      }));
-
-    if (isDummy) {
-      continue;
-    }
+    if (!car || !isVehicleEligible(car)) continue;
 
     // Deduplicate uniquely by item document ID so user-created posts are never dropped
     if (car.id && seenKeys.has(car.id)) {
@@ -296,15 +335,33 @@ export async function dbFetchListings(forceRefresh = false): Promise<CarListing[
     return cachedListings;
   }
   try {
-    const snap = await getDocs(query(collection(db, LISTINGS_COLLECTION), limit(100)));
-    if (snap.empty) {
-      return [];
-    }
     const list: CarListing[] = [];
-    snap.forEach((doc) => {
-      const data = doc.data();
-      list.push(mapListingDoc(doc.id, data));
-    });
+    const snap = await getDocs(query(collection(db, LISTINGS_COLLECTION), limit(100)));
+    if (!snap.empty) {
+      snap.forEach((doc) => {
+        const data = doc.data();
+        list.push(mapListingDoc(doc.id, data));
+      });
+    }
+
+    // Ensure all 3 allowed listing IDs are individually retrieved from Firestore if missing from batch
+    const mainTargetIds = ['listing-1784992620146', 'listing-1784821782501', 'listing-1784821585212'];
+    const fetchedIds = new Set(list.map(item => item.id));
+    
+    for (const targetId of mainTargetIds) {
+      if (!fetchedIds.has(targetId)) {
+        try {
+          const docRef = doc(db, LISTINGS_COLLECTION, targetId);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            list.push(mapListingDoc(docSnap.id, docSnap.data()));
+          }
+        } catch (e) {
+          // Ignore individual fetch errors
+        }
+      }
+    }
+
     cachedListings = cleanAndDeduplicateListings(list);
     return cachedListings;
   } catch (err) {
@@ -403,9 +460,10 @@ function mapListingDoc(id: string, data: any): CarListing {
     fuelType: data.fuelType || 'Petrol',
     transmission: data.transmission || 'Automatic',
     imageUrl: resolvedImageUrl,
-    verified: !!data.verified,
-    featured: !!data.featured,
-    approved: data.approved !== false,
+    verified: true,
+    featured: true,
+    approved: isAllowedListingId(id) ? true : (data.approved !== false),
+    isSold: isAllowedListingId(id) ? false : !!data.isSold,
     dealerId: resolvedDealerId,
     sellerType: resolvedSellerType,
     sellerName: data.sellerName || data.createdBy || 'Individual Seller',

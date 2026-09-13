@@ -12,18 +12,24 @@ import {
   Youtube,
   ShoppingBag,
   Sun,
-  Moon
+  Moon,
+  Volume2,
+  VolumeX,
+  Building2
 } from 'lucide-react';
 
 import { UserProfile } from '../lib/dbService';
 import { DualSwipingBrandLogo } from './DualSwipingBrandLogo';
 import { getOptimizedUrl } from '../lib/cloudinaryService';
 import { useTheme } from './ThemeContext';
+import { cinematicAudio } from '../lib/cinematicAudio';
+
 
 interface TopAppBarProps {
   currentTab: string;
   setTab: (tab: string) => void;
   onPostAdClick?: () => void;
+  onOpenShowroomLogin?: () => void;
   currentUser?: UserProfile | null;
   onLogout?: () => void;
   onBackToGateway?: () => void;
@@ -46,12 +52,22 @@ interface TopAppBarProps {
 export default function TopAppBar({ 
   currentTab, 
   setTab, 
+  onOpenShowroomLogin,
   currentUser,
   favoritesCount = 0
 }: TopAppBarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMuted, setIsMuted] = useState(() => cinematicAudio.getMuted());
   const navContainerRef = useRef<HTMLDivElement>(null);
   const { isDark, toggleTheme } = useTheme();
+
+  const handleToggleMute = () => {
+    const nextMuted = cinematicAudio.toggleMute();
+    setIsMuted(nextMuted);
+    if (!nextMuted) {
+      cinematicAudio.playLuxuryChime();
+    }
+  };
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -108,6 +124,7 @@ export default function TopAppBar({
                 key={tab.id}
                 type="button"
                 onClick={() => {
+                  cinematicAudio.playClick();
                   if (tab.action) {
                     tab.action();
                   } else {
@@ -131,68 +148,101 @@ export default function TopAppBar({
       <div className="flex items-center justify-center gap-3 mx-2">
         <DualSwipingBrandLogo className="scale-90 md:scale-100" />
         
-        {/* Post Free Car Ad Button */}
+        {/* Post Free Car Ad Button & Showroom Portal */}
         <div className="hidden lg:flex items-center gap-2 shrink-0">
           <button
             type="button"
             onClick={() => setTab('sell')}
-            className="btn-gold-primary text-xs tracking-wider uppercase font-bold py-1.5 px-3.5 shadow-xs"
+            className="btn-gold-primary text-xs tracking-wider uppercase font-bold py-1.5 px-3.5 shadow-xs cursor-pointer"
             title="Post your car advertisement for free"
           >
             <PlusCircle size={14} />
             <span>Post Free Ad</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (onOpenShowroomLogin) onOpenShowroomLogin();
+              else setTab('profile');
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[var(--color-accent-main)]/40 bg-[var(--color-accent-main)]/10 hover:bg-[var(--color-accent-main)]/20 text-[var(--color-accent-main)] text-xs font-mono font-extrabold tracking-wider uppercase transition-all shadow-xs cursor-pointer"
+            title="Separate login portal for showroom owners and dealerships"
+          >
+            <Building2 size={14} />
+            <span>Showroom Portal</span>
+          </button>
         </div>
       </div>
 
-      {/* RIGHT SIDE: Theme Toggle, Support, Cart & Profile */}
+      {/* RIGHT SIDE: Audio, Theme Toggle, Support, Cart & Profile (Standardized 40px Touch Targets) */}
       <div className="flex items-center justify-end gap-2.5 shrink-0">
         
-        {/* Theme Toggle (Light / Dark) */}
-        <button
-          type="button"
-          onClick={toggleTheme}
-          className="p-2 rounded-xl bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-tertiary)] text-[var(--color-text-muted)] hover:text-[var(--color-accent-main)] border border-[var(--color-border-main)] transition-all cursor-pointer w-9 h-9 flex items-center justify-center shrink-0 shadow-2xs"
-          title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-        >
-          {isDark ? <Sun size={16} /> : <Moon size={16} />}
-        </button>
+        {/* Utilities Group */}
+        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-[var(--color-bg-tertiary)] border border-[var(--color-border-main)]">
+          {/* Sound FX Audio Toggle */}
+          <button
+            type="button"
+            onClick={handleToggleMute}
+            className="p-2 rounded-xl bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-primary)] text-[var(--color-text-muted)] hover:text-[var(--color-accent-main)] border border-[var(--color-border-subtle)] transition-all cursor-pointer w-10 h-10 flex items-center justify-center shrink-0 shadow-2xs"
+            title={isMuted ? "Unmute Cockpit Audio" : "Mute Cockpit Audio"}
+          >
+            {isMuted ? <VolumeX size={17} /> : <Volume2 size={17} className="text-[var(--color-accent-main)]" />}
+          </button>
 
-        {/* Live Messaging Quick Action Button */}
-        <button
-          type="button"
-          onClick={() => {
-            window.dispatchEvent(new CustomEvent('open-b360-messaging', {
-              detail: {}
-            }));
-          }}
-          className="relative p-2 rounded-xl bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-tertiary)] border border-[var(--color-border-main)] text-[var(--color-text-main)] transition-all cursor-pointer w-9 h-9 flex items-center justify-center shrink-0 shadow-2xs"
-          title="Open Live Conversations & Messages"
-        >
-          <MessageSquare size={16} />
-        </button>
+          {/* Theme Toggle (Light / Dark) */}
+          <button
+            type="button"
+            onClick={() => {
+              cinematicAudio.playClick();
+              toggleTheme();
+            }}
+            className="p-2 rounded-xl bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-primary)] text-[var(--color-text-muted)] hover:text-[var(--color-accent-main)] border border-[var(--color-border-subtle)] transition-all cursor-pointer w-10 h-10 flex items-center justify-center shrink-0 shadow-2xs"
+            title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          >
+            {isDark ? <Sun size={17} /> : <Moon size={17} />}
+          </button>
 
-        {/* Favorites / Shortlist Button */}
-        <button
-          type="button"
-          onClick={() => setTab('inventory')}
-          className="relative p-2 rounded-xl bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-tertiary)] border border-[var(--color-border-main)] text-[var(--color-accent-main)] transition-all cursor-pointer w-9 h-9 flex items-center justify-center shrink-0 shadow-2xs"
-          title="View Shortlist & Favorites"
-        >
-          <ShoppingBag size={16} />
-          {favoritesCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-[var(--color-accent-main)] text-[#090D14] font-mono font-bold text-[9px] w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
-              {favoritesCount}
-            </span>
-          )}
-        </button>
+          {/* Live Messaging Quick Action Button */}
+          <button
+            type="button"
+            onClick={() => {
+              cinematicAudio.playClick();
+              window.dispatchEvent(new CustomEvent('open-b360-messaging', {
+                detail: {}
+              }));
+            }}
+            className="relative p-2 rounded-xl bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-primary)] border border-[var(--color-border-subtle)] text-[var(--color-text-main)] transition-all cursor-pointer w-10 h-10 flex items-center justify-center shrink-0 shadow-2xs"
+            title="Open Live Conversations & Messages"
+          >
+            <MessageSquare size={17} />
+          </button>
+
+          {/* Favorites / Shortlist Button */}
+          <button
+            type="button"
+            onClick={() => {
+              cinematicAudio.playClick();
+              setTab('inventory');
+            }}
+            className="relative p-2 rounded-xl bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-primary)] border border-[var(--color-border-subtle)] text-[var(--color-accent-main)] transition-all cursor-pointer w-10 h-10 flex items-center justify-center shrink-0 shadow-2xs"
+            title="View Shortlist & Favorites"
+          >
+            <ShoppingBag size={17} />
+            {favoritesCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-[var(--color-accent-main)] text-[#090D14] font-mono font-bold text-[9px] w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-xs">
+                {favoritesCount}
+              </span>
+            )}
+          </button>
+        </div>
 
         {/* User Profile / Login Avatar Button */}
         {currentUser ? (
           <button
             type="button"
             onClick={() => setTab('profile')}
-            className="flex items-center gap-2 p-1 pl-1.5 pr-2.5 rounded-xl bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-tertiary)] text-[var(--color-text-main)] transition-all cursor-pointer border border-[var(--color-border-main)] hover:border-[var(--color-accent-main)]/40 shrink-0 group"
+            className="flex items-center gap-2 p-1.5 pl-2 pr-3 rounded-2xl bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-tertiary)] text-[var(--color-text-main)] transition-all cursor-pointer border border-[var(--color-border-main)] hover:border-[var(--color-accent-main)]/40 shrink-0 group min-h-[40px]"
             title="Open User Profile & Dashboard"
           >
             <div className="w-7 h-7 rounded-lg overflow-hidden bg-[var(--color-bg-tertiary)] border border-[var(--color-accent-main)]/30 shrink-0">
@@ -222,10 +272,10 @@ export default function TopAppBar({
           <button
             type="button"
             onClick={() => setTab('profile')}
-            className="p-1.5 rounded-xl bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-tertiary)] text-[var(--color-text-main)] transition-all cursor-pointer w-9 h-9 flex items-center justify-center shrink-0 border border-[var(--color-border-main)]"
+            className="p-2 rounded-2xl bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-tertiary)] text-[var(--color-text-main)] transition-all cursor-pointer w-10 h-10 flex items-center justify-center shrink-0 border border-[var(--color-border-main)]"
             title="User Profile & Login"
           >
-            <User size={16} />
+            <User size={18} />
           </button>
         )}
       </div>

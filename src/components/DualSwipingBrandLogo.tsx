@@ -4,6 +4,7 @@ import { ShieldCheck, ArrowRightLeft } from 'lucide-react';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Bazar360InfinityIcon } from './Bazar360Logo';
+import { cinematicAudio } from '../lib/cinematicAudio';
 
 // High-fidelity Vector SVG representing the brand new Auto Choice car infinity logo
 export function AutoChoiceInfinityIcon({ 
@@ -115,13 +116,19 @@ export function DualSwipingBrandLogo({
     let unsubscribe: (() => void) | undefined;
     try {
       const brandingRef = doc(db, 'system', 'branding');
-      unsubscribe = onSnapshot(brandingRef, (docSnap) => {
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          if (data.bazar360LogoUrl) setCustomBazar360Logo(data.bazar360LogoUrl);
-          if (data.autoChoiceLogoUrl) setCustomAutoChoiceLogo(data.autoChoiceLogoUrl);
+      unsubscribe = onSnapshot(
+        brandingRef,
+        (docSnap) => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            if (data.bazar360LogoUrl) setCustomBazar360Logo(data.bazar360LogoUrl);
+            if (data.autoChoiceLogoUrl) setCustomAutoChoiceLogo(data.autoChoiceLogoUrl);
+          }
+        },
+        (error) => {
+          console.warn('[DualSwipingBrandLogo] Realtime branding subscription fallback:', error.message || error);
         }
-      });
+      );
     } catch (err) {
       console.warn('DualSwipingBrandLogo Firestore subscription bypassed:', err);
     }
@@ -137,7 +144,7 @@ export function DualSwipingBrandLogo({
       name: 'Bazar360.online',
       tagline: 'CONNECT | BUY | SELL',
       subtext: 'EVERYTHING YOU NEED',
-      customLogo: customBazar360Logo,
+      customLogo: customBazar360Logo || '/bazar360_official_logo.jpg',
       badgeColor: 'from-[#1E5B8C] via-[#2E79B5] to-[#C58B65]',
       accentColor: 'text-[var(--color-accent-secondary)]',
       renderIcon: (light: boolean) => <Bazar360InfinityIcon className="w-full h-full p-1" lightMode={light} />
@@ -147,7 +154,7 @@ export function DualSwipingBrandLogo({
       name: 'Auto Choice',
       tagline: 'The Right Choice',
       subtext: 'Peshawar Certified Showroom',
-      customLogo: customAutoChoiceLogo,
+      customLogo: customAutoChoiceLogo || '/auto_choice_official_logo.jpg',
       badgeColor: 'from-[#1E5B8C] via-[#2E79B5] to-[#C58B65]',
       accentColor: 'text-[var(--color-accent-secondary)]',
       renderIcon: (light: boolean) => <AutoChoiceInfinityIcon className="w-full h-full p-1.5" lightMode={light} />
@@ -168,6 +175,7 @@ export function DualSwipingBrandLogo({
 
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
+    cinematicAudio.playClick();
     const nextIdx = (activeBrandIndex + 1) % brands.length;
     setActiveBrandIndex(nextIdx);
     if (onSelectBrand) {

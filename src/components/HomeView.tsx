@@ -24,22 +24,31 @@ interface HomeViewProps {
 }
 
 export default function HomeView(props: HomeViewProps) {
-  const [realtimeListings, setRealtimeListings] = useState<CarListing[]>(props.listings);
+  const [realtimeListings, setRealtimeListings] = useState<CarListing[]>(props.listings || []);
 
-  // Sync with prop listings if they change
+  // Sync with prop listings whenever props.listings updates
   useEffect(() => {
     if (props.listings && props.listings.length > 0) {
       setRealtimeListings(props.listings);
     }
   }, [props.listings]);
 
+  // Initial fetch on mount to guarantee immediate inventory load
+  useEffect(() => {
+    let isMounted = true;
+    dbFetchListings().then(fresh => {
+      if (isMounted && fresh && fresh.length > 0) {
+        setRealtimeListings(fresh);
+      }
+    }).catch(err => console.warn('[HomeView] Initial fetch error:', err));
+    return () => { isMounted = false; };
+  }, []);
+
   // Establish live real-time connection to Firestore listings collection
   useEffect(() => {
     try {
       const q = query(collection(db, 'listings'), limit(100));
-      const unsubscribe = onSnapshot(q, async (snapshot) => {
-        // Trigger a fresh read through the central secure service layer
-        // This ensures the custom logic (mapping, deduplication, blacklist filters) is applied.
+      const unsubscribe = onSnapshot(q, async () => {
         const freshListings = await dbFetchListings(true);
         if (freshListings && freshListings.length > 0) {
           setRealtimeListings(freshListings);

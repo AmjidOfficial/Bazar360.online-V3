@@ -32,6 +32,8 @@ import {
 import { UserProfile } from '../lib/dbService';
 import { useTheme } from './ThemeContext';
 import Bazar360Logo from './Bazar360Logo';
+import { DualSwipingBrandLogo } from './DualSwipingBrandLogo';
+import { cinematicAudio } from '../lib/cinematicAudio';
 
 interface SidebarDrawerProps {
   isOpen: boolean;
@@ -124,10 +126,24 @@ export default function SidebarDrawer({
         >
           {/* Top Bar with Dual Logos & Close */}
           <div className="flex items-center justify-between border-b border-[var(--color-accent-main)]/20 pb-4 mb-5">
-            <Bazar360Logo variant="header" size="md" showTagline={true} />
+            <DualSwipingBrandLogo 
+              className="scale-90 sm:scale-100 origin-left" 
+              onSelectBrand={(brand) => {
+                if (brand === 'autochoice') {
+                  setTab('dealers');
+                  onClose();
+                } else {
+                  setTab('home');
+                  onClose();
+                }
+              }}
+            />
 
             <button
-              onClick={onClose}
+              onClick={() => {
+                cinematicAudio.playClick();
+                onClose();
+              }}
               className="p-2 rounded-full bg-[var(--color-accent-main)]/10 hover:bg-[var(--color-accent-main)]/20 text-[var(--color-accent-main)] border border-[var(--color-accent-main)]/30 transition-all cursor-pointer active:scale-95"
               aria-label="Close menu"
             >

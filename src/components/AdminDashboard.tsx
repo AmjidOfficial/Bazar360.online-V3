@@ -44,6 +44,7 @@ import { ServiceManagementHub } from './admin/ServiceManagementHub';
 import { CentralNotificationService } from './admin/CentralNotificationService';
 import { BusinessIntelligenceDashboard } from './admin/BusinessIntelligenceDashboard';
 import { DataHealthPanel } from './admin/DataHealthPanel';
+import { cinematicAudio } from '../lib/cinematicAudio';
 
 interface AdminDashboardProps {
   listings: CarListing[];
@@ -222,8 +223,8 @@ export default function AdminDashboard({
       {/* Title section */}
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[var(--color-border-main)] pb-6 mb-8">
         <div>
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-orange-500/10 border border-orange-500/20 text-orange-500 rounded-xl">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-[var(--color-accent-main)]/10 border border-[var(--color-accent-main)]/30 text-[var(--color-accent-main)] rounded-2xl shadow-sm">
               <Lock size={20} className="stroke-[2.5]" />
             </div>
             <div>
@@ -239,10 +240,13 @@ export default function AdminDashboard({
 
         <div className="flex items-center gap-3">
           <button
-            onClick={() => handleSingleWindowOpen('/?tab=profile')}
-            className="px-4 py-2 bg-bg-secondary hover:bg-bg-tertiary border border-border-main text-text-muted hover:text-[var(--color-text-header)] rounded-xl text-xs font-mono font-bold flex items-center gap-2 cursor-pointer transition-all active:scale-95"
+            onClick={() => {
+              cinematicAudio.playClick();
+              handleSingleWindowOpen('/?tab=profile');
+            }}
+            className="px-4 py-2.5 bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-primary)] border border-[var(--color-border-main)] hover:border-[var(--color-accent-main)]/40 text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] rounded-xl text-xs font-mono font-bold flex items-center gap-2 cursor-pointer transition-all active:scale-95 shadow-sm"
           >
-            <Settings size={13} />
+            <Settings size={14} />
             <span>Open Settings Module</span>
           </button>
         </div>
@@ -252,61 +256,64 @@ export default function AdminDashboard({
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
         
         {/* Total Vehicles Card */}
-        <div className="bg-bg-secondary/60 border border-border-main p-5 rounded-2xl relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/5 rounded-full blur-2xl group-hover:bg-orange-500/10 transition-all duration-500" />
+        <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] p-5 rounded-2xl relative overflow-hidden group shadow-md hover:border-[var(--color-accent-main)]/40 transition-all">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-[var(--color-accent-main)]/5 rounded-full blur-2xl group-hover:bg-[var(--color-accent-main)]/10 transition-all duration-500" />
           <div className="flex items-center justify-between">
             <span className="text-xs font-mono text-[var(--color-text-muted)] uppercase tracking-widest font-bold">Total Cars</span>
-            <div className="p-2 bg-orange-500/10 text-orange-500 rounded-xl border border-orange-500/20">
+            <div className="p-2.5 bg-[var(--color-accent-main)]/10 text-[var(--color-accent-main)] rounded-xl border border-[var(--color-accent-main)]/20">
               <Car size={16} />
             </div>
           </div>
           <h2 className="text-3xl font-black text-[var(--color-text-header)] mt-4 tracking-tight">{totalListings}</h2>
-          <p className="text-[10px] text-text-muted mt-1 font-mono uppercase">Vehicles in system</p>
+          <p className="text-[10px] text-[var(--color-text-muted)] mt-1 font-mono uppercase">Vehicles in system</p>
         </div>
 
         {/* Active Showrooms Card */}
-        <div className="bg-bg-secondary/60 border border-border-main p-5 rounded-2xl relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-[var(--color-accent-main)]/5 rounded-full blur-2xl group-hover:bg-[var(--color-accent-main)]/10 transition-all duration-500" />
+        <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] p-5 rounded-2xl relative overflow-hidden group shadow-md hover:border-[var(--color-accent-secondary)]/40 transition-all">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-[var(--color-accent-secondary)]/5 rounded-full blur-2xl group-hover:bg-[var(--color-accent-secondary)]/10 transition-all duration-500" />
           <div className="flex items-center justify-between">
             <span className="text-xs font-mono text-[var(--color-text-muted)] uppercase tracking-widest font-bold">Showrooms</span>
-            <div className="p-2 bg-[var(--color-accent-main)]/10 text-[var(--color-accent-main)] rounded-xl border border-[var(--color-accent-main)]/20">
+            <div className="p-2.5 bg-[var(--color-accent-secondary)]/10 text-[var(--color-accent-secondary)] rounded-xl border border-[var(--color-accent-secondary)]/20">
               <Users size={16} />
             </div>
           </div>
           <h2 className="text-3xl font-black text-[var(--color-text-header)] mt-4 tracking-tight">{activeShowrooms}</h2>
-          <p className="text-[10px] text-text-muted mt-1 font-mono uppercase">Registered Dealerships</p>
+          <p className="text-[10px] text-[var(--color-text-muted)] mt-1 font-mono uppercase">Registered Dealerships</p>
         </div>
 
         {/* Pending Moderation / Approval Queue Card */}
         <div 
-          onClick={() => setActiveTab('approval_queue')}
-          className="bg-bg-secondary/60 border border-border-main hover:border-amber-500/50 p-5 rounded-2xl relative overflow-hidden group cursor-pointer transition-all"
+          onClick={() => {
+            cinematicAudio.playClick();
+            setActiveTab('approval_queue');
+          }}
+          className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] hover:border-[var(--color-accent-main)] p-5 rounded-2xl relative overflow-hidden group cursor-pointer transition-all shadow-md"
         >
-          <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full blur-2xl group-hover:bg-amber-500/10 transition-all duration-500" />
+          <div className="absolute top-0 right-0 w-24 h-24 bg-[var(--color-accent-main)]/10 rounded-full blur-2xl group-hover:bg-[var(--color-accent-main)]/20 transition-all duration-500" />
           <div className="flex items-center justify-between">
-            <span className="text-xs font-mono text-amber-400 uppercase tracking-widest font-bold flex items-center gap-1.5">
+            <span className="text-xs font-mono text-[var(--color-accent-main)] uppercase tracking-widest font-bold flex items-center gap-1.5">
               <span>Approval Queue</span>
-              {pendingModeration > 0 && <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />}
+              {pendingModeration > 0 && <span className="w-2 h-2 rounded-full bg-[var(--color-accent-main)] animate-ping" />}
             </span>
-            <div className="p-2 bg-amber-500/10 text-amber-500 rounded-xl border border-amber-500/20">
+            <div className="p-2.5 bg-[var(--color-accent-main)]/15 text-[var(--color-accent-main)] rounded-xl border border-[var(--color-accent-main)]/30">
               <Clock size={16} />
             </div>
           </div>
-          <h2 className="text-3xl font-black text-amber-400 mt-4 tracking-tight">{pendingModeration}</h2>
-          <p className="text-[10px] text-text-muted mt-1 font-mono uppercase">Awaiting admin review</p>
+          <h2 className="text-3xl font-black text-[var(--color-accent-main)] mt-4 tracking-tight">{pendingModeration}</h2>
+          <p className="text-[10px] text-[var(--color-text-muted)] mt-1 font-mono uppercase">Awaiting admin review</p>
         </div>
 
         {/* Premium Featured */}
-        <div className="bg-bg-secondary/60 border border-border-main p-5 rounded-2xl relative overflow-hidden group">
+        <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] p-5 rounded-2xl relative overflow-hidden group shadow-md">
           <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl group-hover:bg-indigo-500/10 transition-all duration-500" />
           <div className="flex items-center justify-between">
             <span className="text-xs font-mono text-[var(--color-text-muted)] uppercase tracking-widest font-bold">Featured Slots</span>
-            <div className="p-2 bg-indigo-500/10 text-indigo-500 rounded-xl border border-indigo-500/20">
+            <div className="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-xl border border-indigo-500/20">
               <Sparkles size={16} />
             </div>
           </div>
           <h2 className="text-3xl font-black text-[var(--color-text-header)] mt-4 tracking-tight">{premiumFeatured}</h2>
-          <p className="text-[10px] text-text-muted mt-1 font-mono uppercase">Highlighted elite slots</p>
+          <p className="text-[10px] text-[var(--color-text-muted)] mt-1 font-mono uppercase">Highlighted elite slots</p>
         </div>
 
       </div>
@@ -315,104 +322,137 @@ export default function AdminDashboard({
       <div className="max-w-7xl mx-auto bg-bg-secondary/40 border border-border-main rounded-2xl overflow-hidden shadow-2xl">
         {/* Tab Controls & Search Lockup */}
         <div className="p-5 border-b border-border-main bg-bg-primary/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-2 bg-bg-primary p-1 border border-border-main rounded-xl self-start flex-wrap">
+          <div className="flex items-center gap-1.5 bg-[var(--color-bg-primary)] p-1.5 border border-[var(--color-border-main)] rounded-2xl self-start flex-wrap shadow-inner">
             <button
-              onClick={() => setActiveTab('listings')}
-              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all cursor-pointer ${
-                activeTab === 'listings' ? 'bg-orange-500 text-[var(--color-text-header)] shadow' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-header)]'
+              onClick={() => {
+                cinematicAudio.playClick();
+                setActiveTab('listings');
+              }}
+              className={`px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+                activeTab === 'listings' ? 'bg-[var(--color-accent-main)] text-[#090D14] shadow-md shadow-[var(--color-accent-main)]/20' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] hover:bg-[var(--color-bg-secondary)]'
               }`}
             >
               Vehicles Inventory ({filteredListings.length})
             </button>
             <button
-              onClick={() => setActiveTab('approval_queue')}
-              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5 ${
-                activeTab === 'approval_queue' ? 'bg-amber-500 text-slate-950 font-black shadow' : 'text-amber-400 hover:text-amber-300'
+              onClick={() => {
+                cinematicAudio.playClick();
+                setActiveTab('approval_queue');
+              }}
+              className={`px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 ${
+                activeTab === 'approval_queue' ? 'bg-[var(--color-accent-main)] text-[#090D14] shadow-md shadow-[var(--color-accent-main)]/20' : 'text-amber-400 hover:text-amber-300 hover:bg-[var(--color-bg-secondary)]'
               }`}
             >
               <Clock size={13} />
               <span>Approval Queue</span>
               {pendingModeration > 0 && (
-                <span className="ml-1 px-1.5 py-0.5 text-[10px] font-mono bg-amber-400 text-slate-950 rounded-full font-black animate-pulse">
+                <span className="ml-1 px-1.5 py-0.5 text-[10px] font-mono bg-[#090D14] text-[var(--color-accent-main)] rounded-full font-black animate-pulse">
                   {pendingModeration}
                 </span>
               )}
             </button>
             <button
-              onClick={() => setActiveTab('showrooms')}
-              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all cursor-pointer ${
-                activeTab === 'showrooms' ? 'bg-orange-500 text-[var(--color-text-header)] shadow' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-header)]'
+              onClick={() => {
+                cinematicAudio.playClick();
+                setActiveTab('showrooms');
+              }}
+              className={`px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+                activeTab === 'showrooms' ? 'bg-[var(--color-accent-main)] text-[#090D14] shadow-md shadow-[var(--color-accent-main)]/20' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] hover:bg-[var(--color-bg-secondary)]'
               }`}
             >
               Showrooms ({filteredDealers.length})
             </button>
             <button
-              onClick={() => setActiveTab('developer_logs')}
-              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5 ${
-                activeTab === 'developer_logs' ? 'bg-orange-500 text-[var(--color-text-header)] shadow' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-header)]'
+              onClick={() => {
+                cinematicAudio.playClick();
+                setActiveTab('developer_logs');
+              }}
+              className={`px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 ${
+                activeTab === 'developer_logs' ? 'bg-[var(--color-accent-main)] text-[#090D14] shadow-md shadow-[var(--color-accent-main)]/20' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] hover:bg-[var(--color-bg-secondary)]'
               }`}
             >
               <FileCheck2 size={13} />
               <span>Developer Logs</span>
             </button>
             <button
-              onClick={() => setActiveTab('branding')}
-              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5 ${
-                activeTab === 'branding' ? 'bg-orange-500 text-slate-950 font-black shadow' : 'text-orange-400 hover:text-orange-300'
+              onClick={() => {
+                cinematicAudio.playClick();
+                setActiveTab('branding');
+              }}
+              className={`px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 ${
+                activeTab === 'branding' ? 'bg-[var(--color-accent-main)] text-[#090D14] shadow-md shadow-[var(--color-accent-main)]/20' : 'text-[var(--color-accent-main)] hover:brightness-125 hover:bg-[var(--color-bg-secondary)]'
               }`}
             >
               <Cloud size={13} />
               <span>Branding & Logos</span>
             </button>
             <button
-              onClick={() => setActiveTab('leads')}
-              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5 ${
-                activeTab === 'leads' ? 'bg-blue-600 text-[var(--color-text-header)] font-black shadow' : 'text-blue-400 hover:text-blue-300'
+              onClick={() => {
+                cinematicAudio.playClick();
+                setActiveTab('leads');
+              }}
+              className={`px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 ${
+                activeTab === 'leads' ? 'bg-sky-500 text-[#090D14] shadow-md shadow-sky-500/20' : 'text-sky-400 hover:text-sky-300 hover:bg-[var(--color-bg-secondary)]'
               }`}
             >
               <MessageCircle size={13} />
               <span>Leads CRM</span>
             </button>
             <button
-              onClick={() => setActiveTab('crm_service_hub')}
-              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5 ${
-                activeTab === 'crm_service_hub' ? 'bg-orange-500 text-slate-950 font-black shadow' : 'text-orange-400 hover:text-orange-300'
+              onClick={() => {
+                cinematicAudio.playClick();
+                setActiveTab('crm_service_hub');
+              }}
+              className={`px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 ${
+                activeTab === 'crm_service_hub' ? 'bg-[var(--color-accent-main)] text-[#090D14] shadow-md shadow-[var(--color-accent-main)]/20' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] hover:bg-[var(--color-bg-secondary)]'
               }`}
             >
               <ShieldCheck size={13} />
               <span>Service CRM Hub</span>
             </button>
             <button
-              onClick={() => setActiveTab('enterprise_crm')}
-              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5 ${
-                activeTab === 'enterprise_crm' ? 'bg-orange-500 text-slate-950 font-black shadow' : 'text-orange-400 hover:text-orange-300'
+              onClick={() => {
+                cinematicAudio.playClick();
+                setActiveTab('enterprise_crm');
+              }}
+              className={`px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 ${
+                activeTab === 'enterprise_crm' ? 'bg-[var(--color-accent-main)] text-[#090D14] shadow-md shadow-[var(--color-accent-main)]/20' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] hover:bg-[var(--color-bg-secondary)]'
               }`}
             >
               <ShieldCheck size={13} />
               <span>Enterprise CRM</span>
             </button>
             <button
-              onClick={() => setActiveTab('service_management')}
-              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5 ${
-                activeTab === 'service_management' ? 'bg-orange-500 text-slate-950 font-black shadow' : 'text-orange-400 hover:text-orange-300'
+              onClick={() => {
+                cinematicAudio.playClick();
+                setActiveTab('service_management');
+              }}
+              className={`px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 ${
+                activeTab === 'service_management' ? 'bg-[var(--color-accent-main)] text-[#090D14] shadow-md shadow-[var(--color-accent-main)]/20' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] hover:bg-[var(--color-bg-secondary)]'
               }`}
             >
               <Wrench size={13} />
               <span>Services Management</span>
             </button>
             <button
-              onClick={() => setActiveTab('bi_analytics')}
-              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5 ${
-                activeTab === 'bi_analytics' ? 'bg-[var(--color-brand-orange)] text-slate-950 font-black shadow' : 'text-orange-400 hover:text-orange-300'
+              onClick={() => {
+                cinematicAudio.playClick();
+                setActiveTab('bi_analytics');
+              }}
+              className={`px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 ${
+                activeTab === 'bi_analytics' ? 'bg-gradient-to-r from-[var(--color-accent-main)] to-[var(--color-accent-secondary)] text-[#090D14] shadow-md shadow-[var(--color-accent-main)]/20' : 'text-[var(--color-accent-secondary)] hover:brightness-125 hover:bg-[var(--color-bg-secondary)]'
               }`}
             >
               <TrendingUp size={13} />
               <span>CEO BI Analytics</span>
             </button>
             <button
-              onClick={() => setActiveTab('data_health')}
-              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5 ${
-                activeTab === 'data_health' ? 'bg-emerald-500 text-slate-950 font-black shadow' : 'text-emerald-400 hover:text-emerald-300'
+              onClick={() => {
+                cinematicAudio.playClick();
+                setActiveTab('data_health');
+              }}
+              className={`px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 ${
+                activeTab === 'data_health' ? 'bg-emerald-500 text-[#090D14] shadow-md shadow-emerald-500/20' : 'text-emerald-400 hover:text-emerald-300 hover:bg-[var(--color-bg-secondary)]'
               }`}
             >
               <ShieldCheck size={13} />

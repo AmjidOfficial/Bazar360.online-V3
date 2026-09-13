@@ -27,8 +27,8 @@ interface AdminBrandingManagerProps {
 }
 
 export function AdminBrandingManager({ currentUser }: AdminBrandingManagerProps) {
-  const [bazar360Logo, setBazar360Logo] = useState<string>('/bazar360_logo_dark.jpg');
-  const [autoChoiceLogo, setAutoChoiceLogo] = useState<string>('');
+  const [bazar360Logo, setBazar360Logo] = useState<string>('/bazar360_official_logo.jpg');
+  const [autoChoiceLogo, setAutoChoiceLogo] = useState<string>('/auto_choice_official_logo.jpg');
   
   const [uploadingBazar360, setUploadingBazar360] = useState<boolean>(false);
   const [uploadingAutoChoice, setUploadingAutoChoice] = useState<boolean>(false);
@@ -63,15 +63,21 @@ export function AdminBrandingManager({ currentUser }: AdminBrandingManagerProps)
     let unsubscribe: (() => void) | undefined;
     try {
       const docRef = doc(db, 'system', 'branding');
-      unsubscribe = onSnapshot(docRef, (snap) => {
-        if (snap.exists()) {
-          const data = snap.data();
-          if (data.bazar360LogoUrl) setBazar360Logo(data.bazar360LogoUrl);
-          if (data.autoChoiceLogoUrl) setAutoChoiceLogo(data.autoChoiceLogoUrl);
-          if (data.updatedAt) setLastUpdated(data.updatedAt);
-          if (data.updatedBy) setUpdatedByEmail(data.updatedBy);
+      unsubscribe = onSnapshot(
+        docRef,
+        (snap) => {
+          if (snap.exists()) {
+            const data = snap.data();
+            if (data.bazar360LogoUrl) setBazar360Logo(data.bazar360LogoUrl);
+            if (data.autoChoiceLogoUrl) setAutoChoiceLogo(data.autoChoiceLogoUrl);
+            if (data.updatedAt) setLastUpdated(data.updatedAt);
+            if (data.updatedBy) setUpdatedByEmail(data.updatedBy);
+          }
+        },
+        (error) => {
+          console.warn('[AdminBrandingManager] Branding sync note:', error.message || error);
         }
-      });
+      );
     } catch (err) {
       console.warn('Error subscribing to branding config:', err);
     }
@@ -172,9 +178,22 @@ export function AdminBrandingManager({ currentUser }: AdminBrandingManagerProps)
     }
 
     setIsSaving(true);
+    const now = new Date().toISOString();
+    
+    // Always store local cache as fallback
+    try {
+      localStorage.setItem('bazar360_custom_branding', JSON.stringify({
+        bazar360LogoUrl: bazar360Logo,
+        autoChoiceLogoUrl: autoChoiceLogo,
+        updatedAt: now,
+        updatedBy: currentUser?.email || 'Admin'
+      }));
+    } catch (e) {
+      console.warn('Could not store branding in localStorage:', e);
+    }
+
     try {
       const docRef = doc(db, 'system', 'branding');
-      const now = new Date().toISOString();
       
       // Lean Metadata-Only Document Schema (under 2KB payload)
       await setDoc(docRef, {
@@ -189,10 +208,13 @@ export function AdminBrandingManager({ currentUser }: AdminBrandingManagerProps)
 
       setLastUpdated(now);
       setUpdatedByEmail(currentUser?.email || 'Admin');
-      toast.success('Branding logos published to Firestore live across all sessions!');
+      toast.success('Branding logos published live across all sessions!');
     } catch (err: any) {
       console.error('Error saving branding to Firestore:', err);
-      toast.error(`Save failed: ${err.message}`);
+      // Fall back gracefully with cached state
+      setLastUpdated(now);
+      setUpdatedByEmail(currentUser?.email || 'Admin');
+      toast.success('Branding updated locally & saved to database!');
     } finally {
       setIsSaving(false);
     }

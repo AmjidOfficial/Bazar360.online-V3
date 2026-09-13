@@ -39,6 +39,22 @@ if (typeof window !== 'undefined') {
 
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 
+// Enable offline persistence to seamlessly handle sandbox iframe connectivity restrictions
+// Persistence MUST be initialized before any network requests are triggered on db.
+if (typeof window !== 'undefined') {
+  try {
+    enableMultiTabIndexedDbPersistence(db)
+      .then(() => {
+        console.log('[Firestore] Multi-tab offline persistence initialized.');
+      })
+      .catch((err) => {
+        console.warn('[Firestore] Multi-tab offline persistence not enabled:', err.code || err.message);
+      });
+  } catch (err: any) {
+    console.warn('[Firestore] Persistence initialization bypassed in sandbox mode:', err.message || err);
+  }
+}
+
 // Validate Connection to Firestore as per critical skill constraint
 if (typeof window !== 'undefined') {
   const testConnection = async () => {
@@ -54,18 +70,6 @@ if (typeof window !== 'undefined') {
     }
   };
   testConnection();
-}
-
-// Enable offline persistence to seamlessly handle sandbox iframe connectivity restrictions
-// We use enableMultiTabIndexedDbPersistence so multiple tabs/previews can synchronize access gracefully.
-if (typeof window !== 'undefined') {
-  enableMultiTabIndexedDbPersistence(db)
-    .then(() => {
-      console.log('[Firestore] Multi-tab offline persistence initialized.');
-    })
-    .catch((err) => {
-      console.warn('[Firestore] Multi-tab offline persistence not enabled:', err.code || err.message);
-    });
 }
 
 export const auth = getAuth(app);

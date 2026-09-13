@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { Lightbox } from './Lightbox';
 import { dbFetchListingById } from '../lib/dbService';
 import VehicleARInspectorModal from './VehicleARInspectorModal';
+import { cinematicAudio } from '../lib/cinematicAudio';
 
 interface VehicleDetailProps {
   car: CarListing;
@@ -134,6 +135,7 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
   };
 
   const handleBack = () => {
+    cinematicAudio.playClick();
     if (onClose) {
       onClose();
     } else {
@@ -296,6 +298,7 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
       doc.text('Verified by Bazar360.online • Pakistan s Premier Automotive Marketplace', 14, 287);
       
       doc.save(`Vehicle-Fact-Sheet-${car.make}-${car.model}-${car.year}.pdf`);
+      cinematicAudio.playLuxuryChime();
       console.log('Vehicle Fact Sheet PDF downloaded successfully!');
     } catch (e) {
       console.error(e);
@@ -338,16 +341,22 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
           
           <div className="flex items-center gap-2 sm:gap-3">
             <button 
-              onClick={() => setShowARModal(true)}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-slate-950 font-black text-xs uppercase tracking-wider transition shadow-md shadow-cyan-500/20 cursor-pointer"
+              onClick={() => {
+                cinematicAudio.playClick();
+                setShowARModal(true);
+              }}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-accent-secondary)]/40 hover:bg-[var(--color-accent-secondary)]/20 text-[var(--color-accent-secondary)] font-black text-xs uppercase tracking-wider transition shadow-sm cursor-pointer"
             >
               <Camera size={14} />
               <span className="hidden sm:inline">Inspect AR Dimensions</span>
               <span className="sm:hidden">AR Frame</span>
             </button>
             <button 
-              onClick={handleDownloadFactSheet}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-orange-500 text-slate-950 font-black text-xs uppercase tracking-wider hover:bg-orange-600 transition shadow-sm cursor-pointer"
+              onClick={() => {
+                cinematicAudio.playClick();
+                handleDownloadFactSheet();
+              }}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-[var(--color-accent-main)] to-[var(--color-accent-secondary)] text-[#090D14] font-black text-xs uppercase tracking-wider hover:brightness-110 transition shadow-md shadow-[var(--color-accent-main)]/20 cursor-pointer"
             >
               <Download size={14} />
               <span className="hidden md:inline">Download Fact Sheet</span>
@@ -356,7 +365,8 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
               href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Check out this ${car.title} (${car.year}) listed on Bazar360 for ${renderPrice(car.price)}! View details here: ${window.location.href}`)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-[var(--color-text-header)] font-black text-xs uppercase tracking-wider transition-all shadow-md shadow-emerald-600/20 cursor-pointer"
+              onClick={() => cinematicAudio.playClick()}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 hover:bg-emerald-500 hover:text-[#090D14] text-emerald-400 font-black text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer"
               title="Share via WhatsApp"
             >
               <MessageCircle size={14} className="stroke-[2.5]" />
@@ -364,8 +374,11 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
               <span className="sm:hidden">WhatsApp</span>
             </a>
             <button 
-              onClick={handleShare}
-              className="w-10 h-10 rounded-full bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] flex items-center justify-center text-[var(--color-text-muted)] hover:text-orange-500 transition-colors"
+              onClick={() => {
+                cinematicAudio.playClick();
+                handleShare();
+              }}
+              className="w-10 h-10 rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-accent-main)] transition-colors cursor-pointer"
             >
               <Share2 size={16} />
             </button>
@@ -454,6 +467,7 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
                 key={`img-${idx}`}
                 className="relative shrink-0 cursor-pointer hover:scale-[1.03] transition-all"
                 onClick={() => {
+                  cinematicAudio.playTick();
                   setActiveMedia({ type: 'image', url: img });
                 }}
               >
@@ -462,8 +476,8 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
                   alt={`${car.title} - Image ${idx + 1}`}
                   className={`w-32 h-24 rounded-xl object-cover border-2 transition-all ${
                     activeMedia?.type === 'image' && activeMedia?.url === img 
-                      ? 'border-orange-500 shadow-md scale-102' 
-                      : 'border-[var(--color-border-main)] hover:border-[#FE805D]'
+                      ? 'border-[var(--color-accent-main)] shadow-[0_0_15px_rgba(245,158,11,0.35)] scale-102' 
+                      : 'border-[var(--color-border-main)] hover:border-[var(--color-accent-main)]/50'
                   }`}
                   loading="lazy"
                   referrerPolicy="no-referrer"
@@ -475,13 +489,14 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
             <div 
               className="relative shrink-0 cursor-pointer hover:scale-[1.03] transition-all"
               onClick={() => {
+                cinematicAudio.playTick();
                 setActiveMedia({ type: 'video', url: videoUrl });
               }}
             >
               <div className={`w-32 h-24 rounded-xl bg-bg-primary border-2 overflow-hidden relative flex items-center justify-center ${
                 activeMedia?.type === 'video' 
-                  ? 'border-orange-500 shadow-md scale-102' 
-                  : 'border-[var(--color-border-main)] hover:border-[#FE805D]'
+                  ? 'border-[var(--color-accent-main)] shadow-[0_0_15px_rgba(245,158,11,0.35)] scale-102' 
+                  : 'border-[var(--color-border-main)] hover:border-[var(--color-accent-main)]/50'
               }`}>
                 <video 
                   src={videoUrl}
@@ -733,9 +748,10 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
                   </p>
                   <a 
                     href={`tel:${resolvedSellerPhone}`}
-                    className="text-sm font-extrabold text-orange-500 font-mono tracking-widest bg-[var(--color-bg-primary)] hover:bg-slate-100 dark:hover:bg-bg-tertiary py-2.5 px-4 rounded-xl border border-[var(--color-border-main)] inline-flex items-center gap-2 select-all cursor-pointer shadow-sm transition-all"
+                    onClick={() => cinematicAudio.playClick()}
+                    className="text-sm font-extrabold text-[var(--color-accent-main)] font-mono tracking-widest bg-[var(--color-bg-primary)] hover:bg-[var(--color-bg-secondary)] py-2.5 px-4 rounded-xl border border-[var(--color-border-main)] inline-flex items-center gap-2 select-all cursor-pointer shadow-sm transition-all"
                   >
-                    <Phone size={14} className="text-orange-500" /> 
+                    <Phone size={14} className="text-[var(--color-accent-main)]" /> 
                     <span>{resolvedSellerPhone}</span>
                   </a>
                   {resolvedSellerWhatsApp && (
@@ -743,9 +759,10 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
                       href={`https://wa.me/${formattedWhatsapp}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs font-extrabold text-[var(--color-accent-main)] font-mono tracking-widest bg-[var(--color-bg-primary)] hover:bg-slate-100 dark:hover:bg-bg-tertiary py-2 px-3 rounded-xl border border-[var(--color-border-main)] inline-flex items-center gap-2 select-all cursor-pointer shadow-sm transition-all"
+                      onClick={() => cinematicAudio.playClick()}
+                      className="text-xs font-extrabold text-emerald-400 font-mono tracking-widest bg-[var(--color-bg-primary)] hover:bg-[var(--color-bg-secondary)] py-2 px-3 rounded-xl border border-emerald-500/20 inline-flex items-center gap-2 select-all cursor-pointer shadow-sm transition-all"
                     >
-                      <MessageCircle size={14} className="text-[var(--color-accent-main)]" /> 
+                      <MessageCircle size={14} className="text-emerald-400" /> 
                       <span>WhatsApp: {resolvedSellerWhatsApp}</span>
                     </a>
                   )}
@@ -756,9 +773,10 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
               <div className="space-y-3">
                 <a 
                   href={`tel:${resolvedSellerPhone}`}
-                  className="w-full py-3.5 bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-secondary)] dark:bg-white dark:text-[#26344F] dark:hover:bg-gray-200 text-[var(--color-text-header)] font-mono font-black text-xs uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg"
+                  onClick={() => cinematicAudio.playClick()}
+                  className="w-full py-3.5 bg-[var(--color-bg-primary)] border border-[var(--color-border-main)] hover:border-[var(--color-accent-main)]/50 text-[var(--color-text-header)] font-mono font-black text-xs uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
                 >
-                  <Phone size={14} />
+                  <Phone size={14} className="text-[var(--color-accent-main)]" />
                   {isPrivateSeller ? 'Call Individual Seller' : 'Call Showroom'}
                 </a>
                 
@@ -767,7 +785,8 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
                     href={`https://wa.me/${formattedWhatsapp}?text=Hi, I am interested in your ${car.year} ${car.title} listed for ${renderPrice(car.price)} on Bazar360.`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-[var(--color-text-header)] font-mono font-black text-xs uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shadow-emerald-600/20"
+                    onClick={() => cinematicAudio.playClick()}
+                    className="w-full py-3.5 bg-emerald-500/15 border border-emerald-500/40 hover:bg-emerald-500 hover:text-[#090D14] text-emerald-400 font-mono font-black text-xs uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
                   >
                     <MessageCircle size={14} />
                     WhatsApp Owner
@@ -777,8 +796,8 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
 
               {/* High-Converting Bazar360 360° Vehicle Inspection CTA */}
               <div className="pt-4 border-t border-[var(--color-border-main)] space-y-3">
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-orange-500/10 via-orange-500/5 to-transparent border border-orange-500/30 space-y-3 text-left">
-                  <div className="flex items-center gap-2 text-orange-400">
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-[var(--color-accent-main)]/15 via-[var(--color-accent-main)]/5 to-transparent border border-[var(--color-accent-main)]/30 space-y-3 text-left">
+                  <div className="flex items-center gap-2 text-[var(--color-accent-main)]">
                     <ShieldCheck size={18} />
                     <span className="text-xs font-mono font-black uppercase tracking-wider">360° Digital Inspection</span>
                   </div>
@@ -787,11 +806,12 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
                   </p>
                   <button
                     onClick={() => {
+                      cinematicAudio.playClick();
                       if (window.dispatchEvent) {
                         window.dispatchEvent(new CustomEvent('open-service-tab', { detail: car }));
                       }
                     }}
-                    className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-slate-950 font-mono font-black text-xs uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md active:scale-95"
+                    className="w-full py-3 bg-[var(--color-accent-main)] hover:bg-[var(--color-accent-hover)] text-[#090D14] font-mono font-black text-xs uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md active:scale-95"
                   >
                     <Zap size={14} />
                     <span>Book Inspection for this Car</span>

@@ -3,7 +3,7 @@ import { CarListing, Dealer } from '../../types';
 import { VehicleCard } from '../VehicleCard';
 import { VehicleSkeletonCard } from '../VehicleSkeletonCard';
 import { ArrowRight, ChevronDown } from 'lucide-react';
-import { dbFetchListingsPaginated } from '../../lib/dbService';
+import { dbFetchListingsPaginated, isAllowedListingId } from '../../lib/dbService';
 
 interface FeaturedVehiclesProps {
   lang: 'en' | 'ur';
@@ -30,10 +30,9 @@ export function FeaturedVehicles({
     async function loadInitial() {
       setLoading(true);
       const { listings, lastVisible: last } = await dbFetchListingsPaginated(null, 8);
-      // Filter for verified/premium only if needed, though DB could do this if we had an index.
-      // We assume dbFetchListingsPaginated returns recent listings, we can filter them locally for now.
-      const premium = listings.filter(l => l.verified);
-      setPaginatedListings(premium.length > 0 ? premium : listings);
+      const allowedOnly = listings.filter(l => l && isAllowedListingId(l.id));
+      const premium = allowedOnly.filter(l => l.verified);
+      setPaginatedListings(premium.length > 0 ? premium : allowedOnly);
       setLastVisible(last);
       setHasMore(listings.length === 8);
       setLoading(false);

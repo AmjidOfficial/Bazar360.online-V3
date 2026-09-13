@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { ProfileCompletion } from './ProfileCompletion';
 import { toast } from 'sonner';
+import { cinematicAudio } from '../../lib/cinematicAudio';
 
 interface ProfileHeaderProps {
   user: UserProfile;
@@ -234,16 +235,22 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           {/* Action Button Strip */}
           <div className="flex flex-wrap items-center justify-center gap-2 pt-2 sm:pt-0">
             <button
-              onClick={onEditProfile}
-              className="px-4 py-2.5 rounded-2xl bg-[var(--color-bg-primary)] hover:bg-[var(--color-bg-tertiary)] border border-[var(--color-border)] text-[var(--color-text-main)] font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer font-sans shadow-sm"
+              onClick={() => {
+                cinematicAudio.playClick();
+                onEditProfile();
+              }}
+              className="px-4 py-2.5 rounded-2xl bg-[var(--color-bg-primary)] hover:bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] hover:border-[var(--color-accent-main)]/50 text-[var(--color-text-header)] font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer font-sans shadow-sm active:scale-95"
             >
-              <Edit2 className="w-3.5 h-3.5 text-sky-400" />
+              <Edit2 className="w-3.5 h-3.5 text-[var(--color-accent-main)]" />
               <span>Edit Profile</span>
             </button>
 
             <button
-              onClick={onOpenSecurity}
-              className="px-4 py-2.5 rounded-2xl bg-[var(--color-bg-primary)] hover:bg-[var(--color-bg-tertiary)] border border-[var(--color-border)] text-[var(--color-text-main)] font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer font-sans shadow-sm"
+              onClick={() => {
+                cinematicAudio.playClick();
+                onOpenSecurity();
+              }}
+              className="px-4 py-2.5 rounded-2xl bg-[var(--color-bg-primary)] hover:bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] hover:border-[var(--color-accent-main)]/50 text-[var(--color-text-header)] font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer font-sans shadow-sm active:scale-95"
             >
               <Shield className="w-3.5 h-3.5 text-[var(--color-accent-main)]" />
               <span>Security</span>
@@ -251,20 +258,26 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
             {(user.associatedShowroomId || user.dealerId) && setTab && (
               <button
-                onClick={() => setTab('dealers')}
-                className="px-4 py-2.5 rounded-2xl bg-[var(--color-accent-main)]/10 hover:bg-[var(--color-accent-main)]/20 border border-[var(--color-accent-main)]/30 text-[var(--color-accent-main)] font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer font-sans shadow-sm"
+                onClick={() => {
+                  cinematicAudio.playClick();
+                  setTab('dealers');
+                }}
+                className="px-4 py-2.5 rounded-2xl bg-[var(--color-accent-main)] hover:bg-[var(--color-accent-hover)] text-[#090D14] font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer font-sans shadow-md active:scale-95"
               >
-                <Building2 className="w-3.5 h-3.5 text-[var(--color-accent-main)]" />
+                <Building2 className="w-3.5 h-3.5" />
                 <span>My Showroom</span>
               </button>
             )}
 
             <button
-              onClick={handleShareProfile}
-              className="p-2.5 rounded-2xl bg-[var(--color-bg-primary)] hover:bg-[var(--color-bg-tertiary)] border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-all cursor-pointer shadow-sm"
+              onClick={() => {
+                cinematicAudio.playClick();
+                handleShareProfile();
+              }}
+              className="p-2.5 rounded-2xl bg-[var(--color-bg-primary)] hover:bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] hover:border-[var(--color-accent-main)]/50 text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] transition-all cursor-pointer shadow-sm active:scale-95"
               title="Share Profile Link"
             >
-              {copiedLink ? <Check className="w-4 h-4 text-[var(--color-accent-main)]" /> : <Share2 className="w-4 h-4" />}
+              {copiedLink ? <Check className="w-4 h-4 text-emerald-400" /> : <Share2 className="w-4 h-4 text-[var(--color-accent-main)]" />}
             </button>
           </div>
 

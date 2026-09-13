@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Moon, Sun, Home, PlusCircle, Grid, Store, User, LogIn, X, ShieldCheck, MapPin, Gauge, Fuel, Milestone, Star, Award, DollarSign, Send, Hourglass, Bell, Sparkles, Car, MessageSquare, Headphones, QrCode, Heart, Copy, ExternalLink, Share2, Users, Phone, ArrowLeft } from 'lucide-react';
+import { Moon, Sun, Home, PlusCircle, Grid, Store, User, LogIn, X, ShieldCheck, MapPin, Gauge, Fuel, Milestone, Star, Award, DollarSign, Send, Hourglass, Bell, Sparkles, Car, MessageSquare, Headphones, QrCode, Heart, Copy, ExternalLink, Share2, Users, Phone, ArrowLeft, Building2 } from 'lucide-react';
 import { CarListing, Dealer, Review } from './types';
 
 
@@ -128,6 +128,7 @@ const HOTSPOTS_LIST = [
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import ShowroomProfile from "./pages/ShowroomProfile";
 import { VehicleDetail } from "./components/VehicleDetail";
+import ShowroomPortalLoginModal from "./components/ShowroomPortalLoginModal";
 
 import { RoleProvider } from './contexts/RoleContext';
 // ...
@@ -475,6 +476,7 @@ function App() {
   const [selectedQrDealer, setSelectedQrDealer] = useState<Dealer | null>(null);
   const [qrCopied, setQrCopied] = useState<boolean>(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+  const [isShowroomPortalLoginOpen, setIsShowroomPortalLoginOpen] = useState<boolean>(false);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState<boolean>(false);
   const [activeIndustry, setActiveIndustry] = useState<'Automotive' | 'Footwear' | 'Apparel' | 'Electronics'>('Automotive');
   const [currentCategory, setCurrentCategory] = useState<'gateway' | 'auto' | 'footwear' | 'food'>('auto');
@@ -649,7 +651,7 @@ function App() {
       updated = [...favoritesList, car];
     }
     setFavoritesList(updated);
-    localStorage.setItem('bazar360_favorites', JSON.stringify(updated));
+    try { localStorage.setItem('bazar360_favorites', JSON.stringify(updated)); } catch {}
 
     if (currentUser?.uid) {
       try {
@@ -1467,13 +1469,22 @@ function App() {
               <button onClick={() => setTab('inventory')} className={`text-[11px] font-black uppercase tracking-wider transition-colors ${currentTab === 'inventory' ? 'text-[var(--color-accent-main)]' : 'text-text-muted hover:text-[var(--color-text-header)]'}`}>Inventory</button>
               <button onClick={() => setTab('dealers')} className={`text-[11px] font-black uppercase tracking-wider transition-colors ${currentTab === 'dealers' ? 'text-[var(--color-accent-main)]' : 'text-text-muted hover:text-[var(--color-text-header)]'}`}>Showrooms</button>
               
-              {/* Prominent CTA for Post Ad */}
+              {/* Prominent CTA for Post Ad & Showroom Portal */}
               <button
                 onClick={() => setTab('sell')}
-                className="group flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-[var(--color-text-header)] rounded-lg text-[11px] font-mono font-black tracking-wider uppercase transition-all shadow-lg shadow-emerald-600/20 active:scale-95 cursor-pointer"
+                className="group flex items-center gap-2 px-3.5 py-1.5 bg-gradient-to-r from-emerald-600 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-[var(--color-text-header)] rounded-lg text-[11px] font-mono font-black tracking-wider uppercase transition-all shadow-lg shadow-emerald-600/20 active:scale-95 cursor-pointer"
               >
                 <PlusCircle size={14} />
                 <span>Post Ad</span>
+              </button>
+
+              <button
+                onClick={() => setIsShowroomPortalLoginOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--color-accent-main)]/50 bg-[var(--color-accent-main)]/15 hover:bg-[var(--color-accent-main)]/25 text-[var(--color-accent-main)] text-[11px] font-mono font-black tracking-wider uppercase transition-all shadow-sm active:scale-95 cursor-pointer"
+                title="Dedicated login link for Showroom Owners & Dealerships"
+              >
+                <Building2 size={13} />
+                <span>Showroom Portal</span>
               </button>
 
               {currentUser ? (
@@ -2307,6 +2318,7 @@ function App() {
           lang={lang} 
           setTab={handleSetTab} 
           onOpenSupportDrawer={() => setIsContactDrawerOpen(true)} 
+          onOpenShowroomLogin={() => setIsShowroomPortalLoginOpen(true)}
         />
       </main>
 
@@ -2323,6 +2335,17 @@ function App() {
         onSuccess={(profile) => {
           setCurrentUser(profile);
           setIsAuthModalOpen(false);
+        }}
+        lang={lang}
+      />
+
+      <ShowroomPortalLoginModal
+        isOpen={isShowroomPortalLoginOpen}
+        onClose={() => setIsShowroomPortalLoginOpen(false)}
+        onSuccess={(profile) => {
+          setCurrentUser(profile);
+          setIsShowroomPortalLoginOpen(false);
+          handleSetTab('profile');
         }}
         lang={lang}
       />

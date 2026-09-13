@@ -22,9 +22,12 @@ import {
   WifiOff
 } from 'lucide-react';
 import { CarListing, Dealer } from '../types';
+import { isVehicleEligible, getEligibleListings } from '../lib/dbService';
 import { VehicleCard } from './VehicleCard';
 import { VehicleSkeletonCard } from './VehicleSkeletonCard';
 import { motion } from 'motion/react';
+import { cinematicAudio } from '../lib/cinematicAudio';
+
 import { 
   PAKISTAN_BRANDS, 
   PAKISTAN_CITIES as IMPORTED_CITIES, 
@@ -324,9 +327,9 @@ export default function SearchExplorerView({
   const isOffline = typeof navigator !== 'undefined' && !navigator.onLine;
 
   const sourceVehicles = useMemo(() => {
-    const safeListings = listings || [];
-    const safeRecentViews = recentViewsList || [];
-    const safeFavorites = favoritesList || [];
+    const safeListings = getEligibleListings(listings);
+    const safeRecentViews = getEligibleListings(recentViewsList);
+    const safeFavorites = getEligibleListings(favoritesList);
 
     // If filtering by recent views, combine listings with recentViewsList so offline items remain fully viewable
     if (filterRecentViews) {
@@ -352,8 +355,8 @@ export default function SearchExplorerView({
   // Filtering Logic
   const filteredVehicles = useMemo(() => {
     return sourceVehicles.filter((car) => {
-      // Approved only, hide sold, paused, and archived from public searches
-      if (car.approved === false || car.isSold || car.isPaused || car.isArchived) return false;
+      // Must pass standardized vehicle eligibility check
+      if (!isVehicleEligible(car)) return false;
 
       // Vehicle Type match
       if (filterVehicleType !== 'All') {
@@ -535,14 +538,17 @@ export default function SearchExplorerView({
 
   const filterSidebarContent = (
     <div className="space-y-6 text-left">
-      <div className="flex justify-between items-center border-b border-[#E2E8F0] pb-4">
-        <h3 className="text-sm font-sans font-bold uppercase tracking-wider text-[#007979] flex items-center gap-1.5">
+      <div className="flex justify-between items-center border-b border-[var(--color-border-main)] pb-4">
+        <h3 className="text-sm font-sans font-bold uppercase tracking-wider text-[var(--color-accent-main)] flex items-center gap-1.5">
           <SlidersHorizontal size={14} />
           {t.filterTitle}
         </h3>
         <button
-          onClick={handleResetFilters}
-          className="text-xs font-sans text-[#64748B] hover:text-[#0F172A] flex items-center gap-1 transition-colors cursor-pointer"
+          onClick={() => {
+            cinematicAudio.playClick();
+            handleResetFilters();
+          }}
+          className="text-xs font-sans text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] flex items-center gap-1 transition-colors cursor-pointer"
         >
           <RotateCcw size={12} />
           {t.resetAll}
@@ -550,12 +556,13 @@ export default function SearchExplorerView({
       </div>
 
       {/* Collections Selection Option Panel */}
-      <div className="bg-[#F8FAFC] border border-[#E2E8F0] p-3.5 rounded-2xl space-y-3 shadow-xs">
-        <span className="text-[10px] font-sans font-bold uppercase tracking-wider text-[#007979] block">Personal Collections</span>
+      <div className="bg-[var(--color-bg-tertiary)] border border-[var(--color-border-main)] p-3.5 rounded-2xl space-y-3 shadow-xs">
+        <span className="text-[10px] font-sans font-bold uppercase tracking-wider text-[var(--color-accent-main)] block">Personal Collections</span>
         
         <div className="flex flex-col gap-2">
           <button
             onClick={() => {
+              cinematicAudio.playClick();
               setFilterFavorites(!filterFavorites);
               if (!filterFavorites) {
                 setFilterRecentViews(false);
@@ -563,8 +570,8 @@ export default function SearchExplorerView({
             }}
             className={`w-full py-2.5 px-3 rounded-xl border font-sans text-xs flex items-center justify-between transition-all cursor-pointer ${
               filterFavorites
-                ? 'bg-rose-50 border-rose-300 text-rose-600 font-bold'
-                : 'bg-white border-[#E2E8F0] text-[#0F172A] hover:border-[#007979]/40'
+                ? 'bg-rose-500/10 border-rose-500/40 text-rose-500 font-bold'
+                : 'bg-[var(--color-bg-secondary)] border-[var(--color-border-main)] text-[var(--color-text-header)] hover:border-[var(--color-accent-main)]/40'
             }`}
           >
             <span className="flex items-center gap-2">
@@ -576,6 +583,7 @@ export default function SearchExplorerView({
 
           <button
             onClick={() => {
+              cinematicAudio.playClick();
               setFilterRecentViews(!filterRecentViews);
               if (!filterRecentViews) {
                 setFilterFavorites(false);
@@ -583,8 +591,8 @@ export default function SearchExplorerView({
             }}
             className={`w-full py-2.5 px-3 rounded-xl border font-sans text-xs flex items-center justify-between transition-all cursor-pointer ${
               filterRecentViews
-                ? 'bg-sky-50 border-sky-300 text-sky-600 font-bold'
-                : 'bg-white border-[#E2E8F0] text-[#0F172A] hover:border-[#007979]/40'
+                ? 'bg-sky-500/10 border-sky-500/40 text-sky-500 font-bold'
+                : 'bg-[var(--color-bg-secondary)] border-[var(--color-border-main)] text-[var(--color-text-header)] hover:border-[var(--color-accent-main)]/40'
             }`}
           >
             <span className="flex items-center gap-2">
@@ -598,11 +606,14 @@ export default function SearchExplorerView({
 
       {/* 0. Vehicle Type Category Dropdown */}
       <div className="space-y-2">
-        <label className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#64748B] block">{t.vehicleType}</label>
+        <label className="text-[11px] font-sans font-bold uppercase tracking-wider text-[var(--color-text-muted)] block">{t.vehicleType}</label>
         <select
           value={filterVehicleType}
-          onChange={(e) => handleVehicleTypeChange(e.target.value)}
-          className="w-full bg-white border border-[#E2E8F0] text-[#0F172A] rounded-xl p-3 text-xs focus:border-[#007979] focus:ring-1 focus:ring-[#007979] outline-none shadow-2xs cursor-pointer"
+          onChange={(e) => {
+            cinematicAudio.playTick();
+            handleVehicleTypeChange(e.target.value);
+          }}
+          className="w-full bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] text-[var(--color-text-header)] rounded-xl p-3 text-xs focus:border-[var(--color-accent-main)] focus:ring-1 focus:ring-[var(--color-accent-main)] outline-none shadow-2xs cursor-pointer"
         >
           <option value="All">{lang === 'ur' ? 'تمام گاڑیاں' : 'All Categories'}</option>
           <option value="car">{lang === 'ur' ? 'کاریں' : 'Cars'}</option>
@@ -613,11 +624,14 @@ export default function SearchExplorerView({
 
       {/* 1. Body Type Category Dropdown */}
       <div className="space-y-2">
-        <label className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#64748B] block">{t.bodyType}</label>
+        <label className="text-[11px] font-sans font-bold uppercase tracking-wider text-[var(--color-text-muted)] block">{t.bodyType}</label>
         <select
           value={filterBodyCategory}
-          onChange={(e) => setFilterBodyCategory(e.target.value)}
-          className="w-full bg-white border border-[#E2E8F0] text-[#0F172A] rounded-xl p-3 text-xs focus:border-[#007979] focus:ring-1 focus:ring-[#007979] outline-none shadow-2xs"
+          onChange={(e) => {
+            cinematicAudio.playTick();
+            setFilterBodyCategory(e.target.value);
+          }}
+          className="w-full bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] text-[var(--color-text-header)] rounded-xl p-3 text-xs focus:border-[var(--color-accent-main)] focus:ring-1 focus:ring-[var(--color-accent-main)] outline-none shadow-2xs cursor-pointer"
         >
           {BODY_CATEGORIES.map(cat => (
             <option key={cat.id} value={cat.id}>{cat.id === 'All' ? t.any : cat.label}</option>
@@ -627,11 +641,14 @@ export default function SearchExplorerView({
 
       {/* 2. Brand Selection */}
       <div className="space-y-2">
-        <label className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#64748B] block">{t.make}</label>
+        <label className="text-[11px] font-sans font-bold uppercase tracking-wider text-[var(--color-text-muted)] block">{t.make}</label>
         <select
           value={filterMake}
-          onChange={(e) => handleMakeChange(e.target.value)}
-          className="w-full bg-white border border-[#E2E8F0] text-[#0F172A] rounded-xl p-3 text-xs focus:border-[#007979] focus:ring-1 focus:ring-[#007979] outline-none shadow-2xs"
+          onChange={(e) => {
+            cinematicAudio.playTick();
+            handleMakeChange(e.target.value);
+          }}
+          className="w-full bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] text-[var(--color-text-header)] rounded-xl p-3 text-xs focus:border-[var(--color-accent-main)] focus:ring-1 focus:ring-[var(--color-accent-main)] outline-none shadow-2xs cursor-pointer"
         >
           {dynamicMakes.map(make => (
             <option key={make} value={make}>{make === 'All' ? t.any : make}</option>
@@ -641,13 +658,16 @@ export default function SearchExplorerView({
 
       {/* 3. Model select/text field */}
       <div className="space-y-2">
-        <label className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#64748B] block">{t.model}</label>
+        <label className="text-[11px] font-sans font-bold uppercase tracking-wider text-[var(--color-text-muted)] block">{t.model}</label>
         <div className="relative">
           {filterMake !== 'All' && dynamicModels.length > 0 ? (
             <select
               value={filterModel}
-              onChange={(e) => handleModelChange(e.target.value)}
-              className="w-full bg-white border border-[#E2E8F0] text-[#0F172A] rounded-xl p-3 text-xs focus:border-[#007979] focus:ring-1 focus:ring-[#007979] outline-none cursor-pointer shadow-2xs"
+              onChange={(e) => {
+                cinematicAudio.playTick();
+                handleModelChange(e.target.value);
+              }}
+              className="w-full bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] text-[var(--color-text-header)] rounded-xl p-3 text-xs focus:border-[var(--color-accent-main)] focus:ring-1 focus:ring-[var(--color-accent-main)] outline-none cursor-pointer shadow-2xs"
             >
               <option value="">{lang === 'ur' ? "تمام ماڈلز (کوئی بھی)" : "All Models (Any)"}</option>
               {dynamicModels.map((model) => (
@@ -661,12 +681,15 @@ export default function SearchExplorerView({
                 value={filterModel}
                 onChange={(e) => handleModelChange(e.target.value)}
                 placeholder={t.modelPlaceholder}
-                className="w-full bg-white border border-[#E2E8F0] text-[#0F172A] rounded-xl p-3 text-xs placeholder-[#94A3B8] focus:border-[#007979] focus:ring-1 focus:ring-[#007979] outline-none shadow-2xs"
+                className="w-full bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] text-[var(--color-text-header)] rounded-xl p-3 text-xs placeholder-[var(--color-text-muted)] focus:border-[var(--color-accent-main)] focus:ring-1 focus:ring-[var(--color-accent-main)] outline-none shadow-2xs"
               />
               {filterModel && (
                 <button
-                  onClick={() => handleModelChange('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#0F172A] cursor-pointer"
+                  onClick={() => {
+                    cinematicAudio.playClick();
+                    handleModelChange('');
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] cursor-pointer"
                 >
                   <X size={12} />
                 </button>
@@ -678,13 +701,16 @@ export default function SearchExplorerView({
 
       {/* 3.5. Variant Selection */}
       <div className="space-y-2">
-        <label className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#64748B] block">{t.variant}</label>
+        <label className="text-[11px] font-sans font-bold uppercase tracking-wider text-[var(--color-text-muted)] block">{t.variant}</label>
         <div className="relative">
           {filterModel && dynamicVariants.length > 0 ? (
             <select
               value={filterVariant}
-              onChange={(e) => setFilterVariant(e.target.value)}
-              className="w-full bg-white border border-[#E2E8F0] text-[#0F172A] rounded-xl p-3 text-xs focus:border-[#007979] focus:ring-1 focus:ring-[#007979] outline-none cursor-pointer shadow-2xs"
+              onChange={(e) => {
+                cinematicAudio.playTick();
+                setFilterVariant(e.target.value);
+              }}
+              className="w-full bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] text-[var(--color-text-header)] rounded-xl p-3 text-xs focus:border-[var(--color-accent-main)] focus:ring-1 focus:ring-[var(--color-accent-main)] outline-none cursor-pointer shadow-2xs"
             >
               <option value="">{lang === 'ur' ? "تمام ویرینٹس (کوئی بھی)" : "All Variants (Any)"}</option>
               {dynamicVariants.map((variant) => (
@@ -698,12 +724,15 @@ export default function SearchExplorerView({
                 value={filterVariant}
                 onChange={(e) => setFilterVariant(e.target.value)}
                 placeholder={lang === 'ur' ? "مثال کے طور پر VTi Oriel" : "e.g. VTi Oriel, GLi"}
-                className="w-full bg-white border border-[#E2E8F0] text-[#0F172A] rounded-xl p-3 text-xs placeholder-[#94A3B8] focus:border-[#007979] focus:ring-1 focus:ring-[#007979] outline-none shadow-2xs"
+                className="w-full bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] text-[var(--color-text-header)] rounded-xl p-3 text-xs placeholder-[var(--color-text-muted)] focus:border-[var(--color-accent-main)] focus:ring-1 focus:ring-[var(--color-accent-main)] outline-none shadow-2xs"
               />
               {filterVariant && (
                 <button
-                  onClick={() => setFilterVariant('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#0F172A] cursor-pointer"
+                  onClick={() => {
+                    cinematicAudio.playClick();
+                    setFilterVariant('');
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] cursor-pointer"
                 >
                   <X size={12} />
                 </button>
@@ -716,8 +745,8 @@ export default function SearchExplorerView({
       {/* 4. Year slider range */}
       <div className="space-y-2">
         <div className="flex justify-between items-baseline text-[11px]">
-          <span className="font-sans font-bold uppercase tracking-wider text-[#64748B]">{t.yearRange}</span>
-          <span className="font-mono text-xs text-[#007979] font-bold">{yearMin} - {yearMax}</span>
+          <span className="font-sans font-bold uppercase tracking-wider text-[var(--color-text-muted)]">{t.yearRange}</span>
+          <span className="font-mono text-xs text-[var(--color-accent-main)] font-bold">{yearMin} - {yearMax}</span>
         </div>
         <div className="grid grid-cols-2 gap-2">
           <input
@@ -726,7 +755,7 @@ export default function SearchExplorerView({
             max="2026"
             value={yearMin}
             onChange={(e) => setYearMin(parseInt(e.target.value))}
-            className="w-full h-1.5 bg-[#E2E8F0] rounded appearance-none cursor-pointer accent-[#007979]"
+            className="w-full h-1.5 bg-[var(--color-border-main)] rounded appearance-none cursor-pointer accent-[var(--color-accent-main)]"
           />
           <input
             type="range"
@@ -734,7 +763,7 @@ export default function SearchExplorerView({
             max="2026"
             value={yearMax}
             onChange={(e) => setYearMax(parseInt(e.target.value))}
-            className="w-full h-1.5 bg-[#E2E8F0] rounded appearance-none cursor-pointer accent-[#007979]"
+            className="w-full h-1.5 bg-[var(--color-border-main)] rounded appearance-none cursor-pointer accent-[var(--color-accent-main)]"
           />
         </div>
       </div>
@@ -742,8 +771,8 @@ export default function SearchExplorerView({
       {/* 5. Price filter sliders */}
       <div className="space-y-2">
         <div className="flex justify-between items-baseline text-[11px]">
-          <span className="font-sans font-bold uppercase tracking-wider text-[#64748B]">{t.priceRange}</span>
-          <span className="font-mono text-xs text-[#007979] font-bold">{formatPriceNum(priceMax)}</span>
+          <span className="font-sans font-bold uppercase tracking-wider text-[var(--color-text-muted)]">{t.priceRange}</span>
+          <span className="font-mono text-xs text-[var(--color-accent-main)] font-bold">{formatPriceNum(priceMax)}</span>
         </div>
         <input
           type="range"
@@ -752,17 +781,20 @@ export default function SearchExplorerView({
           step="500000"
           value={priceMax}
           onChange={(e) => setPriceMax(parseInt(e.target.value))}
-          className="w-full h-1.5 bg-[#E2E8F0] rounded appearance-none cursor-pointer accent-[#007979]"
+          className="w-full h-1.5 bg-[var(--color-border-main)] rounded appearance-none cursor-pointer accent-[var(--color-accent-main)]"
         />
       </div>
 
       {/* 6. City Selection */}
       <div className="space-y-2">
-        <label className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#64748B] block">{t.city}</label>
+        <label className="text-[11px] font-sans font-bold uppercase tracking-wider text-[var(--color-text-muted)] block">{t.city}</label>
         <select
           value={filterCity}
-          onChange={(e) => setFilterCity(e.target.value)}
-          className="w-full bg-white border border-[#E2E8F0] text-[#0F172A] rounded-xl p-3 text-xs focus:border-[#007979] focus:ring-1 focus:ring-[#007979] outline-none shadow-2xs"
+          onChange={(e) => {
+            cinematicAudio.playTick();
+            setFilterCity(e.target.value);
+          }}
+          className="w-full bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] text-[var(--color-text-header)] rounded-xl p-3 text-xs focus:border-[var(--color-accent-main)] focus:ring-1 focus:ring-[var(--color-accent-main)] outline-none shadow-2xs cursor-pointer"
         >
           {PAKISTAN_CITIES.map(city => (
             <option key={city} value={city}>{city === 'All' ? t.any : city}</option>
@@ -772,11 +804,14 @@ export default function SearchExplorerView({
 
       {/* 7. Transmission dropdown */}
       <div className="space-y-2">
-        <label className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#64748B] block">{t.transmission}</label>
+        <label className="text-[11px] font-sans font-bold uppercase tracking-wider text-[var(--color-text-muted)] block">{t.transmission}</label>
         <select
           value={filterTransmission}
-          onChange={(e) => setFilterTransmission(e.target.value)}
-          className="w-full bg-white border border-[#E2E8F0] text-[#0F172A] rounded-xl p-3 text-xs focus:border-[#007979] focus:ring-1 focus:ring-[#007979] outline-none shadow-2xs"
+          onChange={(e) => {
+            cinematicAudio.playTick();
+            setFilterTransmission(e.target.value);
+          }}
+          className="w-full bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] text-[var(--color-text-header)] rounded-xl p-3 text-xs focus:border-[var(--color-accent-main)] focus:ring-1 focus:ring-[var(--color-accent-main)] outline-none shadow-2xs cursor-pointer"
         >
           <option value="All">{t.any}</option>
           <option value="Automatic">{t.automatic}</option>
@@ -786,11 +821,14 @@ export default function SearchExplorerView({
 
       {/* 8. Fuel Type dropdown */}
       <div className="space-y-2">
-        <label className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#64748B] block">{t.fuelType}</label>
+        <label className="text-[11px] font-sans font-bold uppercase tracking-wider text-[var(--color-text-muted)] block">{t.fuelType}</label>
         <select
           value={filterFuel}
-          onChange={(e) => setFilterFuel(e.target.value)}
-          className="w-full bg-white border border-[#E2E8F0] text-[#0F172A] rounded-xl p-3 text-xs focus:border-[#007979] focus:ring-1 focus:ring-[#007979] outline-none shadow-2xs"
+          onChange={(e) => {
+            cinematicAudio.playTick();
+            setFilterFuel(e.target.value);
+          }}
+          className="w-full bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] text-[var(--color-text-header)] rounded-xl p-3 text-xs focus:border-[var(--color-accent-main)] focus:ring-1 focus:ring-[var(--color-accent-main)] outline-none shadow-2xs cursor-pointer"
         >
           <option value="All">{t.any}</option>
           <option value="Petrol">{t.petrol}</option>
@@ -802,11 +840,14 @@ export default function SearchExplorerView({
 
       {/* 9. Condition Selection */}
       <div className="space-y-2">
-        <label className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#64748B] block">{t.condition}</label>
+        <label className="text-[11px] font-sans font-bold uppercase tracking-wider text-[var(--color-text-muted)] block">{t.condition}</label>
         <select
           value={filterCondition}
-          onChange={(e) => setFilterCondition(e.target.value)}
-          className="w-full bg-white border border-[#E2E8F0] text-[#0F172A] rounded-xl p-3 text-xs focus:border-[#007979] focus:ring-1 focus:ring-[#007979] outline-none shadow-2xs"
+          onChange={(e) => {
+            cinematicAudio.playTick();
+            setFilterCondition(e.target.value);
+          }}
+          className="w-full bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] text-[var(--color-text-header)] rounded-xl p-3 text-xs focus:border-[var(--color-accent-main)] focus:ring-1 focus:ring-[var(--color-accent-main)] outline-none shadow-2xs cursor-pointer"
         >
           <option value="All">{t.any}</option>
           <option value="New">{t.new}</option>
@@ -816,11 +857,14 @@ export default function SearchExplorerView({
 
       {/* 10. Assembly Selection */}
       <div className="space-y-2">
-        <label className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#64748B] block">{t.assembly}</label>
+        <label className="text-[11px] font-sans font-bold uppercase tracking-wider text-[var(--color-text-muted)] block">{t.assembly}</label>
         <select
           value={filterAssembly}
-          onChange={(e) => setFilterAssembly(e.target.value)}
-          className="w-full bg-white border border-[#E2E8F0] text-[#0F172A] rounded-xl p-3 text-xs focus:border-[#007979] focus:ring-1 focus:ring-[#007979] outline-none shadow-2xs"
+          onChange={(e) => {
+            cinematicAudio.playTick();
+            setFilterAssembly(e.target.value);
+          }}
+          className="w-full bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] text-[var(--color-text-header)] rounded-xl p-3 text-xs focus:border-[var(--color-accent-main)] focus:ring-1 focus:ring-[var(--color-accent-main)] outline-none shadow-2xs cursor-pointer"
         >
           <option value="All">{t.any}</option>
           <option value="Local">Local Assembled</option>
@@ -830,11 +874,14 @@ export default function SearchExplorerView({
 
       {/* 11. Seller Type Selection */}
       <div className="space-y-2">
-        <label className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#64748B] block">{t.sellerType}</label>
+        <label className="text-[11px] font-sans font-bold uppercase tracking-wider text-[var(--color-text-muted)] block">{t.sellerType}</label>
         <select
           value={filterSellerType}
-          onChange={(e) => setFilterSellerType(e.target.value)}
-          className="w-full bg-white border border-[#E2E8F0] text-[#0F172A] rounded-xl p-3 text-xs focus:border-[#007979] focus:ring-1 focus:ring-[#007979] outline-none shadow-2xs"
+          onChange={(e) => {
+            cinematicAudio.playTick();
+            setFilterSellerType(e.target.value);
+          }}
+          className="w-full bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] text-[var(--color-text-header)] rounded-xl p-3 text-xs focus:border-[var(--color-accent-main)] focus:ring-1 focus:ring-[var(--color-accent-main)] outline-none shadow-2xs cursor-pointer"
         >
           <option value="All">{t.allSellers}</option>
           <option value="Individual">{t.individualSellers}</option>
@@ -846,16 +893,16 @@ export default function SearchExplorerView({
 
   return (
     <div 
-      className={`flex flex-col space-y-6 animate-fade-in text-[#0F172A] font-sans ${isRtl ? 'text-right' : 'text-left'}`}
+      className={`flex flex-col space-y-6 animate-fade-in text-[var(--color-text-header)] font-sans ${isRtl ? 'text-right' : 'text-left'}`}
       dir={isRtl ? 'rtl' : 'ltr'}
     >
       {/* Top Body Category Pills Bar */}
-      <div className="bg-white border border-[#E2E8F0] p-3.5 rounded-2xl space-y-2.5 shadow-xs">
+      <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] p-3.5 rounded-2xl space-y-2.5 shadow-xs">
         <div className="flex items-center justify-between px-1">
-          <span className="text-[10px] font-mono font-bold uppercase text-[#64748B] tracking-wider flex items-center gap-1.5">
-            <Filter size={12} className="text-[#007979]" /> Quick Category Explorer
+          <span className="text-[10px] font-mono font-bold uppercase text-[var(--color-text-muted)] tracking-wider flex items-center gap-1.5">
+            <Filter size={12} className="text-[var(--color-accent-main)]" /> Quick Category Explorer
           </span>
-          <span className="text-[10px] font-mono text-[#007979] font-bold">
+          <span className="text-[10px] font-mono text-[var(--color-accent-main)] font-bold">
             {sortedVehicles.length} Matches Found
           </span>
         </div>
@@ -868,14 +915,17 @@ export default function SearchExplorerView({
             return (
               <button
                 key={cat.id}
-                onClick={() => setFilterBodyCategory(cat.id)}
+                onClick={() => {
+                  cinematicAudio.playClick();
+                  setFilterBodyCategory(cat.id);
+                }}
                 className={`snap-start flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 ${
                   isSelected
-                    ? 'bg-[#007979] text-white font-bold shadow-xs scale-102'
-                    : 'bg-[#F8FAFC] border border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] hover:border-[#007979]/40'
+                    ? 'bg-[var(--color-accent-main)] text-[#090D14] font-bold shadow-xs scale-102'
+                    : 'bg-[var(--color-bg-tertiary)] border border-[var(--color-border-main)] text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] hover:border-[var(--color-accent-main)]/40'
                 }`}
               >
-                <Icon size={14} className={isSelected ? 'text-white' : 'text-[#007979]'} />
+                <Icon size={14} className={isSelected ? 'text-[#090D14]' : 'text-[var(--color-accent-main)]'} />
                 <span>{cat.label}</span>
               </button>
             );
@@ -883,23 +933,28 @@ export default function SearchExplorerView({
         </div>
       </div>
 
+
       {/* Search Bar Header */}
-      <div className="bg-white border border-[#E2E8F0] p-4 rounded-3xl flex flex-col md:flex-row items-center gap-4 justify-between shadow-xs">
+      <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] p-4 rounded-3xl flex flex-col md:flex-row items-center gap-4 justify-between shadow-xs">
         <div className="relative flex-grow w-full">
-          <Search className={`text-[#94A3B8] absolute top-1/2 -translate-y-1/2 shrink-0 ${isRtl ? 'right-4' : 'left-4'}`} size={18} />
+          <Search className={`text-[var(--color-text-muted)] absolute top-1/2 -translate-y-1/2 shrink-0 ${isRtl ? 'right-4' : 'left-4'}`} size={18} />
           <input
             type="text"
             value={localQuery}
             onChange={(e) => setLocalQuery(e.target.value)}
             placeholder={t.searchPlaceholder}
-            className={`w-full bg-[#F8FAFC] border border-[#E2E8F0] text-[#0F172A] text-sm rounded-2xl p-3.5 focus:border-[#007979] focus:bg-white focus:ring-1 focus:ring-[#007979] outline-none shadow-2xs ${
+            className={`w-full bg-[var(--color-bg-tertiary)] border border-[var(--color-border-main)] text-[var(--color-text-header)] text-sm rounded-2xl p-3.5 focus:border-[var(--color-accent-main)] focus:bg-[var(--color-bg-secondary)] focus:ring-1 focus:ring-[var(--color-accent-main)] outline-none shadow-2xs ${
               isRtl ? 'pr-12 pl-4' : 'pl-12 pr-4'
             }`}
           />
           {localQuery && (
             <button
-              onClick={() => { setLocalQuery(''); setSearchQuery(''); }}
-              className={`absolute top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#0F172A] cursor-pointer ${isRtl ? 'left-4' : 'right-4'}`}
+              onClick={() => {
+                cinematicAudio.playClick();
+                setLocalQuery('');
+                setSearchQuery('');
+              }}
+              className={`absolute top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] cursor-pointer ${isRtl ? 'left-4' : 'right-4'}`}
             >
               <X size={16} />
             </button>
@@ -908,35 +963,41 @@ export default function SearchExplorerView({
 
         <div className="flex items-center gap-3 w-full md:w-auto justify-end">
           {/* Sort selection */}
-          <div className="flex items-center gap-2 bg-[#F8FAFC] border border-[#E2E8F0] px-3 py-2.5 rounded-2xl text-xs shadow-2xs hover:border-[#007979]/40 transition-all min-w-[170px]">
-            <ArrowDownUp size={14} className="text-[#007979] shrink-0" />
-            <span className="text-[#64748B] font-sans whitespace-nowrap">{t.sortBy}:</span>
+          <div className="flex items-center gap-2 bg-[var(--color-bg-tertiary)] border border-[var(--color-border-main)] px-3 py-2.5 rounded-2xl text-xs shadow-2xs hover:border-[var(--color-accent-main)]/40 transition-all min-w-[170px]">
+            <ArrowDownUp size={14} className="text-[var(--color-accent-main)] shrink-0" />
+            <span className="text-[var(--color-text-muted)] font-sans whitespace-nowrap">{t.sortBy}:</span>
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="bg-transparent text-[#0F172A] focus:outline-none font-bold outline-none cursor-pointer w-full text-xs"
+              onChange={(e) => {
+                cinematicAudio.playTick();
+                setSortBy(e.target.value);
+              }}
+              className="bg-transparent text-[var(--color-text-header)] focus:outline-none font-bold outline-none cursor-pointer w-full text-xs"
             >
-              <option value="Newest" className="bg-white text-[#0F172A]">{t.newest}</option>
-              <option value="PriceLow" className="bg-white text-[#0F172A]">{t.priceLow}</option>
-              <option value="PriceHigh" className="bg-white text-[#0F172A]">{t.priceHigh}</option>
-              <option value="YearNewest" className="bg-white text-[#0F172A]">{t.yearNewest}</option>
-              <option value="MileageLow" className="bg-white text-[#0F172A]">{t.mileageLow}</option>
-              <option value="MileageHigh" className="bg-white text-[#0F172A]">{t.mileageHigh}</option>
-              <option value="EngineCCLow" className="bg-white text-[#0F172A]">{t.engineLow}</option>
-              <option value="EngineCCHigh" className="bg-white text-[#0F172A]">{t.engineHigh}</option>
+              <option value="Newest" className="bg-[var(--color-bg-secondary)] text-[var(--color-text-header)]">{t.newest}</option>
+              <option value="PriceLow" className="bg-[var(--color-bg-secondary)] text-[var(--color-text-header)]">{t.priceLow}</option>
+              <option value="PriceHigh" className="bg-[var(--color-bg-secondary)] text-[var(--color-text-header)]">{t.priceHigh}</option>
+              <option value="YearNewest" className="bg-[var(--color-bg-secondary)] text-[var(--color-text-header)]">{t.yearNewest}</option>
+              <option value="MileageLow" className="bg-[var(--color-bg-secondary)] text-[var(--color-text-header)]">{t.mileageLow}</option>
+              <option value="MileageHigh" className="bg-[var(--color-bg-secondary)] text-[var(--color-text-header)]">{t.mileageHigh}</option>
+              <option value="EngineCCLow" className="bg-[var(--color-bg-secondary)] text-[var(--color-text-header)]">{t.engineLow}</option>
+              <option value="EngineCCHigh" className="bg-[var(--color-bg-secondary)] text-[var(--color-text-header)]">{t.engineHigh}</option>
             </select>
           </div>
 
           {/* Mobile Filter Toggle */}
           <button
-            onClick={() => setShowMobileFilters(true)}
-            className="lg:hidden bg-[#007979] hover:bg-[#006060] text-white p-3 rounded-2xl border border-[#007979] active:scale-95 duration-100 flex items-center justify-center cursor-pointer font-bold text-xs gap-1.5 shadow-xs"
+            onClick={() => {
+              cinematicAudio.playClick();
+              setShowMobileFilters(true);
+            }}
+            className="lg:hidden bg-[var(--color-accent-main)] hover:bg-[var(--color-accent-hover)] text-[#090D14] p-3 rounded-2xl border border-[var(--color-accent-main)] active:scale-95 duration-100 flex items-center justify-center cursor-pointer font-bold text-xs gap-1.5 shadow-xs"
             style={{ minHeight: '44px', minWidth: '44px' }}
           >
             <SlidersHorizontal size={18} />
             <span className="hidden sm:inline">Filters</span>
             {activeFilters.length > 0 && (
-              <span className="bg-white text-[#007979] font-mono text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+              <span className="bg-[#090D14] text-[var(--color-accent-main)] font-mono text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                 {activeFilters.length}
               </span>
             )}
@@ -946,20 +1007,26 @@ export default function SearchExplorerView({
 
       {/* Active Filter Pills Bar */}
       {activeFilters.length > 0 && (
-        <div className="flex items-center gap-2 flex-wrap bg-white border border-[#E2E8F0] p-2.5 rounded-2xl text-xs shadow-2xs">
-          <span className="text-[10px] font-mono font-bold text-[#64748B] uppercase tracking-wider px-1">Active Filters:</span>
+        <div className="flex items-center gap-2 flex-wrap bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] p-2.5 rounded-2xl text-xs shadow-2xs">
+          <span className="text-[10px] font-mono font-bold text-[var(--color-text-muted)] uppercase tracking-wider px-1">Active Filters:</span>
           {activeFilters.map(item => (
             <button
               key={item.id}
-              onClick={item.reset}
-              className="bg-[#007979]/10 border border-[#007979]/30 text-[#007979] hover:bg-[#007979]/20 px-2.5 py-1 rounded-xl font-bold flex items-center gap-1.5 transition-all cursor-pointer text-xs"
+              onClick={() => {
+                cinematicAudio.playClick();
+                item.reset();
+              }}
+              className="bg-[var(--color-accent-main)]/10 border border-[var(--color-accent-main)]/30 text-[var(--color-accent-main)] hover:bg-[var(--color-accent-main)]/20 px-2.5 py-1 rounded-xl font-bold flex items-center gap-1.5 transition-all cursor-pointer text-xs"
             >
               <span>{item.label}</span>
               <X size={12} className="hover:text-rose-500" />
             </button>
           ))}
           <button
-            onClick={handleResetFilters}
+            onClick={() => {
+              cinematicAudio.playClick();
+              handleResetFilters();
+            }}
             className="text-[10px] font-mono font-bold text-rose-500 hover:underline px-2 py-1 cursor-pointer ml-auto"
           >
             Clear All ({activeFilters.length})
@@ -967,19 +1034,20 @@ export default function SearchExplorerView({
         </div>
       )}
 
+
       {/* Content Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         
         {/* Left Filters Sidebar (Hidden on mobile) */}
-        <aside className="hidden lg:block bg-white border border-[#E2E8F0] p-6 rounded-3xl h-fit sticky top-24 shadow-xs">
+        <aside className="hidden lg:block bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] p-6 rounded-3xl h-fit sticky top-24 shadow-xs">
           {filterSidebarContent}
         </aside>
 
         {/* Right Listings Grid */}
         <section className="lg:col-span-3 space-y-6">
-          <div className="flex justify-between items-center text-xs text-[#64748B] uppercase font-mono tracking-widest px-1">
+          <div className="flex justify-between items-center text-xs text-[var(--color-text-muted)] uppercase font-mono tracking-widest px-1">
             <span>
-              {t.showing} <strong className="text-[#0F172A] font-bold">{sortedVehicles.length}</strong> {t.results}
+              {t.showing} <strong className="text-[var(--color-text-header)] font-bold">{sortedVehicles.length}</strong> {t.results}
             </span>
             <span className="hidden sm:inline">Bazar360 Verified Marketplace</span>
           </div>
@@ -1040,23 +1108,24 @@ export default function SearchExplorerView({
 
               {/* Microsoft-Style Professional Pagination Card */}
               {totalPages > 1 && (
-                <div className="bg-white border border-[#E2E8F0] rounded-3xl p-4 md:p-5 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-xs select-none text-[#0F172A] animate-fade-in" id="microsoft-style-pagination">
-                  <span className="text-xs font-mono font-bold text-[#64748B] uppercase">
-                    Page <strong className="text-[#0F172A] font-bold">{currentPage}</strong> of <strong className="text-[#0F172A] font-bold">{totalPages}</strong> ({sortedVehicles.length} total vehicles)
+                <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] rounded-3xl p-4 md:p-5 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-xs select-none text-[var(--color-text-header)] animate-fade-in" id="microsoft-style-pagination">
+                  <span className="text-xs font-mono font-bold text-[var(--color-text-muted)] uppercase">
+                    Page <strong className="text-[var(--color-text-header)] font-bold">{currentPage}</strong> of <strong className="text-[var(--color-text-header)] font-bold">{totalPages}</strong> ({sortedVehicles.length} total vehicles)
                   </span>
                   
                   <div className="flex items-center gap-1.5 flex-wrap justify-center">
                     {/* Previous Button */}
                     <button
                       onClick={() => {
+                        cinematicAudio.playClick();
                         setCurrentPage(prev => Math.max(prev - 1, 1));
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
                       disabled={currentPage === 1}
                       className={`px-4 py-2 text-xs font-bold uppercase rounded-xl tracking-wider transition-all duration-150 ${
                         currentPage === 1
-                          ? 'text-[#94A3B8] bg-[#F8FAFC] cursor-not-allowed border border-[#E2E8F0]'
-                          : 'text-[#0F172A] hover:bg-[#F1F5F9] bg-white border border-[#E2E8F0] active:scale-95 cursor-pointer shadow-2xs'
+                          ? 'text-[var(--color-text-muted)] opacity-50 bg-[var(--color-bg-tertiary)] cursor-not-allowed border border-[var(--color-border-main)]'
+                          : 'text-[var(--color-text-header)] hover:bg-[var(--color-bg-tertiary)] bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] active:scale-95 cursor-pointer shadow-2xs'
                       }`}
                     >
                       ← Previous
@@ -1069,7 +1138,7 @@ export default function SearchExplorerView({
                       
                       if (!isVisible) {
                         if (pageNum === 2 || pageNum === totalPages - 1) {
-                          return <span key={pageNum} className="px-1.5 text-[#94A3B8] font-bold">...</span>;
+                          return <span key={pageNum} className="px-1.5 text-[var(--color-text-muted)] font-bold">...</span>;
                         }
                         return null;
                       }
@@ -1078,13 +1147,14 @@ export default function SearchExplorerView({
                         <button
                           key={pageNum}
                           onClick={() => {
+                            cinematicAudio.playClick();
                             setCurrentPage(pageNum);
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                           }}
                           className={`w-9 h-9 text-xs font-bold rounded-xl transition-all duration-150 active:scale-95 cursor-pointer ${
                             currentPage === pageNum
-                              ? 'bg-[#007979] text-white shadow-xs font-bold border border-[#007979]'
-                              : 'text-[#0F172A] hover:bg-[#F1F5F9] bg-white border border-[#E2E8F0] shadow-2xs'
+                              ? 'bg-[var(--color-accent-main)] text-[#090D14] shadow-xs font-bold border border-[var(--color-accent-main)]'
+                              : 'text-[var(--color-text-header)] hover:bg-[var(--color-bg-tertiary)] bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] shadow-2xs'
                           }`}
                         >
                           {pageNum}
@@ -1095,14 +1165,15 @@ export default function SearchExplorerView({
                     {/* Next Button */}
                     <button
                       onClick={() => {
+                        cinematicAudio.playClick();
                         setCurrentPage(prev => Math.min(prev + 1, totalPages));
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
                       disabled={currentPage === totalPages}
                       className={`px-4 py-2 text-xs font-bold uppercase rounded-xl tracking-wider transition-all duration-150 ${
                         currentPage === totalPages
-                          ? 'text-[#94A3B8] bg-[#F8FAFC] cursor-not-allowed border border-[#E2E8F0]'
-                          : 'text-[#0F172A] hover:bg-[#F1F5F9] bg-white border border-[#E2E8F0] active:scale-95 cursor-pointer shadow-2xs'
+                          ? 'text-[var(--color-text-muted)] opacity-50 bg-[var(--color-bg-tertiary)] cursor-not-allowed border border-[var(--color-border-main)]'
+                          : 'text-[var(--color-text-header)] hover:bg-[var(--color-bg-tertiary)] bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] active:scale-95 cursor-pointer shadow-2xs'
                       }`}
                     >
                       Next →
@@ -1112,25 +1183,29 @@ export default function SearchExplorerView({
               )}
             </div>
           ) : (
-            <div className="bg-white border border-[#E2E8F0] rounded-3xl p-16 text-center flex flex-col items-center justify-center space-y-6 shadow-xs">
-              <Car size={48} className="text-[#94A3B8] animate-pulse" />
-              <p className="text-[#64748B] font-sans max-w-sm text-sm">
+            <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] rounded-3xl p-16 text-center flex flex-col items-center justify-center space-y-6 shadow-xs">
+              <Car size={48} className="text-[var(--color-text-muted)] animate-pulse" />
+              <p className="text-[var(--color-text-muted)] font-sans max-w-sm text-sm">
                 {t.noResults}
               </p>
               {activeFilters.length > 0 ? (
                 <button
-                  onClick={handleResetFilters}
-                  className="bg-[#007979] hover:bg-[#006060] text-white font-sans font-bold text-xs uppercase px-6 py-3 rounded-xl transition-all cursor-pointer active:scale-95 shadow-xs"
+                  onClick={() => {
+                    cinematicAudio.playClick();
+                    handleResetFilters();
+                  }}
+                  className="bg-[var(--color-accent-main)] hover:bg-[var(--color-accent-hover)] text-[#090D14] font-sans font-bold text-xs uppercase px-6 py-3 rounded-xl transition-all cursor-pointer active:scale-95 shadow-xs"
                 >
                   {t.clearFilters}
                 </button>
               ) : (
                 <button
                   onClick={() => {
+                    cinematicAudio.playClick();
                     handleResetFilters();
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
-                  className="bg-[#007979] hover:bg-[#006060] text-white font-sans font-bold text-xs uppercase px-6 py-3 rounded-xl transition-all cursor-pointer active:scale-95 shadow-xs"
+                  className="bg-[var(--color-accent-main)] hover:bg-[var(--color-accent-hover)] text-[#090D14] font-sans font-bold text-xs uppercase px-6 py-3 rounded-xl transition-all cursor-pointer active:scale-95 shadow-xs"
                 >
                   View All Categories
                 </button>
@@ -1143,13 +1218,16 @@ export default function SearchExplorerView({
 
       {/* Collapsible Mobile Filters Drawer Backdrop */}
       {showMobileFilters && (
-        <div className="fixed inset-0 bg-slate-900/60 z-[120] backdrop-blur-xs flex justify-end lg:hidden">
-          <div className="bg-white w-full max-w-xs h-full p-6 overflow-y-auto flex flex-col relative border-l border-[#E2E8F0] animate-scale-fade shadow-2xl">
+        <div className="fixed inset-0 bg-slate-950/80 z-[120] backdrop-blur-xs flex justify-end lg:hidden">
+          <div className="bg-[var(--color-bg-secondary)] text-[var(--color-text-header)] w-full max-w-xs h-full p-6 overflow-y-auto flex flex-col relative border-l border-[var(--color-border-main)] animate-scale-fade shadow-2xl">
             
             {/* Close Mobile Filters button */}
             <button
-              onClick={() => setShowMobileFilters(false)}
-              className="absolute top-4 right-4 text-[#64748B] hover:text-[#0F172A] p-2 hover:bg-[#F1F5F9] rounded-xl cursor-pointer"
+              onClick={() => {
+                cinematicAudio.playClick();
+                setShowMobileFilters(false);
+              }}
+              className="absolute top-4 right-4 text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] p-2 hover:bg-[var(--color-bg-tertiary)] rounded-xl cursor-pointer"
             >
               <X size={18} />
             </button>
@@ -1160,14 +1238,18 @@ export default function SearchExplorerView({
             </div>
 
             <button
-              onClick={() => setShowMobileFilters(false)}
-              className="mt-6 mb-20 w-full bg-[#007979] hover:bg-[#006060] text-white font-sans font-bold text-xs uppercase py-3.5 rounded-xl text-center cursor-pointer shadow-md relative z-10"
+              onClick={() => {
+                cinematicAudio.playClick();
+                setShowMobileFilters(false);
+              }}
+              className="mt-6 mb-20 w-full bg-[var(--color-accent-main)] hover:bg-[var(--color-accent-hover)] text-[#090D14] font-sans font-bold text-xs uppercase py-3.5 rounded-xl text-center cursor-pointer shadow-md relative z-10"
             >
               Apply Filters ({sortedVehicles.length} Cars)
             </button>
           </div>
         </div>
       )}
+
 
     </div>
   );
