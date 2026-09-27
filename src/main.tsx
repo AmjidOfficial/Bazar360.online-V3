@@ -8,6 +8,7 @@ import { toast as hotToast } from 'react-hot-toast';
 import { toast as sonnerToast } from 'sonner';
 import './index.css';
 import './home-redesign.css';
+import './worldclass-ui.css';
 
 if (typeof window !== 'undefined') {
   const forbiddenKeywords = [
