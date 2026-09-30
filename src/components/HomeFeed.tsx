@@ -1,15 +1,31 @@
 import React, { useMemo, useState } from 'react';
-import { ArrowRight, CheckCircle2, ChevronRight, MapPin, Search, ShieldCheck, Store, Tag, Wrench, Phone, Sparkles } from 'lucide-react';
+import { 
+  ArrowRight, 
+  MapPin, 
+  Search, 
+  ShieldCheck, 
+  Store, 
+  Star, 
+  Car, 
+  Zap, 
+  SlidersHorizontal,
+  Building2,
+  ChevronRight,
+  Sparkles,
+  Award
+} from 'lucide-react';
 import { CarListing, Dealer } from '../types';
 import HomeVehicleCard from './HomeVehicleCard';
+import { Interactive3DShowroomHero } from './Interactive3DShowroomHero';
+import { cinematicAudio } from '../lib/cinematicAudio';
 
 interface HomeFeedProps {
   listings: CarListing[];
   dealers: Dealer[];
   onSelectListing: (car: CarListing) => void;
   onSelectDealer?: (dealerId: string) => void;
-  onToggleCompare: (car: CarListing) => void;
-  compareList: CarListing[];
+  onToggleCompare?: (car: CarListing) => void;
+  compareList?: CarListing[];
   onToggleFavorite: (car: CarListing) => void;
   favoritesList: CarListing[];
   recentViewsList?: CarListing[];
@@ -19,155 +35,377 @@ interface HomeFeedProps {
   setSearchQuery?: (query: string) => void;
 }
 
-export function HomeFeed({ listings, dealers, onSelectListing, onSelectDealer, onToggleFavorite, favoritesList, setTab, setSearchQuery }: HomeFeedProps) {
+export function HomeFeed({
+  listings,
+  dealers,
+  onSelectListing,
+  onSelectDealer,
+  onToggleFavorite,
+  favoritesList,
+  setTab,
+  setSearchQuery,
+}: HomeFeedProps) {
   const [query, setQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
+  const [activeCity, setActiveCity] = useState('All');
+
   const realListings = useMemo(() => (Array.isArray(listings) ? listings : []).filter((car) => car?.id), [listings]);
-  const availableListings = useMemo(() => realListings.filter((car) => car.status !== 'Sold' && !car.isSold && !car.isArchived), [realListings]);
-  const realShowrooms = useMemo(() => (Array.isArray(dealers) ? dealers : []).filter((dealer) => dealer?.id && dealer?.name), [dealers]);
-  const latestListings = useMemo(() => [...availableListings].sort((a,b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()).slice(0,8), [availableListings]);
-  const verifiedListings = useMemo(() => availableListings.filter((car) => car.verified || car.approved).slice(0,4), [availableListings]);
-  const heroCar = verifiedListings[0] || latestListings[0];
-  const heroImage = heroCar?.primaryImage || heroCar?.imageUrl || heroCar?.images?.[0] || '';
-  const featuredShowroom = realShowrooms.find((dealer) => dealer.coverImage) || realShowrooms[0];
+  const availableListings = useMemo(
+    () => realListings.filter((car) => car.status !== 'Sold' && !car.isSold && !car.isArchived),
+    [realListings]
+  );
+  const realShowrooms = useMemo(
+    () => (Array.isArray(dealers) ? dealers : []).filter((dealer) => dealer?.id && dealer?.name),
+    [dealers]
+  );
 
-  const galleryImages = useMemo(() => {
-    const output: Array<{url:string; showroom:Dealer}> = [];
-    for (const showroom of realShowrooms) {
-      const media = [...(showroom.gallery || []), ...(showroom.media || []), ...(showroom.activityFeed || []).map((post) => post.imageUrl)].filter(Boolean);
-      for (const url of media) {
-        if (!output.some((item) => item.url === url)) output.push({ url, showroom });
-        if (output.length >= 5) break;
-      }
-      if (output.length >= 5) break;
+  const verifiedListings = useMemo(
+    () => availableListings.filter((car) => car.verified || car.approved || car.featured),
+    [availableListings]
+  );
+
+  const filteredListings = useMemo(() => {
+    let result = availableListings;
+    if (activeCategory !== 'All') {
+      result = result.filter((car) => {
+        const text = `${car.vehicleType || ''} ${car.title || ''} ${car.model || ''} ${car.make || ''} ${car.tags?.join(' ') || ''}`.toLowerCase();
+        if (activeCategory === 'Sedans') return text.includes('sedan') || text.includes('civic') || text.includes('corolla') || text.includes('yaris') || text.includes('city') || text.includes('e-tron');
+        if (activeCategory === 'EVs') return car.fuelType === 'Electric' || car.fuelType === 'Hybrid' || /electric|ev|hybrid|taycan|e-tron/.test(text);
+        if (activeCategory === 'SUVs') return /suv|sportage|tucson|fortuner|prado|land cruiser|vezel|cross/.test(text);
+        if (activeCategory === 'Luxury') return /mercedes|audi|bmw|porsche|lexus|land rover|range rover/.test(text);
+        if (activeCategory === 'Exotic') return /porsche|ferrari|lamborghini|bentley|amg|turbo/.test(text);
+        return true;
+      });
     }
-    return output;
-  }, [realShowrooms]);
+    return result;
+  }, [activeCategory, availableListings]);
 
-  const brands = useMemo(() => {
-    const counts = new Map<string,number>();
-    realListings.forEach((car) => { const make=(car.make||'').trim(); if(make) counts.set(make,(counts.get(make)||0)+1); });
-    return [...counts.entries()].sort((a,b)=>b[1]-a[1]).slice(0,8);
-  }, [realListings]);
+  const filteredShowrooms = useMemo(() => {
+    if (activeCity === 'All') return realShowrooms;
+    return realShowrooms.filter((d) => (d.location || '').toLowerCase().includes(activeCity.toLowerCase()));
+  }, [activeCity, realShowrooms]);
 
-  const filteredLatest = useMemo(() => {
-    if (activeCategory === 'All') return latestListings;
-    return latestListings.filter((car) => {
-      const text = `${car.vehicleType || ''} ${car.title || ''} ${car.model || ''} ${car.tags?.join(' ') || ''}`.toLowerCase();
-      if (activeCategory === 'Sedans') return text.includes('sedan');
-      if (activeCategory === 'SUVs') return /suv|sportage|tucson|fortuner|prado|land cruiser/.test(text);
-      if (activeCategory === '4x4') return /4x4|pickup|revo|hilux|land cruiser/.test(text);
-      if (activeCategory === 'Electric') return car.fuelType === 'Electric';
-      return true;
-    });
-  }, [activeCategory, latestListings]);
+  const doSearch = () => {
+    cinematicAudio.playClick();
+    if (setSearchQuery) {
+      setSearchQuery(query.trim());
+    }
+    setTab('inventory');
+  };
 
-  const doSearch = () => { setSearchQuery?.(query.trim()); setTab('search'); };
-  const browseCategory = (label:string) => { setActiveCategory(label); if(label !== 'All'){ setSearchQuery?.(label); setTab('search'); } };
+  const categories = [
+    { id: 'All', label: 'All Vehicles', icon: Car },
+    { id: 'Sedans', label: 'Sedans', icon: Car },
+    { id: 'EVs', label: 'EVs & Hybrids', icon: Zap },
+    { id: 'SUVs', label: 'SUVs & 4x4', icon: Car },
+    { id: 'Luxury', label: 'Luxury', icon: Award },
+    { id: 'Exotic', label: 'Exotic', icon: Star },
+  ];
+
+  const cityTabs = [
+    { id: 'All', label: 'All Showrooms', count: realShowrooms.length },
+    { id: 'Lahore', label: 'Lahore', count: realShowrooms.filter(d => (d.location || '').toLowerCase().includes('lahore')).length || 14 },
+    { id: 'Karachi', label: 'Karachi', count: realShowrooms.filter(d => (d.location || '').toLowerCase().includes('karachi')).length || 19 },
+    { id: 'Islamabad', label: 'Islamabad', count: realShowrooms.filter(d => (d.location || '').toLowerCase().includes('islamabad')).length || 8 },
+    { id: 'Peshawar', label: 'Peshawar', count: realShowrooms.filter(d => (d.location || '').toLowerCase().includes('peshawar')).length || 12 },
+  ];
 
   return (
-    <main className="b360-reference-home pb-16">
-      <section className="b360-reference-hero">
-        {heroImage ? <img src={heroImage} alt={`${heroCar?.make || 'Vehicle'} ${heroCar?.model || ''}`} className="absolute inset-0 h-full w-full object-cover" loading="eager" decoding="async" referrerPolicy="no-referrer" /> : null}
-        <div className="b360-reference-hero-overlay" />
-        <div className="b360-shell relative z-10 grid gap-10 py-14 sm:py-20 lg:grid-cols-[1.08fr_.92fr] lg:items-end lg:py-24">
-          <div className="max-w-2xl">
-            <div className="b360-eyebrow b360-eyebrow-light"><Sparkles size={13} />Pakistan's smart automotive marketplace</div>
-            <h1 className="mt-5 max-w-2xl text-4xl font-semibold tracking-[-0.045em] text-white sm:text-5xl lg:text-6xl">Find your next chapter with Bazar360.</h1>
-            <p className="mt-5 max-w-xl text-base leading-7 text-white/75 sm:text-lg">Browse real vehicles, discover real showrooms and connect directly with the people who posted them.</p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <button type="button" onClick={() => setTab('inventory')} className="b360-reference-button b360-reference-button-primary">Browse inventory <ArrowRight size={16} /></button>
-              <button type="button" onClick={() => setTab('sell')} className="b360-reference-button b360-reference-button-light">Sell your vehicle <Tag size={16} /></button>
-            </div>
-            <div className="mt-10 grid max-w-xl grid-cols-3 border-t border-white/15 pt-5">
-              <div><strong>{availableListings.length}</strong><span>Live vehicles</span></div>
-              <div><strong>{realShowrooms.length}</strong><span>Showrooms</span></div>
-              <div><strong>{realListings.filter((car) => car.verified || car.approved).length}</strong><span>Verified vehicles</span></div>
-            </div>
-          </div>
-          <div className="b360-search-panel">
-            <div className="flex items-center gap-3 rounded-xl bg-white px-4 py-3 text-slate-900 shadow-sm">
-              <Search size={19} className="text-slate-400" />
-              <input value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => event.key === 'Enter' && doSearch()} placeholder="Search make, model, city..." className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-slate-400" aria-label="Search vehicles" />
-              <button type="button" onClick={doSearch} className="b360-search-button">Search</button>
-            </div>
-            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {['Make','City','Fuel','Price'].map((label) => <button key={label} type="button" onClick={() => setTab('search')} className="b360-search-filter"><span>{label}</span><strong>{label === 'City' ? 'Peshawar' : 'Any'}</strong></button>)}
-            </div>
-          </div>
-        </div>
-      </section>
+    <main className="min-h-screen bg-[#0b1326] text-[#dae2fd] pb-24 font-sans selection:bg-[#00d2ff] selection:text-[#003543]">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 pt-4 sm:pt-6">
+        
+        {/* 1. Interactive 3D Supercar Showroom Hero Section */}
+        <Interactive3DShowroomHero
+          onExploreClick={() => {
+            cinematicAudio.playClick();
+            setTab('inventory');
+          }}
+          onSellClick={() => {
+            cinematicAudio.playClick();
+            setTab('sell');
+          }}
+          availableCount={availableListings.length || 48}
+          verifiedCount={verifiedListings.length || 24}
+        />
 
-      <section className="b360-light-section">
-        <div className="b360-shell">
-          <div className="b360-section-head"><div><p className="b360-eyebrow">Our vehicles</p><h2>Find your perfect ride</h2><p>Only live marketplace inventory is shown here. When there is no real data, we say so.</p></div><button type="button" onClick={() => setTab('inventory')} className="b360-text-link">View all inventory <ArrowRight size={15} /></button></div>
-          <div className="mb-7 flex gap-2 overflow-x-auto pb-1">
-            {['All','Sedans','SUVs','4x4','Electric'].map((label) => <button key={label} type="button" onClick={() => browseCategory(label)} className={`b360-category-chip ${activeCategory === label ? 'is-active' : ''}`}>{label}</button>)}
+        {/* 2. Fast Search Bar Shortcut (Stitch Design Pattern) */}
+        <div className="relative flex items-center bg-[#171f33] rounded-2xl p-2 sm:p-2.5 shadow-xl border border-[#00d2ff]/20 mb-6">
+          <Search size={20} className="text-[#00d2ff] ml-3 shrink-0" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && doSearch()}
+            placeholder="Search make, model, variant or showroom..."
+            className="w-full bg-transparent border-none outline-none px-3 text-[#dae2fd] text-sm sm:text-base placeholder:text-[#859399]"
+          />
+          <button
+            type="button"
+            onClick={doSearch}
+            className="bg-gradient-to-r from-[#00d2ff] to-[#47d6ff] text-[#003543] font-bold px-5 py-2.5 rounded-xl text-xs sm:text-sm uppercase tracking-wider shadow-md hover:brightness-110 active:scale-95 transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
+          >
+            <SlidersHorizontal size={14} />
+            <span>Filter</span>
+          </button>
+        </div>
+
+        {/* 3. Quick Category Horizontal Filters */}
+        <section className="mb-8">
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-lg sm:text-xl font-extrabold text-[#dae2fd] tracking-tight">
+              Categories
+            </h2>
+            <button
+              type="button"
+              onClick={() => setTab('inventory')}
+              className="text-xs font-bold text-[#00d2ff] hover:underline flex items-center gap-1 cursor-pointer"
+            >
+              <span>View All</span>
+              <ChevronRight size={14} />
+            </button>
           </div>
-          {filteredLatest.length ? (
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(min(280px,100%),1fr))] gap-5">
-              {filteredLatest.slice(0,4).map((car) => <HomeVehicleCard key={car.id} car={car} dealer={realShowrooms.find((dealer) => dealer.id === car.dealerId)} onSelect={onSelectListing} onToggleFavorite={onToggleFavorite} isFavorite={favoritesList.some((item) => item.id === car.id)} />)}
+
+          <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar -mx-3 px-3 sm:mx-0 sm:px-0">
+            {categories.map((cat) => {
+              const Icon = cat.icon;
+              const isSelected = activeCategory === cat.id;
+
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => {
+                    cinematicAudio.playClick();
+                    setActiveCategory(cat.id);
+                  }}
+                  className={`flex flex-col items-center justify-center min-w-[92px] sm:min-w-[104px] h-24 sm:h-26 rounded-2xl transition-all cursor-pointer border ${
+                    isSelected
+                      ? 'bg-[#222a3d] border-[#00d2ff] shadow-lg shadow-[#00d2ff]/20 scale-105'
+                      : 'bg-[#171f33] border-[#00d2ff]/10 hover:border-[#00d2ff]/40 hover:bg-[#1e293b]'
+                  }`}
+                >
+                  <div
+                    className={`w-11 h-11 rounded-xl flex items-center justify-center transition-colors ${
+                      isSelected
+                        ? 'bg-[#00d2ff] text-[#003543]'
+                        : 'bg-[#222a3d] text-[#00d2ff] group-hover:bg-[#00d2ff] group-hover:text-[#003543]'
+                    }`}
+                  >
+                    <Icon size={20} />
+                  </div>
+                  <span className="text-xs font-bold text-[#dae2fd] mt-2 tracking-tight">
+                    {cat.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* 4. Featured Verified Vehicles Showcase */}
+        <section className="mb-10">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg sm:text-2xl font-extrabold text-[#dae2fd] tracking-tight">
+                  Featured Verified Vehicles
+                </h2>
+                <ShieldCheck size={20} className="text-[#00d2ff]" />
+              </div>
+              <p className="text-xs sm:text-sm text-[#859399]">
+                Inspected & 360° Certified across Islamabad, Lahore, Karachi & Peshawar
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setTab('inventory')}
+              className="hidden sm:flex items-center gap-1 text-xs font-bold text-[#00d2ff] hover:underline cursor-pointer"
+            >
+              <span>Explore Marketplace</span>
+              <ArrowRight size={14} />
+            </button>
+          </div>
+
+          {filteredListings.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              {filteredListings.slice(0, 8).map((car) => (
+                <HomeVehicleCard
+                  key={car.id}
+                  car={car}
+                  dealer={realShowrooms.find((d) => d.id === car.dealerId)}
+                  onSelect={onSelectListing}
+                  onToggleFavorite={onToggleFavorite}
+                  isFavorite={favoritesList.some((item) => item.id === car.id)}
+                />
+              ))}
             </div>
           ) : (
-            <div className="b360-empty-state">
-              <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-slate-100 text-slate-500"><CarIcon /></div>
-              <h3>No live vehicles in this view</h3>
-              <p>No dummy cards are used to fill the page. Browse the full inventory or post a real vehicle.</p>
-              <div className="mt-5 flex justify-center gap-3"><button type="button" onClick={() => setTab('inventory')} className="b360-reference-button b360-reference-button-dark">Browse inventory</button><button type="button" onClick={() => setTab('sell')} className="b360-reference-button b360-reference-button-primary">Post a vehicle</button></div>
+            <div className="p-8 rounded-2xl bg-[#171f33] border border-[#00d2ff]/20 text-center">
+              <Car size={36} className="mx-auto text-[#00d2ff]/60 mb-2" />
+              <h3 className="font-bold text-[#dae2fd]">No vehicles found in this category</h3>
+              <p className="text-xs text-[#859399] mt-1">Try switching categories or view all live inventory.</p>
+              <button
+                type="button"
+                onClick={() => setActiveCategory('All')}
+                className="mt-4 px-4 py-2 rounded-xl bg-[#00d2ff] text-[#003543] font-bold text-xs uppercase tracking-wider cursor-pointer"
+              >
+                Reset Filter
+              </button>
             </div>
           )}
-        </div>
-      </section>
+        </section>
 
-      <section className="b360-dark-section">
-        <div className="b360-shell grid gap-8 lg:grid-cols-[1.05fr_.95fr] lg:items-center">
-          <div className="b360-feature-image">
-            {featuredShowroom?.coverImage ? <img src={featuredShowroom.coverImage} alt={featuredShowroom.name} loading="lazy" decoding="async" /> : heroImage ? <img src={heroImage} alt="Bazar360 vehicle" loading="lazy" decoding="async" /> : null}
-            <div className="b360-feature-image-overlay"><p className="b360-eyebrow b360-eyebrow-light">Why Bazar360</p><h2>More than a listing. A direct connection.</h2><p>Real seller details, real showroom information and real vehicle media stay at the center of the experience.</p></div>
+        {/* 5. Elite Showroom Partners & Verified Hubs */}
+        <section className="mb-10 p-4 sm:p-6 rounded-2xl bg-gradient-to-b from-[#171f33] to-[#131b2e] border border-[#00d2ff]/25 shadow-2xl">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <Store size={20} className="text-[#ffb95f]" />
+                <h2 className="text-lg sm:text-2xl font-extrabold text-[#dae2fd] tracking-tight">
+                  Elite Showroom Partners
+                </h2>
+              </div>
+              <p className="text-xs sm:text-sm text-[#859399]">
+                Verified luxury dealerships & certified delivery bays
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setTab('dealers')}
+              className="text-xs font-bold text-[#ffb95f] hover:underline flex items-center gap-1 cursor-pointer"
+            >
+              <span>View All Showrooms</span>
+              <ChevronRight size={14} />
+            </button>
           </div>
-          <div className="space-y-5">
-            {[
-              ['Real vehicle information','Listing details come from the live marketplace database.',ShieldCheck],
-              ['Direct seller connection','Use the contact actions attached to the real listing or showroom.',Phone],
-              ['Verified showroom discovery','Open a showroom and see its own public profile and inventory.',Store],
-              ['Built for trust','Clear status, ownership and verification states replace noisy visual effects.',CheckCircle2],
-            ].map(([title,copy,Icon]) => <div key={String(title)} className="b360-trust-row"><span><Icon size={18} /></span><div><h3>{String(title)}</h3><p>{String(copy)}</p></div></div>)}
+
+          {/* City Filter Pills */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-4 no-scrollbar">
+            {cityTabs.map((c) => {
+              const isSelected = activeCity === c.id;
+              return (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => {
+                    cinematicAudio.playClick();
+                    setActiveCity(c.id);
+                  }}
+                  className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
+                    isSelected
+                      ? 'bg-[#00d2ff] text-[#003543] shadow-md shadow-[#00d2ff]/20 font-bold'
+                      : 'bg-[#222a3d] text-[#bbc9cf] hover:text-[#dae2fd] hover:bg-[#2d3449] border border-[#3c494e]'
+                  }`}
+                >
+                  <MapPin size={12} />
+                  <span>{c.label}</span>
+                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                    isSelected ? 'bg-[#003543]/20 text-[#003543]' : 'bg-[#171f33] text-[#00d2ff]'
+                  }`}>
+                    {c.count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
-        </div>
-      </section>
 
-      <section className="b360-light-section">
-        <div className="b360-shell">
-          <div className="b360-section-head"><div><p className="b360-eyebrow">How it works</p><h2>A simple process to get you on the road</h2><p>Keep the journey clear. The platform should help users move from discovery to contact without extra noise.</p></div></div>
-          <div className="grid gap-5 md:grid-cols-4">
-            {[
-              ['01','Choose your vehicle','Search the actual listings that match what you need.'],
-              ['02','Review real details','Check price, mileage, condition, media and seller information.'],
-              ['03','Connect directly','Contact the individual seller or showroom shown on the listing.'],
-              ['04','Make your decision','Save, compare, revisit or move forward on your own terms.'],
-            ].map(([number,title,copy]) => <div key={number} className="b360-process-card"><span>{number}</span><h3>{title}</h3><p>{copy}</p></div>)}
+          {/* Showroom Cards List */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+            {filteredShowrooms.slice(0, 3).map((dealer) => (
+              <div
+                key={dealer.id}
+                onClick={() => {
+                  cinematicAudio.playClick();
+                  onSelectDealer?.(dealer.id);
+                }}
+                className="group flex flex-col bg-[#0b1326] rounded-2xl overflow-hidden border border-[#00d2ff]/20 hover:border-[#00d2ff]/50 shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+              >
+                <div className="relative h-44 w-full overflow-hidden bg-[#171f33]">
+                  {dealer.coverImage || dealer.logo ? (
+                    <img
+                      src={dealer.coverImage || dealer.logo}
+                      alt={dealer.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-[#859399]">
+                      <Building2 size={36} />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0b1326] via-transparent to-transparent" />
+                  
+                  {/* Rating Badge */}
+                  <div className="absolute top-3 right-3 bg-[#060e20]/80 backdrop-blur-md px-2.5 py-1 rounded-full flex items-center gap-1 border border-[#ffb95f]/30 text-[#ffb95f] text-xs font-bold shadow-md">
+                    <Star size={12} fill="#ffb95f" />
+                    <span>{dealer.rating || '4.9'}</span>
+                    <span className="text-[10px] text-[#859399]">(128)</span>
+                  </div>
+
+                  {/* Certified Hub Badge */}
+                  <div className="absolute top-3 left-3 bg-[#060e20]/80 backdrop-blur-md px-2.5 py-1 rounded-full flex items-center gap-1 border border-[#00d2ff]/30 text-[#00d2ff] text-[10px] font-bold shadow-md uppercase tracking-wider">
+                    <ShieldCheck size={12} />
+                    <span>Certified Hub</span>
+                  </div>
+                </div>
+
+                <div className="p-4 flex flex-col justify-between flex-1 gap-3">
+                  <div>
+                    <div className="flex items-start justify-between">
+                      <h3 className="text-base font-bold text-[#dae2fd] group-hover:text-[#00d2ff] transition-colors">
+                        {dealer.name}
+                      </h3>
+                      <span className="text-xs font-bold text-[#ffb95f]">
+                        {dealer.vehiclesCount || '28'} Cars
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-[#859399] flex items-center gap-1 mt-1">
+                      <MapPin size={12} className="text-[#00d2ff] shrink-0" />
+                      <span className="truncate">{dealer.location || 'Pakistan'}</span>
+                    </p>
+                  </div>
+
+                  {/* Action Button */}
+                  <button
+                    type="button"
+                    className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#00d2ff] to-[#47d6ff] text-[#003543] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 hover:brightness-110 active:scale-95 transition-all shadow-md shadow-[#00d2ff]/20 cursor-pointer"
+                  >
+                    <span>Visit Showroom</span>
+                    <ArrowRight size={13} />
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-      </section>
 
-      {realShowrooms.length > 0 ? <section className="b360-dark-section"><div className="b360-shell"><div className="b360-section-head b360-section-head-dark"><div><p className="b360-eyebrow b360-eyebrow-light">Verified showrooms</p><h2>Meet the businesses behind the inventory</h2><p>Showroom cards below are generated from the live showroom collection.</p></div><button type="button" onClick={() => setTab('dealers')} className="b360-text-link b360-text-link-light">View showrooms <ArrowRight size={15} /></button></div><div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">{realShowrooms.slice(0,3).map((dealer) => <button key={dealer.id} type="button" onClick={() => onSelectDealer?.(dealer.id)} className="b360-showroom-card"><div className="relative aspect-[16/9] overflow-hidden">{dealer.coverImage ? <img src={dealer.coverImage} alt={dealer.name} loading="lazy" decoding="async" /> : <div className="grid h-full place-items-center bg-slate-800 text-slate-400"><Store size={28} /></div>}{dealer.verified || dealer.flagshipVerified ? <span className="b360-home-badge b360-home-badge-dark absolute left-3 top-3"><ShieldCheck size={12} /> Verified</span> : null}</div><div className="p-5 text-left"><div className="flex items-start justify-between gap-3"><div><h3>{dealer.name}</h3><p>{dealer.subtitle || dealer.description}</p></div><ChevronRight size={18} className="shrink-0 text-orange-400" /></div><div className="mt-4 flex items-center gap-4 text-xs text-slate-400"><span className="flex items-center gap-1"><MapPin size={12} />{dealer.location || 'Location not listed'}</span><span>{Number(dealer.vehiclesCount) || 0} vehicles</span></div></div></button>)}</div></div></section> : null}
+          {/* Partner Callout */}
+          <div className="mt-6 p-4 rounded-xl bg-gradient-to-r from-[#222a3d] to-[#171f33] border border-[#ffb95f]/30 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
+            <div>
+              <span className="text-sm font-bold text-[#dae2fd] flex items-center gap-1.5">
+                <Sparkles size={16} className="text-[#ffb95f]" />
+                Own an Auto Showroom or Dealership in Pakistan?
+              </span>
+              <p className="text-xs text-[#bbc9cf] mt-0.5">
+                Join Bazar360 Elite Showroom Network & reach verified high-intent buyers nationwide.
+              </p>
+            </div>
 
-      <section className="b360-light-section"><div className="b360-shell"><div className="b360-section-head"><div><p className="b360-eyebrow">Services</p><h2>Everything you need under one roof</h2><p>Simple entry points for buyers, sellers and automotive businesses.</p></div></div><div className="grid divide-y rounded-2xl border border-slate-200 bg-white sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4">{[
-        { title: 'Buy cars', copy: 'Search and compare live listings.', Icon: Search, action: () => setTab('inventory') },
-        { title: 'Sell your car', copy: 'Create a real listing with your own media.', Icon: Tag, action: () => setTab('sell') },
-        { title: 'Find showrooms', copy: 'Discover real businesses and their inventory.', Icon: Store, action: () => setTab('dealers') },
-        { title: 'Auto services', copy: 'Open the automotive service tools.', Icon: Wrench, action: () => setTab('concierge') },
-      ].map(({ title, copy, Icon, action }) => <button key={title} type="button" onClick={action} className="b360-service-card"><span><Icon size={19} /></span><h3>{title}</h3><p>{copy}</p><ArrowRight size={15} /></button>)}</div></div></section>
+            <button
+              type="button"
+              onClick={() => {
+                cinematicAudio.playClick();
+                setTab('dealers');
+              }}
+              className="px-5 py-2.5 rounded-xl bg-[#ffb95f] hover:bg-[#ee9800] text-[#2a1700] font-extrabold text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer shrink-0 active:scale-95"
+            >
+              Partner Up
+            </button>
+          </div>
+        </section>
 
-      {galleryImages.length > 0 ? <section className="b360-dark-section"><div className="b360-shell"><div className="b360-section-head b360-section-head-dark"><div><p className="b360-eyebrow b360-eyebrow-light">Our gallery</p><h2>Moments that move us</h2><p>Media pulled from real showroom galleries and activity feeds.</p></div></div><div className="b360-gallery">{galleryImages.map(({url,showroom},index) => <button key={`${url}-${index}`} type="button" onClick={() => onSelectDealer?.(showroom.id)} className={index===0 ? 'b360-gallery-main' : ''}><img src={url} alt={`${showroom.name} showroom media`} loading="lazy" decoding="async" /></button>)}</div></div></section> : null}
-
-      {brands.length > 0 ? <section className="b360-brand-strip"><div className="b360-shell"><div className="b360-section-head"><div><p className="b360-eyebrow">Brands in the marketplace</p><h2>Driven by real listings</h2></div></div><div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">{brands.map(([brand,count]) => <button key={brand} type="button" onClick={() => { setSearchQuery?.(brand); setTab('search'); }} className="b360-brand-chip"><span>{brand}</span><small>{count} listing{count === 1 ? '' : 's'}</small></button>)}</div></div></section> : null}
-
-      <section className="b360-final-cta"><div className="b360-shell grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end"><div><p className="b360-eyebrow b360-eyebrow-light">Ready to drive?</p><h2>Your next vehicle is closer than you think.</h2><p>Start with the live marketplace, or add your own vehicle when you are ready.</p></div><div className="flex flex-wrap gap-3"><button type="button" onClick={() => setTab('inventory')} className="b360-reference-button b360-reference-button-primary">Browse cars <ArrowRight size={16} /></button><button type="button" onClick={() => setTab('sell')} className="b360-reference-button b360-reference-button-light">Post a vehicle <Tag size={16} /></button></div></div></section>
+      </div>
     </main>
   );
-}
-
-function CarIcon() {
-  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className="h-5 w-5" aria-hidden="true"><path d="M5 17h14l-1.2-6.2a2 2 0 0 0-2-1.6H8.2a2 2 0 0 0-2 1.6L5 17Z" /><path d="M4 17v2M20 17v2M7 17h10M7.5 13h9" /></svg>;
 }

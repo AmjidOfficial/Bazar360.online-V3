@@ -73,7 +73,7 @@ Generate output strictly conforming to the following JSON structure:
 Tone tuning selected: ${tone}. Ensure vocabulary mirrors luxury automotive catalogs.`;
 
     const response = await client.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-3.8-flash",
       contents: `Translate this shorthand seller note: "${rawInput}"`,
       config: {
         systemInstruction: systemPrompt,
@@ -165,7 +165,7 @@ Incorporate details of our showcase fleet where appropriate. Maintain roleplay p
     formattedContents.push({ role: "user", parts: [{ text: message }] });
 
     const response = await client.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-3.8-flash",
       contents: formattedContents,
       config: {
         systemInstruction: contextPrompt,

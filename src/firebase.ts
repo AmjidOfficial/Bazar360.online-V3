@@ -11,18 +11,14 @@ setLogLevel('silent');
 
 export const app = initializeApp(firebaseConfig);
 
-// Initialize Firebase App Check with reCAPTCHA v3 or local debug fallback only if a real site key is configured
+// Initialize Firebase App Check with reCAPTCHA v3 or local debug fallback only if explicitly configured
 export let appCheck: any = null;
 if (typeof window !== 'undefined') {
-  if ((import.meta as any).env?.DEV) {
-    // Enable debug provider for local/sandbox preview testing
-    (window as any).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
-  }
-  
   const siteKey = (import.meta as any).env?.VITE_RECAPTCHA_SITE_KEY;
   const hasRealKey = siteKey && siteKey !== '6Ld_placeholder_site_key_for_recaptcha_v3' && !siteKey.includes('placeholder') && siteKey.trim() !== '';
   
-  if (hasRealKey) {
+  // In dev/sandbox mode without explicit debug token in Firebase console, avoid triggering 403 debug token exchange
+  if (hasRealKey && !(import.meta as any).env?.DEV) {
     try {
       appCheck = initializeAppCheck(app, {
         provider: new ReCaptchaV3Provider(siteKey),
@@ -33,11 +29,28 @@ if (typeof window !== 'undefined') {
       console.warn('[App Check] Firebase App Check initialization skipped/failed:', err.message || err);
     }
   } else {
-    console.log('[App Check] Firebase App Check initialization skipped: No real site key provided in environment variables.');
+    // Graceful offline/local mode for development and iframe sandbox environments
   }
 }
 
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+function initFirestore() {
+  try {
+    if (firebaseConfig.firestoreDatabaseId) {
+      return getFirestore(app, firebaseConfig.firestoreDatabaseId);
+    }
+    return getFirestore(app);
+  } catch (err: any) {
+    console.warn('[Firestore] Error initializing named database, falling back to default:', err);
+    try {
+      return getFirestore(app);
+    } catch (fallbackErr: any) {
+      console.error('[Firestore] Critical error initializing Firestore:', fallbackErr);
+      throw fallbackErr;
+    }
+  }
+}
+
+export const db = initFirestore();
 
 // Enable offline persistence to seamlessly handle sandbox iframe connectivity restrictions
 // Persistence MUST be initialized before any network requests are triggered on db.

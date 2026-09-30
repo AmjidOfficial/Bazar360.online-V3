@@ -20,18 +20,24 @@ export default function FirstTimeLeadModal({ lang, onComplete }: FirstTimeLeadMo
 
   useEffect(() => {
     // Check if user has already submitted or skipped onboarding
-    const isDismissed = localStorage.getItem('bazar360_lead_modal_dismissed');
-    if (!isDismissed) {
-      // Delay prompt slightly for clean entering UX
-      const timer = setTimeout(() => {
-        setIsOpen(true);
-      }, 1200);
-      return () => clearTimeout(timer);
+    try {
+      const isDismissed = localStorage.getItem('bazar360_lead_modal_dismissed');
+      if (!isDismissed) {
+        // Delay prompt slightly for clean entering UX
+        const timer = setTimeout(() => {
+          setIsOpen(true);
+        }, 1200);
+        return () => clearTimeout(timer);
+      }
+    } catch {
+      // Storage access blocked in iframe
     }
   }, []);
 
   const handleClose = () => {
-    localStorage.setItem('bazar360_lead_modal_dismissed', 'true');
+    try {
+      localStorage.setItem('bazar360_lead_modal_dismissed', 'true');
+    } catch {}
     setIsOpen(false);
     if (onComplete) onComplete();
   };

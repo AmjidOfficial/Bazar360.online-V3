@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { ShieldCheck, MapPin, Phone, Clock, Star, Building2, MessageCircle, QrCode, ImageIcon, CheckCircle2, Share2, Calendar } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export interface ShowroomHeaderData {
   id: string;
@@ -45,7 +46,7 @@ export function ShowroomHeaderAnimated({ showroom, onOpenMediaManager, onOpenQrM
       }).catch(() => {});
     } else {
       navigator.clipboard.writeText(window.location.href);
-      alert('Showroom link copied to clipboard!');
+      toast.success('Showroom link copied to clipboard!');
     }
   };
 

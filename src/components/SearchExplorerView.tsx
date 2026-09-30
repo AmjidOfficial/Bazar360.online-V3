@@ -19,14 +19,16 @@ import {
   Filter,
   Check,
   ArrowDownUp,
-  WifiOff
+  WifiOff,
+  DollarSign
 } from 'lucide-react';
 import { CarListing, Dealer } from '../types';
 import { isVehicleEligible, getEligibleListings } from '../lib/dbService';
 import { VehicleCard } from './VehicleCard';
 import { VehicleSkeletonCard } from './VehicleSkeletonCard';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { cinematicAudio } from '../lib/cinematicAudio';
+import { TouchGestureRangeSlider } from './TouchGestureRangeSlider';
 
 import { 
   PAKISTAN_BRANDS, 
@@ -75,6 +77,23 @@ const BODY_CATEGORIES = [
   { id: 'Pickup', label: 'Pickups & 4x4s', icon: Truck },
   { id: 'Commercial', label: 'Vans & Commercial', icon: Truck },
   { id: 'Bike', label: 'Motorcycles', icon: Bike },
+];
+
+const PRICE_PRESETS = [
+  { label: 'All Prices', min: 0, max: 120000000 },
+  { label: '< 20 Lakh', min: 0, max: 2000000 },
+  { label: '20 - 50 Lakh', min: 2000000, max: 5000000 },
+  { label: '50L - 1 Crore', min: 5000000, max: 10000000 },
+  { label: '1 - 3 Crore', min: 10000000, max: 30000000 },
+  { label: '3 Crore+', min: 30000000, max: 120000000 },
+];
+
+const YEAR_PRESETS = [
+  { label: 'All Years', min: 2000, max: 2026 },
+  { label: '2010+', min: 2010, max: 2026 },
+  { label: '2015+', min: 2015, max: 2026 },
+  { label: '2020+', min: 2020, max: 2026 },
+  { label: '2024+ (New)', min: 2024, max: 2026 },
 ];
 
 export default function SearchExplorerView({
@@ -742,48 +761,37 @@ export default function SearchExplorerView({
         </div>
       </div>
 
-      {/* 4. Year slider range */}
-      <div className="space-y-2">
-        <div className="flex justify-between items-baseline text-[11px]">
-          <span className="font-sans font-bold uppercase tracking-wider text-[var(--color-text-muted)]">{t.yearRange}</span>
-          <span className="font-mono text-xs text-[var(--color-accent-main)] font-bold">{yearMin} - {yearMax}</span>
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-          <input
-            type="range"
-            min="2000"
-            max="2026"
-            value={yearMin}
-            onChange={(e) => setYearMin(parseInt(e.target.value))}
-            className="w-full h-1.5 bg-[var(--color-border-main)] rounded appearance-none cursor-pointer accent-[var(--color-accent-main)]"
-          />
-          <input
-            type="range"
-            min="2000"
-            max="2026"
-            value={yearMax}
-            onChange={(e) => setYearMax(parseInt(e.target.value))}
-            className="w-full h-1.5 bg-[var(--color-border-main)] rounded appearance-none cursor-pointer accent-[var(--color-accent-main)]"
-          />
-        </div>
-      </div>
+      {/* 4. Touch-Optimized Year Slider Range */}
+      <TouchGestureRangeSlider
+        label={t.yearRange}
+        min={2000}
+        max={2026}
+        step={1}
+        valueMin={yearMin}
+        valueMax={yearMax}
+        onChangeMin={setYearMin}
+        onChangeMax={setYearMax}
+        isDual={true}
+        formatValue={(val) => `${val}`}
+        presets={YEAR_PRESETS}
+        icon={<Gauge size={13} className="text-[var(--color-accent-main)]" />}
+      />
 
-      {/* 5. Price filter sliders */}
-      <div className="space-y-2">
-        <div className="flex justify-between items-baseline text-[11px]">
-          <span className="font-sans font-bold uppercase tracking-wider text-[var(--color-text-muted)]">{t.priceRange}</span>
-          <span className="font-mono text-xs text-[var(--color-accent-main)] font-bold">{formatPriceNum(priceMax)}</span>
-        </div>
-        <input
-          type="range"
-          min="0"
-          max="120000000"
-          step="500000"
-          value={priceMax}
-          onChange={(e) => setPriceMax(parseInt(e.target.value))}
-          className="w-full h-1.5 bg-[var(--color-border-main)] rounded appearance-none cursor-pointer accent-[var(--color-accent-main)]"
-        />
-      </div>
+      {/* 5. Touch-Optimized Price Range Slider */}
+      <TouchGestureRangeSlider
+        label={t.priceRange}
+        min={0}
+        max={120000000}
+        step={500000}
+        valueMin={priceMin}
+        valueMax={priceMax}
+        onChangeMin={setPriceMin}
+        onChangeMax={setPriceMax}
+        isDual={true}
+        formatValue={(val) => formatPriceNum(val)}
+        presets={PRICE_PRESETS}
+        icon={<DollarSign size={13} className="text-[var(--color-accent-main)]" />}
+      />
 
       {/* 6. City Selection */}
       <div className="space-y-2">
@@ -1216,39 +1224,134 @@ export default function SearchExplorerView({
 
       </div>
 
-      {/* Collapsible Mobile Filters Drawer Backdrop */}
-      {showMobileFilters && (
-        <div className="fixed inset-0 bg-slate-950/80 z-[120] backdrop-blur-xs flex justify-end lg:hidden">
-          <div className="bg-[var(--color-bg-secondary)] text-[var(--color-text-header)] w-full max-w-xs h-full p-6 overflow-y-auto flex flex-col relative border-l border-[var(--color-border-main)] animate-scale-fade shadow-2xl">
-            
-            {/* Close Mobile Filters button */}
-            <button
-              onClick={() => {
-                cinematicAudio.playClick();
-                setShowMobileFilters(false);
-              }}
-              className="absolute top-4 right-4 text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] p-2 hover:bg-[var(--color-bg-tertiary)] rounded-xl cursor-pointer"
-            >
-              <X size={18} />
-            </button>
-
-            {/* Content drawer */}
-            <div className="pt-8 flex-grow">
-              {filterSidebarContent}
-            </div>
-
-            <button
-              onClick={() => {
-                cinematicAudio.playClick();
-                setShowMobileFilters(false);
-              }}
-              className="mt-6 mb-20 w-full bg-[var(--color-accent-main)] hover:bg-[var(--color-accent-hover)] text-[#090D14] font-sans font-bold text-xs uppercase py-3.5 rounded-xl text-center cursor-pointer shadow-md relative z-10"
-            >
-              Apply Filters ({sortedVehicles.length} Cars)
-            </button>
-          </div>
+      {/* Floating Mobile Sticky Filter Action Bar */}
+      <div className="fixed bottom-20 left-4 right-4 z-[90] lg:hidden flex items-center justify-between gap-3 bg-[var(--color-bg-secondary)]/95 border border-[var(--color-border-main)] backdrop-blur-md p-3 rounded-2xl shadow-xl animate-fade-in">
+        <div className="flex flex-col">
+          <span className="text-xs font-bold text-[var(--color-text-header)] flex items-center gap-1.5">
+            <Car size={14} className="text-[var(--color-accent-main)]" />
+            <span>{sortedVehicles.length} Matches Found</span>
+          </span>
+          <span className="text-[10px] text-[var(--color-text-muted)] font-mono">
+            {activeFilters.length > 0 ? `${activeFilters.length} Active Filters` : 'Touch sliders to refine'}
+          </span>
         </div>
-      )}
+
+        <button
+          onClick={() => {
+            cinematicAudio.playClick();
+            setShowMobileFilters(true);
+          }}
+          className="bg-[var(--color-accent-main)] hover:bg-[var(--color-accent-hover)] text-[#090D14] px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 shadow-md active:scale-95 transition-transform cursor-pointer shrink-0"
+          style={{ minHeight: '44px' }}
+        >
+          <SlidersHorizontal size={16} />
+          <span>Filters & Sliders</span>
+          {activeFilters.length > 0 && (
+            <span className="bg-[#090D14] text-[var(--color-accent-main)] font-mono text-[10px] font-extrabold px-1.5 py-0.5 rounded-full">
+              {activeFilters.length}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Touch-Gesture Mobile Filters Drawer Modal */}
+      <AnimatePresence>
+        {showMobileFilters && (
+          <div className="fixed inset-0 z-[150] lg:hidden flex flex-col justify-end">
+            {/* Backdrop Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => {
+                cinematicAudio.playClick();
+                setShowMobileFilters(false);
+              }}
+              className="absolute inset-0 bg-slate-950/80 backdrop-blur-xs"
+            />
+
+            {/* Touch-Gesture Swipeable Bottom Sheet */}
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 280 }}
+              drag="y"
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={{ top: 0, bottom: 0.5 }}
+              onDragEnd={(_, info) => {
+                if (info.offset.y > 90 || info.velocity.y > 400) {
+                  cinematicAudio.playClick();
+                  setShowMobileFilters(false);
+                }
+              }}
+              className="relative z-10 bg-[var(--color-bg-secondary)] text-[var(--color-text-header)] w-full max-h-[88vh] rounded-t-3xl border-t border-[var(--color-border-main)] flex flex-col shadow-2xl overflow-hidden"
+            >
+              {/* Swipe Handle & Modal Header */}
+              <div className="pt-3 pb-2.5 px-4 flex flex-col items-center bg-[var(--color-bg-secondary)] border-b border-[var(--color-border-main)] shrink-0 touch-none cursor-grab active:cursor-grabbing select-none">
+                <div className="w-12 h-1.5 bg-[var(--color-border-main)] rounded-full mb-3" />
+                
+                <div className="w-full flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <SlidersHorizontal size={16} className="text-[var(--color-accent-main)]" />
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--color-text-header)]">
+                      {t.filterTitle} & Sliders
+                    </h3>
+                    <span className="text-[10px] font-mono bg-[var(--color-accent-main)]/10 text-[var(--color-accent-main)] border border-[var(--color-accent-main)]/30 px-2 py-0.5 rounded-full font-bold">
+                      {sortedVehicles.length} Matches
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        cinematicAudio.playClick();
+                        handleResetFilters();
+                      }}
+                      className="text-xs font-mono text-[var(--color-text-muted)] hover:text-rose-400 p-1 flex items-center gap-1 cursor-pointer"
+                    >
+                      <RotateCcw size={12} />
+                      {t.resetAll}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        cinematicAudio.playClick();
+                        setShowMobileFilters(false);
+                      }}
+                      className="text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] p-1.5 bg-[var(--color-bg-tertiary)] rounded-xl cursor-pointer"
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Scrollable Touch-Optimized Filter Form Body */}
+              <div className="p-5 overflow-y-auto flex-grow space-y-6">
+                {filterSidebarContent}
+              </div>
+
+              {/* Sticky Apply Action Footer */}
+              <div className="p-4 bg-[var(--color-bg-secondary)] border-t border-[var(--color-border-main)] shrink-0 pb-8">
+                <button
+                  type="button"
+                  onClick={() => {
+                    cinematicAudio.playClick();
+                    setShowMobileFilters(false);
+                  }}
+                  className="w-full bg-[var(--color-accent-main)] hover:bg-[var(--color-accent-hover)] text-[#090D14] font-bold text-xs uppercase py-3.5 rounded-xl text-center cursor-pointer shadow-md active:scale-98 transition-transform"
+                  style={{ minHeight: '44px' }}
+                >
+                  Apply Filters ({sortedVehicles.length} Vehicles)
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
 
     </div>

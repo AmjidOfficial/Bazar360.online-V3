@@ -5,9 +5,9 @@
  */
 
 // Cloudinary Configuration
-export const CLOUDINARY_CLOUD_NAME = (import.meta as any).env.VITE_CLOUDINARY_CLOUD_NAME || "me634xd0";
-export const CLOUDINARY_UPLOAD_PRESET = (import.meta as any).env.VITE_CLOUDINARY_UPLOAD_PRESET || "bazar360_upload";
-export const CLOUDINARY_API_KEY = (import.meta as any).env.VITE_CLOUDINARY_API_KEY || "165721653511945";
+export const CLOUDINARY_CLOUD_NAME = (typeof import.meta !== 'undefined' && (import.meta as any)?.env?.VITE_CLOUDINARY_CLOUD_NAME) || "me634xd0";
+export const CLOUDINARY_UPLOAD_PRESET = (typeof import.meta !== 'undefined' && (import.meta as any)?.env?.VITE_CLOUDINARY_UPLOAD_PRESET) || "bazar360_upload";
+export const CLOUDINARY_API_KEY = (typeof import.meta !== 'undefined' && (import.meta as any)?.env?.VITE_CLOUDINARY_API_KEY) || "165721653511945";
 
 export interface CloudinaryUploadResult {
   url: string;

@@ -13,6 +13,7 @@ import { dbFetchListingById } from '../lib/dbService';
 import VehicleARInspectorModal from './VehicleARInspectorModal';
 import { InspectionReportModal } from './InspectionReportModal';
 import { cinematicAudio } from '../lib/cinematicAudio';
+import { VehicleConciergeChat } from './VehicleConciergeChat';
 
 interface VehicleDetailProps {
   car: CarListing;
@@ -719,6 +720,15 @@ export function VehicleDetail({ car: propCar, dealer, allListings = [], onSelect
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* AI-Powered Vehicle Concierge Chat Interface */}
+            <div className="pt-4">
+              <VehicleConciergeChat 
+                car={car} 
+                dealer={dealer} 
+                onOpenInspection={() => setShowInspectionModal(true)} 
+              />
             </div>
           </div>
 

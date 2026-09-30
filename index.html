@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/jpeg" href="/bazar360_icon.jpg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>BAZAR360.online | Connect, Buy, Sell • Everything You Need</title>
     <meta name="description" content="Pakistan's premier direct automotive network. Connect with certified showrooms, buy verified cars, and sell in 60 seconds on Bazar360.online." />
     
@@ -24,22 +24,51 @@
     <meta name="twitter:description" content="Pakistan's premier direct automotive network. Connect with certified showrooms, buy verified cars, and sell in 60 seconds on Bazar360.online." />
     <meta name="twitter:image" content="https://bazar360.online/bazar360_official_logo.jpg" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
-
     <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#101418" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <link rel="apple-touch-icon" href="/bazar360_icon.jpg" />
     <script>
+      // Immediate Cache-Buster & Service Worker purger for dev/preview environments to resolve white screen cache loops
+      (function() {
+        var isDevOrPreview = 
+          window.location.hostname === 'localhost' || 
+          window.location.hostname.includes('127.0.0.1') || 
+          window.location.hostname.includes('.run.app') || 
+          window.location.hostname.includes('webcontainer') ||
+          window.location.hostname.includes('aistudio');
+
+        if (isDevOrPreview) {
+          // Clear standard HTTP Cache Storage
+          if ('caches' in window) {
+            caches.keys().then(function(names) {
+              names.forEach(function(name) {
+                caches.delete(name);
+              });
+            }).catch(function() {});
+          }
+
+          // Force unregister all active Service Workers silently without triggering reload
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(regs) {
+              if (regs.length > 0) {
+                regs.forEach(function(reg) {
+                  reg.unregister().catch(function() {});
+                });
+              }
+            }).catch(function() {});
+          }
+        }
+      })();
+
       // Global window shim for Node process compatibility
       window.process = window.process || { env: { NODE_ENV: 'development' } };
       window.global = window.global || window;
     </script>
   </head>
-  <body class="overflow-x-hidden antialiased">
+  <body class="bg-slate-50 text-slate-900 antialiased font-sans min-h-screen">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

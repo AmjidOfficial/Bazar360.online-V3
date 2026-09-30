@@ -105,13 +105,20 @@ export default function ShowroomMiniSite({
 
   useEffect(() => {
     if (dealer) {
-      const likedShowrooms = JSON.parse(localStorage.getItem('bazar360_liked_showrooms') || '[]');
-      setIsLiked(likedShowrooms.includes(dealer.id));
+      try {
+        const likedShowrooms = JSON.parse(localStorage.getItem('bazar360_liked_showrooms') || '[]');
+        setIsLiked(likedShowrooms.includes(dealer.id));
+      } catch {
+        setIsLiked(false);
+      }
     }
   }, [dealer.id]);
 
   const handleLike = async () => {
-    const likedShowrooms = JSON.parse(localStorage.getItem('bazar360_liked_showrooms') || '[]');
+    let likedShowrooms: string[] = [];
+    try {
+      likedShowrooms = JSON.parse(localStorage.getItem('bazar360_liked_showrooms') || '[]');
+    } catch {}
     const newIsLiked = !isLiked;
     
     let updatedLiked;
@@ -124,7 +131,9 @@ export default function ShowroomMiniSite({
     }
     
     setIsLiked(newIsLiked);
-    localStorage.setItem('bazar360_liked_showrooms', JSON.stringify(updatedLiked));
+    try {
+      localStorage.setItem('bazar360_liked_showrooms', JSON.stringify(updatedLiked));
+    } catch {}
     
     try {
       const currentCount = dealer.likes_count || dealer.likesCount || 0;

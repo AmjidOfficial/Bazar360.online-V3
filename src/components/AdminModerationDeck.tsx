@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ShieldCheck, Plus, Check, X, Trash2, Edit2, Car, MapPin } from 'lucide-react';
 import { CarListing, Dealer } from '../types';
 import { UserProfile } from '../lib/dbService';
+import toast from 'react-hot-toast';
 
 interface AdminModerationDeckProps {
   listings: CarListing[];
@@ -66,10 +67,10 @@ export default function AdminModerationDeck({
         onApproveListing(id);
       });
 
-      alert(`Successfully approved ${selectedListingIds.length} listings in a single database transaction!`);
+      toast.success(`Successfully approved ${selectedListingIds.length} listings!`);
       setSelectedListingIds([]);
     } catch (error: any) {
-      alert(`Bulk approval error: ${error.message}`);
+      toast.error(`Bulk approval error: ${error.message}`);
     } finally {
       setIsBulkApproving(false);
     }
@@ -104,14 +105,14 @@ export default function AdminModerationDeck({
       };
 
       await setDoc(doc(db, 'listings', newListing.id), newListing);
-      alert('Listing created successfully!');
+      toast.success('Listing created successfully!');
       setTitle('');
       setMake('');
       setModel('');
       setPrice('');
       setMileage('');
     } catch (error: any) {
-      alert(`Error posting: ${error.message}`);
+      toast.error(`Error posting: ${error.message}`);
     }
   };
 

@@ -149,10 +149,10 @@ export function ShowroomAnalyticsDashboard({ showroom, inventory }: ShowroomAnal
         status: newStatus,
         updatedAt: new Date().toISOString()
       });
-      console.log(`Lead status updated to ${newStatus}`);
+      toast.success(`Lead status updated to ${newStatus}`);
     } catch (err) {
       console.error(err);
-      alert('Failed to update lead status. Please retry.');
+      toast.error('Failed to update lead status. Please retry.');
     }
   };
 

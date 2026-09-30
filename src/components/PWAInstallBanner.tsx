@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Download, Smartphone, X, Check, ShieldCheck, Sparkles } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 interface PWAInstallBannerProps {
   lang: 'en' | 'ur';
@@ -37,10 +38,11 @@ export default function PWAInstallBanner({ lang }: PWAInstallBannerProps) {
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
-      alert(
+      toast(
         isUrdu
           ? 'ایپ کو انسٹال کرنے کے لیے اپنے براؤزر کا مینو کھولیں اور "صفحہ ہوم اسکرین میں شامل کریں" (Add to Home Screen) منتخب کریں۔'
-          : 'To install Bazar360, tap your browser menu (3 dots or share button) and select "Add to Home Screen" or "Install App".'
+          : 'To install Bazar360, tap your browser menu (3 dots or share button) and select "Add to Home Screen" or "Install App".',
+        { icon: '📱', duration: 5000 }
       );
       return;
     }

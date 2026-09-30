@@ -312,7 +312,9 @@ export default function DetailedVehiclePostingPage({
   ]);
 
   const handleClearDraft = () => {
-    localStorage.removeItem('bazar360_post_ad_draft');
+    try {
+      localStorage.removeItem('bazar360_post_ad_draft');
+    } catch {}
     setDraftRestored(false);
     toast.success('Saved draft cleared.');
   };

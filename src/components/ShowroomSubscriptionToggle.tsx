@@ -17,7 +17,13 @@ export function ShowroomSubscriptionToggle({ dealer, currentUser, className = ''
   const [subscriberEmail, setSubscriberEmail] = useState(currentUser?.email || '');
   const [subscriberPhone, setSubscriberPhone] = useState('');
 
-  const visitorId = currentUser?.uid || localStorage.getItem('bazar360_visitor_id') || 'anon_visitor';
+  const visitorId = currentUser?.uid || (() => {
+    try {
+      return localStorage.getItem('bazar360_visitor_id') || 'anon_visitor';
+    } catch {
+      return 'anon_visitor';
+    }
+  })();
 
   useEffect(() => {
     if (dealer?.id) {

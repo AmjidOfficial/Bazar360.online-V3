@@ -16,18 +16,24 @@ export function FirstTimeVisitorModal({ onClose }: FirstTimeVisitorModalProps) {
 
   useEffect(() => {
     // Check if visitor has already completed or skipped the prompt
-    const hasSeenPrompt = localStorage.getItem('bazar360_lead_prompt_seen');
-    if (!hasSeenPrompt) {
-      // Small delay so page renders smoothly first
-      const timer = setTimeout(() => {
-        setIsOpen(true);
-      }, 1200);
-      return () => clearTimeout(timer);
+    try {
+      const hasSeenPrompt = localStorage.getItem('bazar360_lead_prompt_seen');
+      if (!hasSeenPrompt) {
+        // Small delay so page renders smoothly first
+        const timer = setTimeout(() => {
+          setIsOpen(true);
+        }, 1200);
+        return () => clearTimeout(timer);
+      }
+    } catch {
+      // Storage access blocked in iframe
     }
   }, []);
 
   const handleSkip = () => {
-    localStorage.setItem('bazar360_lead_prompt_seen', 'true');
+    try {
+      localStorage.setItem('bazar360_lead_prompt_seen', 'true');
+    } catch {}
     setIsOpen(false);
     if (onClose) onClose();
   };
@@ -55,9 +61,11 @@ export function FirstTimeVisitorModal({ onClose }: FirstTimeVisitorModalProps) {
         createdAt: new Date().toISOString()
       });
 
-      localStorage.setItem('bazar360_lead_prompt_seen', 'true');
-      localStorage.setItem('bazar360_visitor_name', name.trim());
-      localStorage.setItem('bazar360_visitor_phone', phone.trim());
+      try {
+        localStorage.setItem('bazar360_lead_prompt_seen', 'true');
+        localStorage.setItem('bazar360_visitor_name', name.trim());
+        localStorage.setItem('bazar360_visitor_phone', phone.trim());
+      } catch {}
 
       setSubmitted(true);
       setTimeout(() => {
@@ -66,7 +74,9 @@ export function FirstTimeVisitorModal({ onClose }: FirstTimeVisitorModalProps) {
       }, 1500);
     } catch (err) {
       console.warn('Visitor lead registration bypass:', err);
-      localStorage.setItem('bazar360_lead_prompt_seen', 'true');
+      try {
+        localStorage.setItem('bazar360_lead_prompt_seen', 'true');
+      } catch {}
       setIsOpen(false);
       if (onClose) onClose();
     } finally {

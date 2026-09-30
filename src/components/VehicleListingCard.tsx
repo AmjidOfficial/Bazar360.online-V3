@@ -11,6 +11,7 @@ import { VehicleVerificationModal } from './VehicleVerificationModal';
 import { getOptimizedUrl } from '../lib/cloudinaryService';
 import { GlassCard } from './GlassCard';
 import { Lightbox } from './Lightbox';
+import toast from 'react-hot-toast';
 
 // Swiper integration
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -142,11 +143,11 @@ export default function VehicleListingCard({
       
       await dbSubmitLead(leadData);
       dbTrackShowroomEvent(leadData.showroomOwnerId, 'lead', leadData.vehicleId, leadData.vehicleTitle).catch(() => {});
-      alert('Your inquiry was submitted successfully! The showroom advisor has been notified and will contact you shortly.');
+      toast.success('Your inquiry was submitted successfully! The showroom advisor has been notified.');
       setIsEnquiryOpen(false);
     } catch (err) {
       console.error(err);
-      alert('Failed to submit inquiry. Please retry or contact the advisor directly via the hotline.');
+      toast.error('Failed to submit inquiry. Please retry or contact the advisor directly via phone/WhatsApp.');
     } finally {
       setSubmitting(false);
     }

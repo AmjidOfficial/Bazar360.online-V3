@@ -149,6 +149,41 @@ async function startServer() {
 
   app.use(express.json({ limit: '25mb' }));
 
+  // Public SEO Routes (Accessible to search engine crawlers without App Check token)
+  app.get(["/sitemap.xml", "/api/sitemap.xml"], async (req, res) => {
+    try {
+      const { generateSitemapXml } = await import("./server/sitemapGenerator");
+      const host = req.get("host") || "bazar360.online";
+      const protocol = req.protocol === "https" || req.headers["x-forwarded-proto"] === "https" ? "https" : "http";
+      const baseUrl = `${protocol}://${host}`;
+      
+      const xml = await generateSitemapXml(baseUrl);
+      res.header("Content-Type", "application/xml; charset=utf-8");
+      res.header("Cache-Control", "public, max-age=3600, s-maxage=3600");
+      res.status(200).send(xml);
+    } catch (err: any) {
+      console.error("[Sitemap API] Error generating sitemap.xml:", err);
+      res.status(500).send(`<?xml version="1.0" encoding="UTF-8"?><error>${err.message || "Failed to generate sitemap"}</error>`);
+    }
+  });
+
+  app.get("/robots.txt", (req, res) => {
+    const host = req.get("host") || "bazar360.online";
+    const protocol = req.protocol === "https" || req.headers["x-forwarded-proto"] === "https" ? "https" : "http";
+    const sitemapUrl = `${protocol}://${host}/sitemap.xml`;
+    
+    const robotsContent = `User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+Sitemap: ${sitemapUrl}
+`;
+    res.header("Content-Type", "text/plain; charset=utf-8");
+    res.header("Cache-Control", "public, max-age=86400");
+    res.status(200).send(robotsContent);
+  });
+
   // Protect all API endpoints with Firebase App Check
   app.use("/api", appCheckVerification);
 
@@ -189,7 +224,7 @@ Generate output strictly conforming to the following JSON structure:
 }`;
 
       const response = await executeWithRetry(() => client.models.generateContent({
-        model: "gemini-3.5-flash",
+        model: "gemini-3.8-flash",
         contents: `Translate this shorthand seller note: "${rawInput}"`,
         config: {
           systemInstruction: systemPrompt,
@@ -262,7 +297,7 @@ Incorporate details of our showcase fleet where appropriate. Maintain roleplay p
       formattedContents.push({ role: 'user', parts: [{ text: message }] });
 
       const response = await executeWithRetry(() => client.models.generateContent({
-        model: "gemini-3.5-flash",
+        model: "gemini-3.8-flash",
         contents: formattedContents,
         config: {
           systemInstruction: contextPrompt,
@@ -277,6 +312,101 @@ Incorporate details of our showcase fleet where appropriate. Maintain roleplay p
       // Graceful fallback dialogue system
       res.json({
         reply: "Hello standard buyer! Thanks for contacting us. To secure optimal pricing on these listings or speak directly with our team, please click 'Call Showroom' or leave a review below."
+      });
+    }
+  });
+
+  // API 2.5: AI Vehicle Concierge Expert
+  app.post("/api/ai/vehicle-concierge", async (req, res) => {
+    try {
+      const { vehicle, message, history, lang = 'en' } = req.body;
+
+      if (!message || typeof message !== 'string') {
+        return res.status(400).json({ error: "Message prompt is required." });
+      }
+
+      if (!vehicle) {
+        return res.status(400).json({ error: "Vehicle context is required." });
+      }
+
+      const client = getGeminiClient();
+
+      const carTitle = `${vehicle.year || ''} ${vehicle.make || ''} ${vehicle.model || ''} ${vehicle.variant || ''}`.trim() || vehicle.title || 'Vehicle';
+      const specsContext = `
+VEHICLE DOSSIER:
+- Title / Model: ${carTitle}
+- Make: ${vehicle.make || 'N/A'}
+- Model: ${vehicle.model || 'N/A'}
+- Variant: ${vehicle.variant || 'Standard'}
+- Year: ${vehicle.year || 'N/A'}
+- Asking Price: PKR ${vehicle.price ? Number(vehicle.price).toLocaleString() : 'N/A'}
+- Mileage: ${vehicle.mileage ? `${Number(vehicle.mileage).toLocaleString()} km` : 'N/A'}
+- Fuel Type: ${vehicle.fuelType || 'Petrol'}
+- Transmission: ${vehicle.transmission || 'Automatic'}
+- Engine Displacement: ${vehicle.engineCC ? `${vehicle.engineCC} CC` : (vehicle.specs?.engineSize || 'N/A')}
+- Exterior Color: ${vehicle.exteriorColor || vehicle.specs?.color || 'N/A'}
+- Body Condition / Touch-ups: ${vehicle.bodyCondition || 'Total Genuine'}
+- Overall Condition: ${vehicle.condition || 'Used'}
+- Assembly: ${vehicle.assemblyType || 'Local (Pakistani)'}
+- Document Type: ${vehicle.documentType || 'Smart Card'}
+- Token Tax Status: ${vehicle.tokenTaxPaid ? 'Paid' : 'Unpaid'}
+- Registration City: ${vehicle.registrationCity || 'N/A'}
+- Location: ${vehicle.location || 'Pakistan'}
+- Installed Features: ${Array.isArray(vehicle.features) ? vehicle.features.join(', ') : 'Standard package'}
+- Seller Overview & Notes: ${vehicle.description || 'No additional seller description provided.'}
+- Dent / Paint / Inspection Notes: ${vehicle.dentPaintDescription || 'No reported body imperfections.'}
+`;
+
+      const systemInstruction = `You are "Bazar360 Vehicle Concierge", an elite, impartial automotive expert and diagnostic engineer specialized in the Pakistani automotive market (Peshawar, Islamabad/Rawalpindi, Lahore, Karachi).
+
+Your objective is to help prospective buyers inspect, evaluate, and understand this specific vehicle:
+${specsContext}
+
+Key Guidance:
+1. Provide accurate technical specifications, fuel economy averages in Pakistani urban and highway conditions, expected maintenance costs, oil viscosity recommendations (e.g. 0W-20, 5W-30), spark plug intervals, transmission fluid schedules (CVT/ATF), suspension durability on Pakistani road conditions, and parts availability (Peshawar Shoba Bazar, Rawalpindi Sultan ka Khoo, Lahore Montgomery Rd, Karachi Plaza).
+2. Highlight any potential buyer watchpoints based on the car's mileage (${vehicle.mileage || 'N/A'} km) and year (${vehicle.year || 'N/A'}), such as brake pad wear, suspension bushings, catalytic converter cleaning, battery health, and AC performance.
+3. If the user asks in Urdu or Roman Urdu, respond in friendly, respectful Urdu or Roman Urdu. Otherwise respond in crisp, professional English.
+4. Format responses cleanly with brief bullet points, bold key numbers, and scannable sections. Keep responses concise (around 100-180 words) and directly actionable for buyers.
+5. Remind the buyer that they can book an official Bazar360 200+ Point Inspection or contact the seller directly via WhatsApp on the page.`;
+
+      const formattedContents = [];
+      if (history && Array.isArray(history)) {
+        for (const h of history) {
+          if (h.text) {
+            formattedContents.push({
+              role: h.role === 'user' ? 'user' : 'model',
+              parts: [{ text: h.text }]
+            });
+          }
+        }
+      }
+      formattedContents.push({ role: 'user', parts: [{ text: message }] });
+
+      const response = await executeWithRetry(() => client.models.generateContent({
+        model: "gemini-3.8-flash",
+        contents: formattedContents,
+        config: {
+          systemInstruction: systemInstruction,
+          temperature: 0.3,
+        }
+      }));
+
+      const reply = response.text || "I've analyzed this vehicle's specifications. Please feel free to ask about maintenance, fuel average, or inspection advisories.";
+      return res.json({ success: true, reply: reply.trim() });
+    } catch (error: any) {
+      console.warn("[Vehicle Concierge API] Fallback triggered:", error?.message || error);
+      
+      const vehicle = req.body?.vehicle || {};
+      const fallbackAvg = vehicle.fuelType === 'Hybrid' ? '18-24 km/L' : (vehicle.engineCC && vehicle.engineCC <= 1000 ? '14-18 km/L' : '10-14 km/L');
+      
+      return res.json({
+        success: true,
+        reply: `Here are key insights for this **${vehicle.year || ''} ${vehicle.make || ''} ${vehicle.model || 'Vehicle'}**:\n\n` +
+          `• **Estimated Fuel Average:** ~${fallbackAvg} in standard driving conditions.\n` +
+          `• **Routine Maintenance:** Engine oil change every 5,000 km, brake & suspension check at ${vehicle.mileage ? `${Number(vehicle.mileage).toLocaleString()} km` : 'current mileage'}.\n` +
+          `• **Parts Availability:** Readily available across major Pakistani auto markets.\n` +
+          `• **Verification:** Verified registration: ${vehicle.registrationCity || 'Pakistan'}, Token tax: ${vehicle.tokenTaxPaid ? 'Paid' : 'To be checked'}.\n\n` +
+          `*Tip: You can book a full Bazar360 200+ Point Inspection directly from this page to verify mechanical health.*`
       });
     }
   });
@@ -389,7 +519,7 @@ Your task is to translate any incoming text block beautifully and accurately int
 - Return ONLY the clean, translated text block itself.`;
 
       const response = await executeWithRetry(() => client.models.generateContent({
-        model: "gemini-3.5-flash",
+        model: "gemini-3.8-flash",
         contents: `Translate this text block: "${text}"`,
         config: {
           systemInstruction: systemPrompt,
@@ -714,94 +844,7 @@ Your task is to translate any incoming text block beautifully and accurately int
     }
   });
 
-  // Serve dynamic robots.txt pointing to the XML sitemap
-  app.get("/robots.txt", (req, res) => {
-    let robots = `User-agent: *\n`;
-    robots += `Allow: /\n`;
-    robots += `Disallow: /api/\n`;
-    robots += `Sitemap: https://bazar360.online/sitemap.xml\n`;
-    res.header('Content-Type', 'text/plain');
-    res.status(200).send(robots);
-  });
-
-  // Dynamic XML Sitemap for Search Engines Indexing (Peshawar Automotive Searches)
-  app.get("/sitemap.xml", async (req, res) => {
-    try {
-      const dbAdmin = getDbAdmin();
-      
-      // Query dealers and listings concurrently
-      const [dealersSnap, listingsSnap] = await Promise.all([
-        dbAdmin.collection('dealers').get(),
-        dbAdmin.collection('listings').get()
-      ]);
-
-      const dealersList: any[] = [];
-      dealersSnap.forEach(doc => {
-        dealersList.push({ id: doc.id, ...doc.data() });
-      });
-
-      const listingsList: any[] = [];
-      listingsSnap.forEach(doc => {
-        listingsList.push({ id: doc.id, ...doc.data() });
-      });
-
-      let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
-      xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">\n`;
-
-      // Static Pages
-      const staticPages = [
-        { loc: 'https://bazar360.online/', changefreq: 'daily', priority: '1.0' },
-        { loc: 'https://bazar360.online/search', changefreq: 'daily', priority: '0.9' },
-        { loc: 'https://bazar360.online/dealers', changefreq: 'weekly', priority: '0.8' },
-        { loc: 'https://bazar360.online/contact', changefreq: 'monthly', priority: '0.5' }
-      ];
-
-      staticPages.forEach(p => {
-        xml += `  <url>\n`;
-        xml += `    <loc>${p.loc}</loc>\n`;
-        xml += `    <changefreq>${p.changefreq}</changefreq>\n`;
-        xml += `    <priority>${p.priority}</priority>\n`;
-        xml += `  </url>\n`;
-      });
-
-      // Dealers / Showrooms (e.g. auto-choice-peshawar)
-      dealersList.forEach(d => {
-        const dId = d.id || 'auto-choice-peshawar';
-        xml += `  <url>\n`;
-        xml += `    <loc>https://bazar360.online/dealers/${dId}</loc>\n`;
-        xml += `    <changefreq>weekly</changefreq>\n`;
-        xml += `    <priority>0.85</priority>\n`;
-        xml += `  </url>\n`;
-      });
-
-      // Listings / Vehicle details page (e.g. car-porsche-911-gt3)
-      listingsList.forEach(l => {
-        if (l.id) {
-          xml += `  <url>\n`;
-          xml += `    <loc>https://bazar360.online/vehicle/${l.id}</loc>\n`;
-          xml += `    <changefreq>daily</changefreq>\n`;
-          xml += `    <priority>0.75</priority>\n`;
-          xml += `  </url>\n`;
-        }
-      });
-
-      xml += `</urlset>`;
-
-      res.header('Content-Type', 'application/xml');
-      res.status(200).send(xml);
-
-    } catch (error: any) {
-      console.error("[Sitemap API] Critical error fetching persistent Firestore records:", error);
-      // Serve reliable static fallback sitemap so Google/Bing crawls are never broken
-      let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
-      xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
-      xml += `  <url>\n    <loc>https://bazar360.online/</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
-      xml += `  <url>\n    <loc>https://bazar360.online/dealers/auto-choice-peshawar</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
-      xml += `</urlset>`;
-      res.header('Content-Type', 'application/xml');
-      res.status(200).send(xml);
-    }
-  });
+  // Public routes for SEO and Sitemap are registered at the top of the route stack
 
   // API 8: Lead Capture Service
   app.post("/api/leads", requireAuth, async (req, res) => {
@@ -1142,7 +1185,7 @@ Your task is to translate any incoming text block beautifully and accurately int
       if (req.path.startsWith('/dealers/') || req.path.startsWith('/showroom/')) {
         const dealerId = req.path.split('/')[2];
         if (dealerId) {
-          const { generateDealerSeo } = await import("./src/lib/seoGenerator");
+          const { generateDealerSeo } = await import("./server/seoGenerator");
           const metaTags = await generateDealerSeo(dealerId);
           if (metaTags) {
             html = html.replace('</head>', `${metaTags}\n</head>`);
@@ -1151,7 +1194,7 @@ Your task is to translate any incoming text block beautifully and accurately int
       } else if (req.path.startsWith('/vehicle/')) {
         const vehicleId = req.path.split('/')[2];
         if (vehicleId) {
-          const { generateVehicleSeo } = await import("./src/lib/seoGenerator");
+          const { generateVehicleSeo } = await import("./server/seoGenerator");
           const metaTags = await generateVehicleSeo(vehicleId);
           if (metaTags) {
             html = html.replace('</head>', `${metaTags}\n</head>`);

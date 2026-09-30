@@ -158,6 +158,14 @@ export interface Dealer {
   tagline?: string;
   taglineCategory?: 'Professional' | 'Dynamic' | 'Convenience' | 'Short';
   updatedAt?: string;
+
+  // Smart Link & Passkey Protection
+  smartSlug?: string; // e.g. "AutoChoice01"
+  passkey?: string;   // e.g. "Choice360"
+  isPrivateLocked?: boolean;
+  customSmartUrl?: string;
+  accessCount?: number;
+  featuredShowcaseCarId?: string;
 }
 
 export interface ActivityPost {
@@ -270,6 +278,7 @@ export interface Lead {
   vehicleTitle?: string;
   vehiclePrice?: number;
   vehicleImage?: string;
+  notes?: string;
 
   // Older legacy fields for compatibility with existing subviews
   type?: string;

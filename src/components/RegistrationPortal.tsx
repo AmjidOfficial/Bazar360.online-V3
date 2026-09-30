@@ -46,6 +46,7 @@ import { UserProfile, dbSaveUserProfile, dbFetchUserProfile, dbFetchListings, db
 import { CarListing, Dealer } from '../types';
 import { GlassCard } from './GlassCard';
 import { getFriendlyAuthErrorMessage } from './AuthModal';
+import toast from 'react-hot-toast';
 import { Sun, Moon } from 'lucide-react';
 import SocialMediaForm from './SocialMediaForm';
 import { auth, db, googleProvider, facebookProvider, linkedinProvider } from '../firebase';
@@ -80,6 +81,7 @@ interface RegistrationPortalProps {
   setCurrentUser: (user: UserProfile | null) => void;
   onDealerRegistered?: (newDealer: Dealer) => void;
   onClose?: () => void;
+  onNavigateTab?: (tab: string) => void;
 }
 
 // Live presets for visitor tracking simulation
@@ -109,7 +111,8 @@ export default function RegistrationPortal({
   currentUser, 
   setCurrentUser, 
   onDealerRegistered,
-  onClose 
+  onClose,
+  onNavigateTab
 }: RegistrationPortalProps) {
   
   // Tab within portal
@@ -229,22 +232,29 @@ export default function RegistrationPortal({
 
   const handleRequestNotificationPermission = async () => {
     if (!('Notification' in window)) {
-      alert('This browser does not support push notifications.');
+      toast.error('This browser does not support push notifications.');
       return;
     }
     const permission = await Notification.requestPermission();
     setNotificationsEnabled(permission === 'granted');
     if (permission === 'granted') {
-      new Notification('BAZAR360 Notifications Active!', {
-        body: 'You will now receive instant push alerts for vehicle bargains and showroom leads.',
-        icon: '/bazar360_icon.jpg'
-      });
+      toast.success('Push notifications activated!');
+      try {
+        new Notification('BAZAR360 Notifications Active!', {
+          body: 'You will now receive instant push alerts for vehicle bargains and showroom leads.',
+          icon: '/bazar360_icon.jpg'
+        });
+      } catch (e) {
+        // Notification constructor may be restricted in sandboxes
+      }
+    } else {
+      toast('Notification permission was dismissed or denied.', { icon: '🔔' });
     }
   };
 
   const handlePwaInstall = async () => {
     if (!pwaPrompt) {
-      alert('Installation is ready! If you do not see the prompt, you can install Bazar360 using your browser settings menu (Add to Home Screen).');
+      toast('Installation ready: open browser menu and select "Add to Home Screen".', { icon: '📱' });
       return;
     }
     pwaPrompt.prompt();
@@ -323,6 +333,10 @@ export default function RegistrationPortal({
 
   // User Profile Editing & Active Profile Section states
   const [activeProfileTab, setActiveProfileTab] = useState<'vehicles' | 'favorites' | 'searches' | 'notifications' | 'messages' | 'settings' | 'socials'>('vehicles');
+  const [savedSearchAlerts, setSavedSearchAlerts] = useState<Array<{ id: string; query: string; filters: string; frequency: string }>>([
+    { id: '1', query: 'Toyota Fortuner in Peshawar', filters: 'Year: 2021-2024, Condition: Used', frequency: 'Instant' },
+    { id: '2', query: 'Suzuki Alto in KP', filters: 'Price: Under 25 Lakh, Condition: Used', frequency: 'Daily Digest' }
+  ]);
   const [isEditingProfile, setIsEditingProfile] = useState<boolean>(false);
   const [editDisplayName, setEditDisplayName] = useState<string>('');
   const [editCity, setEditCity] = useState<string>('');
@@ -384,7 +398,7 @@ export default function RegistrationPortal({
       setEditProfilePhoto(result.secure_url);
     } catch (err: any) {
       console.error('[RegistrationPortal] Profile photo upload failed:', err);
-      alert('Profile photo upload failed: ' + (err.message || err));
+      toast.error('Profile photo upload failed: ' + (err.message || err));
     } finally {
       setPhotoUploading(false);
     }
@@ -625,7 +639,7 @@ export default function RegistrationPortal({
       }
     } catch (err: any) {
       console.error("Account deletion failed:", err);
-      alert(`Deletion Failed: ${err.message}`);
+      toast.error(`Deletion Failed: ${err.message}`);
     }
   };
 
@@ -1395,11 +1409,11 @@ export default function RegistrationPortal({
   const handleCreateSellerListing = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMake || !newModel || !newPrice) {
-      alert('Please fill out the brand make, model, and asking price fields.');
+      toast.error('Please fill out the brand make, model, and asking price fields.');
       return;
     }
     if (!currentUser && !guestPhone.trim()) {
-      alert('Please enter your contact phone number to proceed with posting as a guest.');
+      toast.error('Please enter your contact phone number to proceed with posting as a guest.');
       return;
     }
 
@@ -1527,12 +1541,14 @@ export default function RegistrationPortal({
         try {
           await navigator.clipboard.writeText(shareUrl);
           setSuccessMessage('✓ Vehicle Ad Link successfully copied to clipboard!');
+          toast.success('Vehicle Ad Link copied to clipboard!');
           setTimeout(() => setSuccessMessage(''), 3000);
         } catch (e) {
           console.error(e);
+          toast(shareUrl, { icon: '🔗' });
         }
       } else {
-        alert(`Copy listing link: ${shareUrl}`);
+        toast(shareUrl, { icon: '🔗' });
       }
       return;
     }
@@ -1636,17 +1652,44 @@ export default function RegistrationPortal({
       }
       
       setShowroomDuplicates(false);
-      alert(`Showroom profiles compiled and merged successfully under ID "auto-choice-peshawar"! Consolidated ${mergeCount} duplicate profile(s) and redirected ${listingUpdateCount} listing(s) directly to the flagship Bazar360 Peshawar.`);
+      toast.success(`Showrooms compiled and merged successfully under flagship profile! Consolidated ${mergeCount} profile(s).`);
     } catch (error) {
       console.error('Failed to merge showrooms in database:', error);
       setShowroomDuplicates(false);
-      alert('Showroom profiles compiled and merged successfully under ID "auto-choice-peshawar"!');
+      toast.success('Showroom profiles compiled successfully!');
     }
   };
 
-  // Export Leads
+  // Export Leads with real CSV / TXT download
   const handleExportLeads = (format: string) => {
-    alert(`Successfully generated and downloaded Leads Sheet as BAZAR360_Leads.${format}`);
+    try {
+      const headers = ['Lead ID', 'Customer Name', 'Phone', 'Vehicle Title', 'Status', 'Date'];
+      const rows = leads.map(l => [
+        l.id,
+        l.customerName || l.userName || l.name || 'Inquiry',
+        l.customerPhone || l.userPhone || l.phone || '',
+        l.vehicleTitle || l.vehicle || '',
+        l.status || 'New',
+        l.createdAt ? new Date(l.createdAt).toISOString() : (l.date || new Date().toISOString())
+      ]);
+      const csvString = [
+        headers.join(','),
+        ...rows.map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      ].join('\n');
+
+      const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `BAZAR360_Leads_${new Date().toISOString().slice(0, 10)}.${format === 'csv' ? 'csv' : 'txt'}`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast.success(`Successfully exported ${leads.length} leads as BAZAR360_Leads.${format}`);
+    } catch (e: any) {
+      toast.error('Failed to export leads: ' + (e.message || e));
+    }
   };
 
   return (
@@ -2529,7 +2572,7 @@ export default function RegistrationPortal({
                           setSuccessMessage("✓ Security reCAPTCHA challenge successfully solved and verified.");
                           setTimeout(() => setSuccessMessage(""), 4000);
                         } else {
-                          alert("Security Challenge Failed: Selected images did not accurately match all specified luxury hybrid SUVs. Please try again.");
+                          toast.error("Security Challenge Failed: Selected images did not match all specified luxury hybrid SUVs. Please try again.");
                           window.recaptchaVerifier = [];
                         }
                       }}
@@ -2746,10 +2789,10 @@ export default function RegistrationPortal({
                             registrations.forEach(reg => {
                               reg.update();
                             });
-                            alert('Service worker cache checked. Bazar360 is fully up to date with the latest production environment features!');
+                            toast.success('Service worker cache checked. Bazar360 is fully up to date with latest features!');
                           });
                         } else {
-                          alert('Standard browser compilation is current.');
+                          toast.success('Standard browser compilation is current.');
                         }
                       }}
                       className="text-[var(--color-accent-main)] hover:underline hover:text-sky-300 flex items-center gap-1 cursor-pointer font-black uppercase"
@@ -3103,9 +3146,13 @@ export default function RegistrationPortal({
                         <h5 className="text-xs font-black text-[var(--color-text-header)] uppercase tracking-wider">My Marketplace Vehicles</h5>
                         <button
                           onClick={() => {
-                            alert('Post ads dynamically by navigating to the "SELL" tab in the bottom bar.');
+                            if (onNavigateTab) {
+                              onNavigateTab('sell');
+                            } else {
+                              toast('Navigate to the SELL tab to post your vehicle ad.', { icon: '🚗' });
+                            }
                           }}
-                          className="px-3 py-1.5 bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 rounded-lg text-[10px] font-mono uppercase font-black"
+                          className="px-3 py-1.5 bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 rounded-lg text-[10px] font-mono uppercase font-black cursor-pointer transition-colors"
                         >
                           + Post New Ad
                         </button>
@@ -3206,25 +3253,31 @@ export default function RegistrationPortal({
                   {activeProfileTab === 'searches' && (
                     <div className="space-y-3">
                       <h5 className="text-xs font-black text-[var(--color-text-header)] uppercase tracking-wider mb-2">My Saved Search Alerts</h5>
-                      <div className="space-y-2">
-                        {[
-                          { query: 'Toyota Fortuner in Peshawar', filters: 'Year: 2021-2024, Condition: Used', frequency: 'Instant' },
-                          { query: 'Suzuki Alto in KP', filters: 'Price: Under 25 Lakh, Condition: Used', frequency: 'Daily Digest' }
-                        ].map((s, idx) => (
-                          <div key={idx} className="bg-bg-secondary/40 border border-white/5 p-3 rounded-2xl flex justify-between items-center">
-                            <div>
-                              <span className="font-extrabold text-[var(--color-text-header)] block">{s.query}</span>
-                              <span className="text-[10px] text-text-muted block mt-0.5">{s.filters} • Alert: {s.frequency}</span>
+                      {savedSearchAlerts.length > 0 ? (
+                        <div className="space-y-2">
+                          {savedSearchAlerts.map((s) => (
+                            <div key={s.id} className="bg-bg-secondary/40 border border-white/5 p-3 rounded-2xl flex justify-between items-center">
+                              <div>
+                                <span className="font-extrabold text-[var(--color-text-header)] block">{s.query}</span>
+                                <span className="text-[10px] text-text-muted block mt-0.5">{s.filters} • Alert: {s.frequency}</span>
+                              </div>
+                              <button
+                                onClick={() => {
+                                  setSavedSearchAlerts(prev => prev.filter(item => item.id !== s.id));
+                                  toast.success(`Search alert for "${s.query}" cleared`);
+                                }}
+                                className="px-2.5 py-1 bg-bg-tertiary text-text-muted hover:text-[var(--color-text-header)] rounded-lg text-[10px] cursor-pointer transition-colors"
+                              >
+                                Clear
+                              </button>
                             </div>
-                            <button
-                              onClick={() => alert('Search alert cleared')}
-                              className="px-2.5 py-1 bg-bg-tertiary text-text-muted hover:text-[var(--color-text-header)] rounded-lg text-[10px]"
-                            >
-                              Clear
-                            </button>
-                          </div>
-                        ))}
-                      </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="p-6 text-center text-text-muted bg-white/2 rounded-2xl border border-white/5">
+                          <p className="text-xs">No active search alerts. Save searches from the market explorer to receive instant vehicle alerts.</p>
+                        </div>
+                      )}
                     </div>
                   )}
 

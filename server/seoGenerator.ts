@@ -1,19 +1,36 @@
 import { getApps, initializeApp, getApp, App } from 'firebase-admin/app';
 import { getFirestore, Firestore } from 'firebase-admin/firestore';
+import firebaseConfig from '../firebase-applet-config.json';
 
 // Initialize Firebase Admin (lazy)
-let app: App;
-if (getApps().length === 0) {
+function getAdminDb(): Firestore | null {
   try {
-    app = initializeApp();
-  } catch (e) {
-    app = getApp();
+    let app: App;
+    if (getApps().length === 0) {
+      try {
+        app = initializeApp({
+          projectId: firebaseConfig.projectId,
+        });
+      } catch (e) {
+        app = getApp();
+      }
+    } else {
+      app = getApps()[0] || getApp();
+    }
+    
+    if (firebaseConfig.firestoreDatabaseId) {
+      try {
+        return getFirestore(app, firebaseConfig.firestoreDatabaseId);
+      } catch (e) {
+        return getFirestore(app);
+      }
+    }
+    return getFirestore(app);
+  } catch (err) {
+    console.warn('[Server SEO Generator] Firebase Admin db initialization skipped:', err);
+    return null;
   }
-} else {
-  app = getApp();
 }
-
-const db: Firestore = getFirestore(app);
 
 function ensureAbsoluteUrl(url: string | undefined): string {
   if (!url) return '';
@@ -25,6 +42,8 @@ function ensureAbsoluteUrl(url: string | undefined): string {
 
 export async function generateDealerSeo(dealerId: string): Promise<string> {
   try {
+    const db = getAdminDb();
+    if (!db) return '';
     const dealerDoc = await db.collection('dealers').doc(dealerId).get();
     if (!dealerDoc.exists) {
       return '';
@@ -132,6 +151,8 @@ export async function generateDealerSeo(dealerId: string): Promise<string> {
 
 export async function generateVehicleSeo(vehicleId: string): Promise<string> {
   try {
+    const db = getAdminDb();
+    if (!db) return '';
     const carDoc = await db.collection('listings').doc(vehicleId).get();
     if (!carDoc.exists) {
       return '';
@@ -169,4 +190,3 @@ export async function generateVehicleSeo(vehicleId: string): Promise<string> {
     return '';
   }
 }
-

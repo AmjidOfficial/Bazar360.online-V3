@@ -6,7 +6,9 @@ import { GlassCard } from './GlassCard';
 import { 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
-  signInWithPopup
+  signInWithPopup,
+  sendPasswordResetEmail,
+  OAuthProvider
 } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, db, googleProvider, facebookProvider } from '../firebase';
@@ -228,6 +230,64 @@ export default function AuthModal({ isOpen, onClose, onSuccess, lang }: AuthModa
     } catch (err: any) {
       console.error(err);
       setError(getFriendlyAuthErrorMessage(err.message || 'Facebook Authentication failed', lang));
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email || !email.trim()) {
+      setError(lang === 'ur' ? 'براہ کرم پاس ورڈ ری سیٹ کے لیے اپنا ای میل درج کریں۔' : 'Please enter your email address in the field above to receive a reset link.');
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      await sendPasswordResetEmail(auth, email.trim());
+      setSuccess(lang === 'ur' ? 'پاس ورڈ ری سیٹ کا لنک آپ کے ای میل پر بھیج دیا گیا ہے۔' : `Password reset link sent to ${email.trim()}. Please check your inbox.`);
+    } catch (err: any) {
+      setError(getFriendlyAuthErrorMessage(err.message || 'Failed to send password reset email', lang));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAppleSignIn = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const appleProvider = new OAuthProvider('apple.com');
+      appleProvider.addScope('email');
+      appleProvider.addScope('name');
+      const result = await signInWithPopup(auth, appleProvider);
+      const fUser = result.user;
+      let profile = await dbFetchUserProfile(fUser.uid);
+      if (!profile) {
+        profile = {
+          uid: fUser.uid,
+          email: fUser.email || 'apple.user@bazar360.online',
+          displayName: fUser.displayName || 'Apple User',
+          phoneNumber: fUser.phoneNumber || '',
+          phoneVerified: !!fUser.phoneNumber,
+          role: 'Buyer',
+          status: 'Active',
+          createdAt: new Date().toISOString(),
+          lastLogin: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          city: 'Peshawar',
+          state: 'Khyber Pakhtunkhwa'
+        };
+        await dbSaveUserProfile(profile);
+      }
+      setSuccess(t.successLogin);
+      setTimeout(() => {
+        onSuccess?.(profile!);
+        onClose();
+        setSuccess(null);
+        setLoading(false);
+      }, 1000);
+    } catch (err: any) {
+      console.warn('Apple sign in:', err);
+      setError(getFriendlyAuthErrorMessage(err.message || 'Apple Authentication failed', lang));
       setLoading(false);
     }
   };
@@ -685,8 +745,8 @@ export default function AuthModal({ isOpen, onClose, onSuccess, lang }: AuthModa
                 {isLogin && (
                   <button 
                     type="button" 
-                    onClick={() => alert('Password reset link has been dispatched to your email address.')}
-                    className="text-[10px] font-mono font-bold uppercase tracking-wider text-text-muted hover:text-text-muted transition-colors mt-2"
+                    onClick={handleForgotPassword}
+                    className="text-[10px] font-mono font-bold uppercase tracking-wider text-text-muted hover:text-orange-500 transition-colors mt-2 cursor-pointer"
                   >
                     Forgot Password?
                   </button>
@@ -758,7 +818,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, lang }: AuthModa
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     type="button"
-                    onClick={() => alert('Apple Sign-In integration ready under Sandbox mode!')}
+                    onClick={handleAppleSignIn}
                     disabled={loading}
                     className="w-10 h-10 rounded-full bg-[var(--color-bg-secondary)] border border-white/5 hover:bg-[var(--color-bg-tertiary)] hover:border-white/10 shadow-sm flex items-center justify-center cursor-pointer transition-all"
                     title="Sign in with Apple"

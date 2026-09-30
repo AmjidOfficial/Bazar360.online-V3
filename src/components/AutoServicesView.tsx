@@ -22,6 +22,7 @@ import { dbSubmitServiceBooking } from '../lib/dbService';
 import { generateInspectionPDF } from '../lib/inspectionPdfService';
 import { CarListing } from '../types';
 import { ServiceManagementHub } from './admin/ServiceManagementHub';
+import toast from 'react-hot-toast';
 
 interface AutoServicesViewProps {
   lang: 'en' | 'ur';
@@ -198,7 +199,7 @@ export default function AutoServicesView({ lang, preselectedCar }: AutoServicesV
 
   const handleDownloadSamplePDF = () => {
     if (!preselectedCar && (!bookingForm.vehicleInfo || !bookingForm.vehicleInfo.trim())) {
-      alert('Please enter vehicle details in the form or select a vehicle from inventory to download an official inspection report.');
+      toast.error('Please enter vehicle details in the form or select a vehicle from inventory to download an official inspection report.');
       return;
     }
 

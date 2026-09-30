@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CarListing } from '../types';
 import { formatPkrPrice } from '../lib/currency';
+import toast from 'react-hot-toast';
 import { 
   ShoppingBag, 
   Trash2, 
@@ -67,8 +68,9 @@ export function ShortlistCartView({
       const disc = Math.round(subtotal * 0.05); // 5% promotional discount
       setDiscountAmount(disc);
       setAppliedPromo(promoCode.toUpperCase());
+      toast.success(isUrdu ? 'پرومو کوڈ کامیابی سے لاگو ہو گیا! 5% رعایت' : 'Promo code applied successfully! 5% discount');
     } else {
-      alert(isUrdu ? 'غلط پرومو کوڈ' : 'Invalid Promo Code. Try "AUTOCHOICE" or "BAZAR360"');
+      toast.error(isUrdu ? 'غلط پرومو کوڈ' : 'Invalid Promo Code. Try "AUTOCHOICE" or "BAZAR360"');
     }
   };
 
