@@ -1,6 +1,8 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { HelmetProvider } from 'react-helmet-async';
+import { ThemeProvider } from './components/ThemeContext';
+import { AuthProvider } from './components/AuthContext';
 import App from './App.tsx';
 import ErrorBoundary from './components/ErrorBoundary';
 import './index.css';
@@ -36,7 +38,11 @@ if (rootElement) {
     <StrictMode>
       <ErrorBoundary>
         <HelmetProvider>
-          <App />
+          <ThemeProvider>
+            <AuthProvider>
+              <App />
+            </AuthProvider>
+          </ThemeProvider>
         </HelmetProvider>
       </ErrorBoundary>
     </StrictMode>

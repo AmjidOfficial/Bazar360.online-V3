@@ -37,6 +37,7 @@ interface MobileDrawerProps {
   leadsCount: number;
   onOpenCompare: () => void;
   onOpenValuation: () => void;
+  onOpenShowroomLogin?: () => void;
 }
 
 export const MobileDrawer: React.FC<MobileDrawerProps> = ({
@@ -50,6 +51,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
   leadsCount,
   onOpenCompare,
   onOpenValuation,
+  onOpenShowroomLogin,
 }) => {
   if (!isOpen) return null;
 
@@ -140,6 +142,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
             <nav className="space-y-1">
               {[
                 { id: 'showrooms', label: 'Verified Showrooms', icon: Store },
+                { id: 'showroom-studio', label: 'Showroom HQ & Portal', icon: Building2, action: onOpenShowroomLogin },
                 { id: 'fleet-health', label: 'Fleet & Diagnostics', icon: Activity, badge: 'Northvale' },
                 { id: 'financing', label: 'Financing & Trade-In', icon: DollarSign },
                 { id: 'about', label: 'About & Showroom Story', icon: Building2 },

@@ -118,10 +118,10 @@ export const VehicleCompareModal: React.FC<VehicleCompareModalProps> = ({
                   <td className="p-2.5 font-bold text-slate-600 border-r border-slate-100 w-1/3">
                     {row.label}
                   </td>
-                  <td className="p-2.5 font-semibold text-slate-900 border-r border-slate-100 w-1/3 text-center">
+                  <td className="p-2.5 font-semibold text-slate-900 border-r border-slate-100 w-1/3 text-center tabular-nums">
                     {row.val1 || '-'}
                   </td>
-                  <td className="p-2.5 font-semibold text-slate-900 w-1/3 text-center">
+                  <td className="p-2.5 font-semibold text-slate-900 w-1/3 text-center tabular-nums">
                     {row.val2 || '-'}
                   </td>
                 </tr>

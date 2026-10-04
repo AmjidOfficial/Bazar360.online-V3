@@ -449,20 +449,15 @@ export const HomeFeedView: React.FC<HomeFeedViewProps> = ({
                         {formatPrice(car.price)}
                       </div>
 
-                      {/* Specs Row */}
-                      <div className="grid grid-cols-3 gap-1.5 mt-3 text-xs text-slate-600">
-                        <div className="bg-slate-50 border border-slate-100 rounded px-2 py-1 flex items-center gap-1">
-                          <Calendar size={12} className="text-slate-400 shrink-0" />
-                          <span className="truncate">{car.year}</span>
-                        </div>
-                        <div className="bg-slate-50 border border-slate-100 rounded px-2 py-1 flex items-center gap-1">
-                          <Gauge size={12} className="text-slate-400 shrink-0" />
-                          <span className="truncate">{car.mileage?.toLocaleString()} km</span>
-                        </div>
-                        <div className="bg-slate-50 border border-slate-100 rounded px-2 py-1 flex items-center gap-1">
-                          <Fuel size={12} className="text-slate-400 shrink-0" />
-                          <span className="truncate">{car.fuelType || 'Petrol'}</span>
-                        </div>
+                      {/* Specs Row - Zero-Pill Inline Typography */}
+                      <div className="flex items-center flex-wrap gap-2 mt-2.5 text-xs text-slate-500 tabular-nums">
+                        <span className="font-semibold text-slate-700">{car.year}</span>
+                        <span aria-hidden="true" className="text-slate-300">·</span>
+                        <span>{car.mileage?.toLocaleString()} km</span>
+                        <span aria-hidden="true" className="text-slate-300">·</span>
+                        <span>{car.fuelType || 'Petrol'}</span>
+                        <span aria-hidden="true" className="text-slate-300">·</span>
+                        <span>{car.transmission || 'Automatic'}</span>
                       </div>
 
                       <div className="flex items-center justify-between text-[11px] text-slate-500 mt-3 pt-2 border-t border-slate-100">

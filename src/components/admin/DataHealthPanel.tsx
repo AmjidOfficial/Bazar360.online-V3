@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, Database, CheckCircle2, AlertTriangle, RefreshCw, Car, Store, Users, FileText, Trash2, CheckSquare, Square, Filter, Wrench } from 'lucide-react';
+import { ShieldCheck, Database, CheckCircle2, AlertTriangle, RefreshCw, Car, Store, Users, FileText, Trash2, CheckSquare, Square, Filter, Wrench, Sparkles, ShieldAlert } from 'lucide-react';
 import { dbFetchListings, dbFetchDealers, dbFetchLeads, dbDeleteListing, dbDeleteDealership } from '../../lib/dbService';
+import { scanNonProductionData, executePurgeNonProductionData, PurgeScanReport } from '../../lib/adminDataPurgeService';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { CarListing, Dealer, Lead } from '../../types';
+import { toast } from 'react-hot-toast';
 
 export const DataHealthPanel: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -14,6 +16,11 @@ export const DataHealthPanel: React.FC = () => {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [actionLoading, setActionLoading] = useState(false);
   const [integrityFilter, setIntegrityFilter] = useState<'all' | 'missing_price_raw' | 'missing_dealer_id' | 'blank_status' | 'missing_images' | 'dummy_keywords'>('all');
+
+  // Non-production Purge state
+  const [purgeReport, setPurgeReport] = useState<PurgeScanReport | null>(null);
+  const [isPurging, setIsPurging] = useState(false);
+  const [isScanningPurge, setIsScanningPurge] = useState(false);
 
   const runAudit = async () => {
     setLoading(true);
@@ -28,8 +35,50 @@ export const DataHealthPanel: React.FC = () => {
       setLeads(ldList);
       setSelectedIds([]);
       setLastChecked(new Date().toLocaleTimeString());
+      
+      // Auto-scan non-production items
+      const scan = await scanNonProductionData().catch(() => null);
+      if (scan) setPurgeReport(scan);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRunPurgeScan = async () => {
+    setIsScanningPurge(true);
+    try {
+      const report = await scanNonProductionData();
+      setPurgeReport(report);
+      toast.success(`Scanned: ${report.listings.length} demo listings, ${report.users.length} demo users found.`);
+    } catch (e) {
+      toast.error('Scan failed');
+    } finally {
+      setIsScanningPurge(false);
+    }
+  };
+
+  const handleExecutePurge = async () => {
+    if (!purgeReport) return;
+    const totalToDelete = purgeReport.listings.length + purgeReport.users.length + purgeReport.leads.length;
+    if (totalToDelete === 0) {
+      toast.success('Database is 100% clean of demo/placeholder records!');
+      return;
+    }
+
+    if (!window.confirm(`PERMANENT PURGE CONFIRMATION:\n\nAre you sure you want to permanently delete:\n- ${purgeReport.listings.length} dummy/demo listings\n- ${purgeReport.users.length} dummy/demo users\n- ${purgeReport.leads.length} dummy/demo leads\n\nAuthentic production assets and registered users will be protected.`)) {
+      return;
+    }
+
+    setIsPurging(true);
+    try {
+      const res = await executePurgeNonProductionData(purgeReport, 'admin');
+      toast.success(`Purge complete! Deleted ${res.deletedListings} listings, ${res.deletedUsers} users, ${res.deletedLeads} leads.`);
+      await runAudit();
+    } catch (e) {
+      console.error('[Purge Error]', e);
+      toast.error('Failed to execute purge');
+    } finally {
+      setIsPurging(false);
     }
   };
 
@@ -201,6 +250,84 @@ export const DataHealthPanel: React.FC = () => {
           <h3 className="text-2xl font-black text-[var(--color-text-header)] font-mono">FIRESTORE</h3>
           <p className="text-[10px] text-text-muted font-mono">Verified real database instances</p>
         </div>
+      </div>
+
+      {/* Non-Production & Demo Data Sanitizer Card */}
+      <div className="bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-surface-highest)] border border-[var(--color-outline)] rounded-3xl p-6 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--color-outline)] pb-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <Sparkles size={18} className="text-[var(--color-amber-accent)]" />
+              <h3 className="text-base font-extrabold text-[var(--color-text-main)] uppercase tracking-tight">
+                Non-Production & Demo Data Sanitizer
+              </h3>
+            </div>
+            <p className="text-xs text-[var(--color-text-secondary)] mt-1">
+              Automated engine to detect and permanently delete placeholder listings, mock users, and demo leads from live Firestore while safeguarding production assets.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+            <button
+              type="button"
+              onClick={handleRunPurgeScan}
+              disabled={isScanningPurge}
+              className="px-4 py-2.5 rounded-xl bg-[var(--color-bg-deep)] hover:bg-[var(--color-surface-highest)] text-[var(--color-text-main)] border border-[var(--color-outline)] text-xs font-bold font-mono transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+            >
+              <RefreshCw size={13} className={isScanningPurge ? 'animate-spin text-[var(--color-amber-accent)]' : ''} />
+              <span>{isScanningPurge ? 'Scanning...' : 'Rescan Demo Data'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleExecutePurge}
+              disabled={isPurging || !purgeReport || (purgeReport.listings.length === 0 && purgeReport.users.length === 0 && purgeReport.leads.length === 0)}
+              className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-extrabold uppercase tracking-wider transition flex items-center gap-1.5 cursor-pointer shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <Trash2 size={14} />
+              <span>{isPurging ? 'Purging Firestore...' : 'Purge All Demo Data'}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Scan Status Summary */}
+        {purgeReport ? (
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 pt-1">
+            <div className="p-3.5 rounded-2xl bg-[var(--color-bg-deep)] border border-[var(--color-outline)]">
+              <span className="text-[10px] font-bold uppercase text-[var(--color-text-muted)] block font-mono">Demo Listings Detected</span>
+              <span className="text-xl font-extrabold text-[var(--color-text-main)] mt-0.5 block font-mono">
+                {purgeReport.listings.length}
+              </span>
+              <span className="text-[10px] text-[var(--color-text-secondary)]">Unsplash / Legacy seeds</span>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-[var(--color-bg-deep)] border border-[var(--color-outline)]">
+              <span className="text-[10px] font-bold uppercase text-[var(--color-text-muted)] block font-mono">Demo Users Detected</span>
+              <span className="text-xl font-extrabold text-[var(--color-text-main)] mt-0.5 block font-mono">
+                {purgeReport.users.length}
+              </span>
+              <span className="text-[10px] text-[var(--color-text-secondary)]">Mock accounts / Example emails</span>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-[var(--color-bg-deep)] border border-[var(--color-outline)]">
+              <span className="text-[10px] font-bold uppercase text-[var(--color-text-muted)] block font-mono">Dummy Leads Detected</span>
+              <span className="text-xl font-extrabold text-[var(--color-text-main)] mt-0.5 block font-mono">
+                {purgeReport.leads.length}
+              </span>
+              <span className="text-[10px] text-[var(--color-text-secondary)]">Test inquiry objects</span>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-[var(--color-bg-deep)] border border-[var(--color-outline)]">
+              <span className="text-[10px] font-bold uppercase text-emerald-500 block font-mono">Protected Production</span>
+              <span className="text-xl font-extrabold text-emerald-500 mt-0.5 block font-mono">
+                {purgeReport.protectedCount.listings + purgeReport.protectedCount.users} Active
+              </span>
+              <span className="text-[10px] text-[var(--color-text-secondary)]">Whitelisted assets safeguarded</span>
+            </div>
+          </div>
+        ) : (
+          <p className="text-xs text-[var(--color-text-muted)] font-mono">Running automated sanitizer check...</p>
+        )}
       </div>
 
       {/* Inventory & Entity Breakdown */}

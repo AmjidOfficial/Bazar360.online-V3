@@ -1,25 +1,70 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root {
-  --color-bg-primary: #0B1326;
-  --color-bg-deep: #060E20;
-  --color-surface: #171F33;
-  --color-surface-elevated: #222A3D;
-  --color-surface-highest: #2D3449;
-  --color-electric-blue: #00D2FF;
-  --color-primary-light: #A5E7FF;
-  --color-amber-accent: #FFB95F;
-  --color-secondary-orange: #EE9800;
-  --color-tertiary-blue: #3B82F6;
-  --color-text-main: #DAE2FD;
-  --color-text-secondary: #BBC9CF;
-  --color-text-muted: #859399;
-  --color-outline: #3C494E;
-  --color-error: #FFB4AB;
+  /* Expressive Display and Body Fonts: Plus Jakarta Sans for Porsche/Audi/Mercedes-level precision */
+  --font-heading: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Premium Light Theme Variables (Champagne Gold, Warm Alabaster & Obsidian) */
+  --color-bg-primary: #FAF9F6;       /* Luxury Warm Alabaster */
+  --color-bg-deep: #F4F2EC;          /* Warm Ivory Sand */
+  --color-bg-tertiary: #EFECE4;      /* Deep Ivory Neutral */
+  --color-surface: #FFFFFF;          /* Pure White Card Surfaces */
+  --color-surface-elevated: #FFFFFF; /* Elevated Card Surfaces */
+  --color-surface-highest: #F5F3ED;  /* Soft Hover Surface */
   
-  --font-heading: 'Space Grotesk', system-ui, sans-serif;
-  --font-body: 'Inter', system-ui, sans-serif;
+  --color-electric-blue: #0B0F19;    /* Obsidian Anchor */
+  --color-primary-light: #1E293B;    /* Deep Charcoal */
+  --color-amber-accent: #C5A880;     /* Brushed Champagne Gold */
+  --color-secondary-orange: #A47E53; /* Burnished Bronze */
+  --color-tertiary-blue: #1E3A8A;    /* Royal Deep Navy */
+  
+  --color-text-main: #0B0F19;        /* High-contrast obsidian type */
+  --color-text-header: #0B0F19;      /* Header typography */
+  --color-text-secondary: #475569;   /* Polished Slate grey */
+  --color-text-muted: #8EA0A7;       /* Muted technical metadata */
+  
+  --color-outline: #E5E7EB;          /* Clean 1px hairline borders */
+  --color-border-main: #E5E7EB;      /* Compatibility border token */
+  --color-border-subtle: #F0F2F5;    /* Ultra-subtle hairline divider */
+  --color-accent-main: #C5A880;      /* Compatibility primary accent */
+  --color-accent-hover: #A47E53;     /* Compatibility hover accent */
+  --color-error: #DC2626;
+
+  /* Spacing and Transition Tokens */
+  --ease-luxury: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-luxury: 280ms;
+}
+
+/* Premium Dark Theme Variables (Midnight Obsidian & Velvet Bronze) */
+html.dark, :root.dark {
+  --color-bg-primary: #040812;       /* Rich Obsidian Space */
+  --color-bg-deep: #020409;          /* Dark Void */
+  --color-bg-tertiary: #0A0F1D;      /* Deep Space Neutral */
+  --color-surface: #0B1120;          /* Deep Graphite Card Surfaces */
+  --color-surface-elevated: #111A2E; /* Elevated Graphite Surfaces */
+  --color-surface-highest: #162035;  /* Hover Graphite Surface */
+  
+  --color-electric-blue: #D4AF37;    /* Classic Warm Gold Accent */
+  --color-primary-light: #E2E8F0;    /* Light Slate */
+  --color-amber-accent: #C5A880;     /* Brushed Champagne Gold */
+  --color-secondary-orange: #A47E53; /* Burnished Bronze */
+  --color-tertiary-blue: #3B82F6;    /* Cobalt Accent */
+  
+  --color-text-main: #F8FAFC;        /* Clean off-white luxury typography */
+  --color-text-header: #F8FAFC;      /* Header typography */
+  --color-text-secondary: #94A3B8;   /* Polished Slate */
+  --color-text-muted: #64748B;       /* Muted technical metadata */
+  
+  --color-outline: #1E293B;          /* Subtle dark hairline borders */
+  --color-border-main: #1E293B;      /* Compatibility border token */
+  --color-border-subtle: rgba(255, 255, 255, 0.05); /* Ultra-soft divider */
+  --color-accent-main: #C5A880;      /* Compatibility primary accent */
+  --color-accent-hover: #D4AF37;     /* Compatibility hover accent */
+  --color-error: #EF4444;
 }
 
 *, ::before, ::after {
@@ -31,45 +76,123 @@ html, body, #root {
   min-height: 100%;
   margin: 0;
   padding: 0;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-main);
+  font-family: var(--font-body);
+  transition: background-color 0.4s var(--ease-luxury), color 0.4s var(--ease-luxury);
 }
 
-/* Diagnostic layout override to confirm CSS import chaining and container bounding dimensions */
 #root {
-  border: 1px solid rgba(0, 210, 255, 0.35);
+  display: flex;
+  flex-direction: column;
 }
 
 body {
-  font-family: var(--font-body);
-  background-color: #f8fafc;
-  color: #0f172a;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* ==========================================================================
+   1. REFINED TYPOGRAPHY & TRACKING SYSTEM
+   ========================================================================== */
 
 .font-heading {
   font-family: var(--font-heading);
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.font-mono {
+  font-family: var(--font-mono);
 }
 
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
 
-/* Glassmorphism utility */
-.glass-panel {
-  background: rgba(30, 41, 59, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(0, 210, 255, 0.15);
+/* Enhanced luxury letter-spacing tracking */
+.tracking-luxury-kicker {
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
+.tracking-luxury-wide {
+  letter-spacing: 0.08em;
+}
+
+.tracking-luxury {
+  letter-spacing: 0.04em;
+}
+
+.tracking-tight-title {
+  letter-spacing: -0.03em;
+}
+
+/* Dark mode optical text compensation to prevent spindly low-contrast rendering */
+html.dark body {
+  letter-spacing: 0.012em;
+}
+
+/* ==========================================================================
+   2. LUXURY 1PX BORDER TRANSITION & CARD ARCHITECTURE
+   ========================================================================== */
+
+/* Refined 1px card border transition system */
+.luxury-card,
+.vehicle-card-container,
+article[class*="group"] {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-outline);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.02), 0 1px 4px rgba(0, 0, 0, 0.01);
+  transition: 
+    border-color var(--duration-luxury) var(--ease-luxury),
+    box-shadow var(--duration-luxury) var(--ease-luxury),
+    transform var(--duration-luxury) var(--ease-luxury),
+    background-color var(--duration-luxury) ease;
+}
+
+.luxury-card:hover,
+.vehicle-card-container:hover,
+article[class*="group"]:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-amber-accent);
+  box-shadow: 0 16px 36px -6px rgba(197, 168, 128, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.03);
+}
+
+/* Ultra-subtle hairline dividers */
+.hairline-divider {
+  border-bottom: 1px solid var(--color-outline);
+}
+
+/* Sophisticated Minimalist Nav panel */
 .glass-nav {
-  background: rgba(11, 19, 38, 0.88);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(60, 73, 78, 0.5);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-outline);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.01);
+  transition: background-color var(--duration-luxury) ease, border-color var(--duration-luxury) ease;
 }
 
+/* ==========================================================================
+   3. REFINED SPACING & BREATHING ROOM SYSTEM
+   ========================================================================== */
+
+.luxury-container {
+  width: 100%;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(1rem, 3.5vw, 2.5rem);
+  padding-right: clamp(1rem, 3.5vw, 2.5rem);
+}
+
+.section-breathing-room {
+  margin-bottom: clamp(2.5rem, 5.5vw, 4.5rem);
+}
+
+/* Interactive Elements */
 button {
   cursor: pointer;
+  transition: all var(--duration-luxury) var(--ease-luxury);
 }
 
 button:disabled {
@@ -80,4 +203,3 @@ img {
   max-width: 100%;
   height: auto;
 }
-

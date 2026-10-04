@@ -12,8 +12,8 @@ interface Interactive3DShowroomHeroProps {
 export function Interactive3DShowroomHero({
   onExploreClick,
   onSellClick,
-  availableCount = 48,
-  verifiedCount = 24,
+  availableCount = 0,
+  verifiedCount = 0,
 }: Interactive3DShowroomHeroProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isRotating, setIsRotating] = useState(true);
@@ -287,93 +287,92 @@ export function Interactive3DShowroomHero({
   }, [isRotating]);
 
   return (
-    <div className="relative w-full rounded-2xl overflow-hidden bg-gradient-to-b from-[#0b1326] via-[#131b2e] to-[#0b1326] border border-[#00d2ff]/25 shadow-2xl p-4 sm:p-6 mb-6">
+    <div className="relative w-full rounded-3xl overflow-hidden bg-[var(--color-surface)] border border-[var(--color-outline)] shadow-sm p-5 sm:p-7 mb-8">
       {/* Background ambient lighting effects */}
-      <div className="absolute top-0 right-0 w-72 h-72 bg-[#00d2ff]/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-72 h-72 bg-[#ffb95f]/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-0 right-0 w-72 h-72 bg-[var(--color-amber-accent)]/5 rounded-full blur-3xl pointer-events-none" />
 
       {/* Top Header Badge & Telemetry */}
       <div className="relative z-20 flex flex-col gap-2">
         <div className="flex items-center justify-between flex-wrap gap-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#ee9800]/20 border border-[#ffb95f]/40 text-[#ffb95f] w-max shadow-md">
-            <ShieldCheck size={14} className="text-[#ffb95f]" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--color-bg-deep)] border border-[var(--color-outline)] text-[var(--color-amber-accent)] w-max shadow-xs">
+            <ShieldCheck size={14} className="text-[var(--color-amber-accent)]" />
             <span className="text-[11px] font-bold uppercase tracking-wider">3D Interactive Showroom & Telemetry</span>
           </div>
 
           <button
             type="button"
             onClick={() => setIsRotating(!isRotating)}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#222a3d]/80 hover:bg-[#2d3449] text-[#a5e7ff] text-xs font-semibold border border-[#00d2ff]/20 transition-all cursor-pointer shadow-xs"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[var(--color-bg-deep)] hover:bg-[var(--color-surface-highest)] text-[var(--color-text-main)] text-xs font-semibold border border-[var(--color-outline)] transition-all cursor-pointer shadow-xs"
             title={isRotating ? "Pause auto-rotation" : "Resume auto-rotation"}
           >
-            <RotateCw size={12} className={isRotating ? "animate-spin" : ""} />
+            <RotateCw size={12} className={isRotating ? "animate-spin text-[var(--color-amber-accent)]" : "text-[var(--color-text-muted)]"} />
             <span>{isRotating ? "Auto-Rotating" : "Paused"}</span>
           </button>
         </div>
 
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#dae2fd] tracking-tight mt-1">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[var(--color-text-main)] tracking-tight mt-1">
           Pakistan's Elite Certified Automotive Marketplace
         </h1>
-        <p className="text-xs sm:text-sm text-[#bbc9cf] max-w-xl">
+        <p className="text-xs sm:text-sm text-[var(--color-text-secondary)] max-w-xl">
           Discover verified luxury vehicles, electric mobility, and certified showrooms backed by our 360-degree inspection guarantee.
         </p>
       </div>
 
       {/* 3D Canvas Container */}
-      <div className="relative w-full h-64 sm:h-76 md:h-84 my-3 rounded-xl overflow-hidden bg-[#060e20]/80 border border-[#00d2ff]/20 shadow-inner group">
+      <div className="relative w-full h-64 sm:h-76 md:h-84 my-4 rounded-2xl overflow-hidden bg-black/90 border border-[var(--color-outline)] shadow-inner group">
         <div ref={containerRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
 
         {/* 3D Telemetry Overlay Controls */}
-        <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-[11px] font-mono text-[#a5e7ff] pointer-events-none">
-          <div className="flex items-center gap-1.5 bg-[#060e20]/80 backdrop-blur-md px-2.5 py-1 rounded-full border border-[#00d2ff]/20">
-            <span className="w-2 h-2 rounded-full bg-[#00d2ff] animate-ping" />
-            <span className="font-semibold">Live 3D Telemetry</span>
+        <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[11px] font-mono text-white pointer-events-none">
+          <div className="flex items-center gap-1.5 bg-black/75 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
+            <span className="w-2 h-2 rounded-full bg-[var(--color-amber-accent)] animate-ping" />
+            <span className="font-semibold text-xs">Live 3D View</span>
           </div>
 
-          <div className="bg-[#060e20]/80 backdrop-blur-md px-2.5 py-1 rounded-full border border-[#ffb95f]/30 text-[#ffb95f] font-semibold flex items-center gap-1">
+          <div className="bg-black/75 backdrop-blur-md px-3 py-1 rounded-full border border-[var(--color-amber-accent)]/30 text-[var(--color-amber-accent)] font-semibold flex items-center gap-1 text-xs">
             <Eye size={12} />
-            <span>Drag / Swipe to Rotate</span>
+            <span>Drag to Rotate</span>
           </div>
         </div>
       </div>
 
       {/* Quick Action Buttons & Live Stats */}
-      <div className="relative z-20 flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
-        <div className="flex items-center gap-2 w-full sm:w-auto">
+      <div className="relative z-20 flex flex-col sm:flex-row items-center justify-between gap-4 pt-1">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
           <button
             type="button"
             onClick={onExploreClick}
-            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#00d2ff] to-[#47d6ff] hover:from-[#47d6ff] hover:to-[#00d2ff] text-[#003543] font-bold text-xs sm:text-sm tracking-wide uppercase transition-all shadow-lg shadow-[#00d2ff]/20 cursor-pointer active:scale-95"
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[var(--color-amber-accent)] to-[var(--color-secondary-orange)] text-white font-bold text-xs sm:text-sm tracking-wide uppercase transition-all shadow-md cursor-pointer active:scale-95 hover:brightness-105"
           >
             <Zap size={15} />
-            <span>Browse {availableCount}+ Vehicles</span>
+            <span>{availableCount > 0 ? `Browse ${availableCount} Live Vehicles` : 'Explore Marketplace'}</span>
           </button>
 
           <button
             type="button"
             onClick={onSellClick}
-            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#222a3d] hover:bg-[#2d3449] text-[#dae2fd] hover:text-[#00d2ff] border border-[#00d2ff]/30 font-semibold text-xs sm:text-sm transition-all cursor-pointer active:scale-95"
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[var(--color-bg-deep)] hover:bg-[var(--color-surface-highest)] text-[var(--color-text-main)] border border-[var(--color-outline)] font-semibold text-xs sm:text-sm transition-all cursor-pointer active:scale-95 hover:border-[var(--color-amber-accent)]/40"
           >
-            <Sparkles size={14} className="text-[#ffb95f]" />
-            <span>Sell in 60s</span>
+            <Sparkles size={14} className="text-[var(--color-amber-accent)]" />
+            <span>Sell Vehicle</span>
           </button>
         </div>
 
         {/* Quick Micro-Stats Strip */}
-        <div className="flex items-center gap-4 text-xs text-[#bbc9cf] w-full sm:w-auto justify-around sm:justify-end border-t sm:border-t-0 border-[#222a3d] pt-2 sm:pt-0">
+        <div className="flex items-center gap-4 text-xs text-[var(--color-text-secondary)] w-full sm:w-auto justify-around sm:justify-end border-t sm:border-t-0 border-[var(--color-outline)] pt-3 sm:pt-0">
           <div>
-            <span className="font-bold text-[#dae2fd] text-sm">{availableCount}</span>
-            <span className="text-[10px] block uppercase text-[#859399]">Live Units</span>
+            <span className="font-bold text-[var(--color-text-main)] text-sm">{availableCount}</span>
+            <span className="text-[10px] block uppercase text-[var(--color-text-muted)]">Live Units</span>
           </div>
-          <div className="h-6 w-px bg-[#222a3d]" />
+          <div className="h-6 w-px bg-[var(--color-outline)]" />
           <div>
-            <span className="font-bold text-[#ffb95f] text-sm">{verifiedCount}</span>
-            <span className="text-[10px] block uppercase text-[#859399]">360° Inspected</span>
+            <span className="font-bold text-[var(--color-amber-accent)] text-sm">{verifiedCount}</span>
+            <span className="text-[10px] block uppercase text-[var(--color-text-muted)]">360° Inspected</span>
           </div>
-          <div className="h-6 w-px bg-[#222a3d]" />
+          <div className="h-6 w-px bg-[var(--color-outline)]" />
           <div>
-            <span className="font-bold text-[#00d2ff] text-sm">100%</span>
-            <span className="text-[10px] block uppercase text-[#859399]">Direct Contact</span>
+            <span className="font-bold text-[var(--color-text-main)] text-sm">100%</span>
+            <span className="text-[10px] block uppercase text-[var(--color-text-muted)]">Direct Contact</span>
           </div>
         </div>
       </div>

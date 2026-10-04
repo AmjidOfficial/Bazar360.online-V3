@@ -22,7 +22,11 @@ export async function precacheCarImages(car: CarListing): Promise<void> {
     });
   }
 
-  if (urlsToCache.length === 0 || !('caches' in window)) return;
+  try {
+    if (urlsToCache.length === 0 || typeof window === 'undefined' || !('caches' in window)) return;
+  } catch {
+    return;
+  }
 
   try {
     const cache = await caches.open(IMAGE_CACHE_NAME);

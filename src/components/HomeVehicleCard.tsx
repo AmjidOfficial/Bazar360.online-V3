@@ -50,7 +50,7 @@ export default function HomeVehicleCard({
   const fuelOrBattery = car.fuelType === 'Electric' 
     ? '93 kWh Battery' 
     : (car.engineCC ? `${car.engineCC} cc` : (car.specs?.engineSize || '2.0L Turbo'));
-  const powerOrSpeed = car.specs?.horspower || (car.fuelType === 'Electric' ? '522 HP' : '453 HP');
+  const powerOrSpeed = car.specs?.horspower || (car.fuelType === 'Electric' ? '522 HP' : '150 HP');
   const locationName = car.registrationCity || car.location || dealer?.location || 'Pakistan';
 
   return (
@@ -60,10 +60,10 @@ export default function HomeVehicleCard({
           cinematicAudio.playClick();
           onSelect(car);
         }}
-        className="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-[#171f33] border border-[#00d2ff]/20 hover:border-[#00d2ff]/50 shadow-xl hover:shadow-[0_12px_30px_-10px_rgba(71,214,255,0.3)] transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+        className="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-[var(--color-surface)] border border-[var(--color-outline)] hover:border-[var(--color-amber-accent)]/60 shadow-xs hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer"
       >
         {/* Media Container with 16:9 ratio */}
-        <div className="relative aspect-[16/9] w-full overflow-hidden bg-[#0b1326]">
+        <div className="relative aspect-[16/9] w-full overflow-hidden bg-[var(--color-bg-deep)]">
           {image ? (
             <img
               src={getOptimizedUrl(image, {
@@ -81,13 +81,13 @@ export default function HomeVehicleCard({
               referrerPolicy="no-referrer"
             />
           ) : (
-            <div className="grid h-full place-items-center text-xs font-mono text-[#859399]">
+            <div className="grid h-full place-items-center text-xs font-mono text-[var(--color-text-muted)]">
               Vehicle imagery loading...
             </div>
           )}
 
           {/* Vignette Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#171f33] via-transparent to-black/40 opacity-90" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20 opacity-80" />
 
           {/* Top Left Glowing Badges */}
           <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1.5 z-10">
@@ -98,16 +98,16 @@ export default function HomeVehicleCard({
                 cinematicAudio.playLuxuryChime();
                 setIsInspectionModalOpen(true);
               }}
-              className="px-2.5 py-1 rounded-full bg-[#0b1326]/85 backdrop-blur-md text-[#ffb95f] border border-[#ffb95f]/40 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 shadow-md hover:bg-[#ffb95f] hover:text-[#2a1700] transition-colors cursor-pointer"
+              className="px-2.5 py-1 rounded-full bg-black/75 backdrop-blur-md text-[var(--color-amber-accent)] border border-[var(--color-amber-accent)]/30 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 shadow-md hover:bg-[var(--color-amber-accent)] hover:text-white transition-colors cursor-pointer"
               title="View 200+ Point Inspection Report"
             >
-              <Award size={12} className="text-[#ffb95f]" />
+              <Award size={11} className="text-[var(--color-amber-accent)]" />
               <span>360° Certified</span>
             </button>
 
             {car.verified && (
-              <span className="px-2.5 py-1 rounded-full bg-[#0b1326]/85 backdrop-blur-md text-[#00d2ff] border border-[#00d2ff]/30 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 shadow-md">
-                <ShieldCheck size={12} />
+              <span className="px-2.5 py-1 rounded-full bg-black/75 backdrop-blur-md text-white border border-white/10 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 shadow-md">
+                <ShieldCheck size={11} className="text-[var(--color-amber-accent)]" />
                 <span>Showroom Verified</span>
               </span>
             )}
@@ -123,59 +123,59 @@ export default function HomeVehicleCard({
                 cinematicAudio.playClick();
                 onToggleFavorite(car);
               }}
-              className="absolute top-3 right-3 grid h-9 w-9 place-items-center rounded-full bg-[#0b1326]/80 hover:bg-[#0b1326] text-white border border-white/10 hover:border-[#00d2ff]/50 shadow-md backdrop-blur-md transition-all active:scale-90 z-10 cursor-pointer"
+              className="absolute top-3 right-3 grid h-9 w-9 place-items-center rounded-full bg-black/60 hover:bg-black/80 text-white border border-white/10 hover:border-[var(--color-amber-accent)]/40 shadow-md backdrop-blur-md transition-all active:scale-90 z-10 cursor-pointer"
             >
               <Heart
-                size={16}
-                fill={isFavorite ? '#ffb95f' : 'none'}
-                className={isFavorite ? 'text-[#ffb95f] scale-110 transition-transform' : 'text-white/80 hover:text-white'}
+                size={14}
+                fill={isFavorite ? 'var(--color-amber-accent)' : 'none'}
+                className={isFavorite ? 'text-[var(--color-amber-accent)] scale-110 transition-transform' : 'text-white/80 hover:text-white'}
               />
             </button>
           )}
 
           {/* Bottom Left Floating Price Tag */}
-          <div className="absolute bottom-3 left-3 bg-[#0b1326]/90 backdrop-blur-md px-3 py-1 rounded-xl text-[#00d2ff] font-extrabold text-sm sm:text-base border border-[#00d2ff]/30 shadow-lg tracking-tight z-10 font-mono">
+          <div className="absolute bottom-3 left-3 bg-black/80 backdrop-blur-md px-3 py-1 rounded-xl text-[var(--color-amber-accent)] font-extrabold text-sm sm:text-base border border-[var(--color-amber-accent)]/30 shadow-lg tracking-tight z-10">
             {formatPakistaniPrice(car.price)}
           </div>
         </div>
 
         {/* Card Body */}
-        <div className="p-3.5 sm:p-4 flex flex-col justify-between flex-1 gap-2.5 bg-gradient-to-b from-[#171f33] to-[#131b2e]">
+        <div className="p-3.5 sm:p-4 flex flex-col justify-between flex-1 gap-2.5 bg-[var(--color-surface)]">
           <div>
             <div className="flex justify-between items-start gap-2">
               <div className="min-w-0">
-                <h3 className="truncate text-base font-bold text-[#dae2fd] group-hover:text-[#00d2ff] transition-colors">
+                <h3 className="truncate text-base font-bold text-[var(--color-text-main)] group-hover:text-[var(--color-amber-accent)] transition-colors">
                   {car.make} {car.model} {car.variant ? `• ${car.variant}` : ''}
                 </h3>
-                <p className="text-xs text-[#bbc9cf] font-mono mt-0.5">
+                <p className="text-xs text-[var(--color-text-secondary)] font-mono mt-0.5">
                   {car.year} • {formatMileage(car.mileage)} • {car.fuelType || 'Petrol'}
                 </p>
               </div>
 
-              <span className="shrink-0 px-2 py-0.5 rounded-lg bg-[#222a3d] text-[#00d2ff] text-[10px] font-bold uppercase tracking-wider border border-[#00d2ff]/20">
+              <span className="shrink-0 px-2 py-0.5 rounded-lg bg-[var(--color-bg-deep)] text-[var(--color-text-secondary)] text-[10px] font-bold uppercase tracking-wider border border-[var(--color-outline)]">
                 {car.fuelType === 'Electric' ? 'EV' : (car.vehicleType || 'Sedan')}
               </span>
             </div>
 
             {/* Micro-Telemetry 3-Column Strip */}
-            <div className="grid grid-cols-3 gap-1.5 py-2 px-2.5 mt-2.5 bg-[#0b1326]/70 rounded-xl text-center border border-[#00d2ff]/10">
+            <div className="grid grid-cols-3 gap-1.5 py-2 px-2.5 mt-2.5 bg-[var(--color-bg-deep)] rounded-xl text-center border border-[var(--color-outline)] text-[var(--color-text-main)]">
               <div className="truncate">
-                <span className="text-[9px] font-bold uppercase text-[#859399] block leading-tight">
+                <span className="text-[9px] font-bold uppercase text-[var(--color-text-secondary)] block leading-tight">
                   {car.fuelType === 'Electric' ? 'BATTERY' : 'ENGINE'}
                 </span>
-                <span className="text-xs font-bold text-[#dae2fd] truncate block">
+                <span className="text-xs font-bold truncate block">
                   {fuelOrBattery}
                 </span>
               </div>
-              <div className="truncate border-x border-[#222a3d]">
-                <span className="text-[9px] font-bold uppercase text-[#859399] block leading-tight">POWER</span>
-                <span className="text-xs font-bold text-[#dae2fd] truncate block">
+              <div className="truncate border-x border-[var(--color-outline)]">
+                <span className="text-[9px] font-bold uppercase text-[var(--color-text-secondary)] block leading-tight">POWER</span>
+                <span className="text-xs font-bold truncate block">
                   {powerOrSpeed}
                 </span>
               </div>
               <div className="truncate">
-                <span className="text-[9px] font-bold uppercase text-[#859399] block leading-tight">LOCATION</span>
-                <span className="text-xs font-bold text-[#dae2fd] truncate block">
+                <span className="text-[9px] font-bold uppercase text-[var(--color-text-secondary)] block leading-tight">LOCATION</span>
+                <span className="text-xs font-bold truncate block">
                   {locationName}
                 </span>
               </div>
@@ -187,10 +187,10 @@ export default function HomeVehicleCard({
             <a
               href={telUrl}
               onClick={(e) => e.stopPropagation()}
-              className="min-h-[40px] rounded-xl bg-[#222a3d] hover:bg-[#2d3449] text-[#dae2fd] hover:text-[#00d2ff] border border-[#3c494e] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-xs"
+              className="min-h-[40px] rounded-xl bg-[var(--color-bg-deep)] hover:bg-[var(--color-surface-highest)] text-[var(--color-text-main)] border border-[var(--color-outline)] hover:border-[var(--color-amber-accent)]/30 hover:text-[var(--color-amber-accent)] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-xs"
             >
-              <Phone size={13} className="text-[#00d2ff]" />
-              <span>Call Inquiry</span>
+              <Phone size={12} className="text-[var(--color-amber-accent)]" />
+              <span>Call</span>
             </a>
 
             <a
@@ -198,9 +198,9 @@ export default function HomeVehicleCard({
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="min-h-[40px] rounded-xl bg-gradient-to-r from-[#00d2ff] to-[#47d6ff] hover:opacity-95 text-[#003543] font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all shadow-md shadow-[#00d2ff]/20 active:scale-95 cursor-pointer"
+              className="min-h-[40px] rounded-xl bg-gradient-to-r from-[var(--color-amber-accent)] to-[var(--color-secondary-orange)] text-white font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer hover:brightness-105"
             >
-              <MessageCircle size={14} className="fill-[#003543] text-transparent" />
+              <MessageCircle size={13} className="fill-white text-transparent" />
               <span>WhatsApp</span>
             </a>
           </div>

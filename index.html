@@ -25,51 +25,77 @@
     <meta name="twitter:image" content="https://bazar360.online/bazar360_official_logo.jpg" />
 
     <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#ffffff" />
+    <meta name="theme-color" content="#0B1326" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="apple-touch-icon" href="/bazar360_icon.jpg" />
+
+    <!-- Google Fonts: Non-blocking performance preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- Safe sandboxed environment shims -->
     <script>
-      // Immediate Cache-Buster & Service Worker purger for dev/preview environments to resolve white screen cache loops
-      (function() {
-        var isDevOrPreview = 
-          window.location.hostname === 'localhost' || 
-          window.location.hostname.includes('127.0.0.1') || 
-          window.location.hostname.includes('.run.app') || 
-          window.location.hostname.includes('webcontainer') ||
-          window.location.hostname.includes('aistudio');
+      try {
+        window.process = window.process || { env: { NODE_ENV: 'development' } };
+        window.global = window.global || window;
+      } catch (e) {}
 
-        if (isDevOrPreview) {
-          // Clear standard HTTP Cache Storage
-          if ('caches' in window) {
-            caches.keys().then(function(names) {
-              names.forEach(function(name) {
-                caches.delete(name);
-              });
-            }).catch(function() {});
-          }
+      // Safe service worker deregistration for preview iframes
+      try {
+        if (typeof window !== 'undefined' && window.location) {
+          var isDevOrPreview = 
+            window.location.hostname === 'localhost' || 
+            window.location.hostname.includes('127.0.0.1') || 
+            window.location.hostname.includes('.run.app') || 
+            window.location.hostname.includes('webcontainer') ||
+            window.location.hostname.includes('aistudio');
 
-          // Force unregister all active Service Workers silently without triggering reload
-          if ('serviceWorker' in navigator) {
+          if (isDevOrPreview && 'serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(function(regs) {
-              if (regs.length > 0) {
-                regs.forEach(function(reg) {
-                  reg.unregister().catch(function() {});
-                });
+              if (regs && regs.length) {
+                regs.forEach(function(r) { r.unregister().catch(function() {}); });
               }
             }).catch(function() {});
           }
         }
-      })();
-
-      // Global window shim for Node process compatibility
-      window.process = window.process || { env: { NODE_ENV: 'development' } };
-      window.global = window.global || window;
+      } catch (e) {}
     </script>
   </head>
   <body class="bg-slate-50 text-slate-900 antialiased font-sans min-h-screen">
-    <div id="root"></div>
+    <!-- Immediate Branded Fallback in #root to guarantee ZERO white screen on cold starts -->
+    <div id="root">
+      <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; background:#0B1326; color:#DAE2FD; font-family:'Inter',system-ui,sans-serif; text-align:center; padding:20px;">
+        <div style="width:72px; height:72px; border-radius:18px; background:linear-gradient(135deg, #101418, #1E293B); border:1px solid rgba(0,210,255,0.4); display:flex; align-items:center; justify-content:center; margin-bottom:20px; box-shadow:0 0 30px rgba(0,210,255,0.25);">
+          <span style="font-size:24px; font-weight:900; letter-spacing:1px; color:#00D2FF;">360</span>
+        </div>
+        <h1 style="font-size:22px; font-weight:800; margin:0 0 8px 0; color:#FFFFFF; letter-spacing:-0.5px;">BAZAR360.online</h1>
+        <p style="font-size:13px; color:#859399; margin:0 0 24px 0; max-width:320px;">Pakistan's Premier Automotive Marketplace & Verified Showroom Network</p>
+        <div style="width:40px; height:3px; border-radius:2px; background:rgba(0,210,255,0.2); overflow:hidden; position:relative;">
+          <div style="position:absolute; top:0; left:0; bottom:0; width:50%; background:#00D2FF; animation:b360Pulse 1.2s infinite ease-in-out;"></div>
+        </div>
+        <button id="b360-manual-enter" onclick="window.location.reload()" style="display:none; margin-top:20px; padding:10px 18px; background:#2563EB; color:#FFFFFF; border:none; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; box-shadow:0 4px 14px rgba(37,99,235,0.3);">
+          Tap to Refresh & Enter Marketplace ➔
+        </button>
+        <script>
+          setTimeout(function() {
+            var btn = document.getElementById('b360-manual-enter');
+            if (btn && document.getElementById('root') && document.getElementById('root').innerText.includes('Pakistan')) {
+              btn.style.display = 'inline-block';
+            }
+          }, 3000);
+        </script>
+        <style>
+          @keyframes b360Pulse {
+            0% { left: -50%; width: 30%; }
+            50% { left: 35%; width: 50%; }
+            100% { left: 100%; width: 30%; }
+          }
+        </style>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

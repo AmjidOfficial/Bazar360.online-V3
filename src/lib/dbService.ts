@@ -150,11 +150,11 @@ export async function dbFetchDealers(forceRefresh = false): Promise<Dealer[]> {
       });
     }
 
-    cachedDealers = list.length > 0 ? list : INITIAL_DEALERS;
+    cachedDealers = list;
     return cachedDealers;
   } catch (err) {
-    console.warn('dbFetchDealers Error (using fallback):', err);
-    return INITIAL_DEALERS;
+    console.warn('dbFetchDealers Error:', err);
+    return [];
   }
 }
 
@@ -362,11 +362,11 @@ export async function dbFetchListings(forceRefresh = false): Promise<CarListing[
     }
 
     const cleaned = cleanAndDeduplicateListings(list);
-    cachedListings = cleaned.length > 0 ? cleaned : INITIAL_LISTINGS;
+    cachedListings = cleaned;
     return cachedListings;
   } catch (err) {
-    console.warn('dbFetchListings Error (using fallback):', err);
-    return INITIAL_LISTINGS;
+    console.warn('dbFetchListings Error:', err);
+    return [];
   }
 }
 

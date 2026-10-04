@@ -553,6 +553,51 @@ export const VehicleDetailView: React.FC<VehicleDetailViewProps> = ({
         </div>
       )}
 
+      {/* 4. Luxury Mobile Sticky Contact Action Bar */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200 px-3 py-2.5 flex items-center justify-between gap-2 shadow-2xl safe-area-bottom">
+        <div className="min-w-0 pr-1">
+          <div className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Demand</div>
+          <div className="text-sm font-black text-blue-600 truncate font-mono">
+            {formatPrice(vehicle.price)}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1.5 shrink-0">
+          {/* Make Offer */}
+          <button
+            type="button"
+            onClick={() => onOpenOfferModal && onOpenOfferModal(vehicle)}
+            className="px-2.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-colors cursor-pointer"
+          >
+            Offer
+          </button>
+
+          {/* Call Seller */}
+          {vehicle.phone && (
+            <a
+              href={`tel:${vehicle.phone}`}
+              onClick={() => onCallClick && onCallClick(vehicle)}
+              className="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 flex items-center justify-center transition-colors cursor-pointer"
+              title="Call Seller"
+            >
+              <Phone size={16} />
+            </a>
+          )}
+
+          {/* Direct WhatsApp Responder */}
+          <a
+            href={`https://wa.me/${targetPhone.replace(/\D/g, '')}?text=${waMessage}`}
+            target="_blank"
+            rel="noreferrer"
+            onClick={() => onWhatsAppClick && onWhatsAppClick(vehicle)}
+            className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer"
+          >
+            <MessageSquare size={15} />
+            <span>WhatsApp</span>
+          </a>
+        </div>
+      </div>
+
     </div>
   );
 };

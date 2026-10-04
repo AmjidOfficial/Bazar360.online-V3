@@ -44,10 +44,12 @@ export function HomeFeed({
   favoritesList,
   setTab,
   setSearchQuery,
+  lang,
 }: HomeFeedProps) {
   const [query, setQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   const [activeCity, setActiveCity] = useState('All');
+  const isUrdu = lang === 'ur';
 
   const realListings = useMemo(() => (Array.isArray(listings) ? listings : []).filter((car) => car?.id), [listings]);
   const availableListings = useMemo(
@@ -94,16 +96,16 @@ export function HomeFeed({
   };
 
   const categories = [
-    { id: 'All', label: 'All Vehicles', icon: Car },
-    { id: 'Sedans', label: 'Sedans', icon: Car },
-    { id: 'EVs', label: 'EVs & Hybrids', icon: Zap },
-    { id: 'SUVs', label: 'SUVs & 4x4', icon: Car },
-    { id: 'Luxury', label: 'Luxury', icon: Award },
-    { id: 'Exotic', label: 'Exotic', icon: Star },
+    { id: 'All', label: isUrdu ? 'تمام گاڑیاں' : 'All Vehicles', icon: Car },
+    { id: 'Sedans', label: isUrdu ? 'سیڈانز' : 'Sedans', icon: Car },
+    { id: 'EVs', label: isUrdu ? 'ای وی اور ہائبرڈ' : 'EVs & Hybrids', icon: Zap },
+    { id: 'SUVs', label: isUrdu ? 'ایس یو ویز' : 'SUVs & 4x4', icon: Car },
+    { id: 'Luxury', label: isUrdu ? 'لگژری' : 'Luxury', icon: Award },
+    { id: 'Exotic', label: isUrdu ? 'نایاب' : 'Exotic', icon: Star },
   ];
 
   const cityTabs = [
-    { id: 'All', label: 'All Showrooms', count: realShowrooms.length },
+    { id: 'All', label: isUrdu ? 'تمام شو رومز' : 'All Showrooms', count: realShowrooms.length },
     { id: 'Lahore', label: 'Lahore', count: realShowrooms.filter(d => (d.location || '').toLowerCase().includes('lahore')).length || 14 },
     { id: 'Karachi', label: 'Karachi', count: realShowrooms.filter(d => (d.location || '').toLowerCase().includes('karachi')).length || 19 },
     { id: 'Islamabad', label: 'Islamabad', count: realShowrooms.filter(d => (d.location || '').toLowerCase().includes('islamabad')).length || 8 },
@@ -111,8 +113,8 @@ export function HomeFeed({
   ];
 
   return (
-    <main className="min-h-screen bg-[#0b1326] text-[#dae2fd] pb-24 font-sans selection:bg-[#00d2ff] selection:text-[#003543]">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 pt-4 sm:pt-6">
+    <main className="min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-main)] pb-24 font-sans selection:bg-[var(--color-amber-accent)] selection:text-[var(--color-bg-primary)] transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6">
         
         {/* 1. Interactive 3D Supercar Showroom Hero Section */}
         <Interactive3DShowroomHero
@@ -129,42 +131,42 @@ export function HomeFeed({
         />
 
         {/* 2. Fast Search Bar Shortcut (Stitch Design Pattern) */}
-        <div className="relative flex items-center bg-[#171f33] rounded-2xl p-2 sm:p-2.5 shadow-xl border border-[#00d2ff]/20 mb-6">
-          <Search size={20} className="text-[#00d2ff] ml-3 shrink-0" />
+        <div className="relative flex items-center bg-[var(--color-surface)] rounded-2xl p-2 sm:p-2.5 shadow-xl border border-[var(--color-outline)] hover:border-[var(--color-amber-accent)]/50 mb-8 transition-all duration-300">
+          <Search size={20} className="text-[var(--color-amber-accent)] ml-3 shrink-0" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && doSearch()}
-            placeholder="Search make, model, variant or showroom..."
-            className="w-full bg-transparent border-none outline-none px-3 text-[#dae2fd] text-sm sm:text-base placeholder:text-[#859399]"
+            placeholder={isUrdu ? 'گاڑی یا شو روم تلاش کریں...' : "Search make, model, variant or showroom..."}
+            className="w-full bg-transparent border-none outline-none px-3 text-[var(--color-text-main)] text-sm sm:text-base placeholder:text-[var(--color-text-muted)]"
           />
           <button
             type="button"
             onClick={doSearch}
-            className="bg-gradient-to-r from-[#00d2ff] to-[#47d6ff] text-[#003543] font-bold px-5 py-2.5 rounded-xl text-xs sm:text-sm uppercase tracking-wider shadow-md hover:brightness-110 active:scale-95 transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
+            className="bg-gradient-to-r from-[var(--color-amber-accent)] to-[var(--color-secondary-orange)] text-white font-bold px-5 py-2.5 rounded-xl text-xs sm:text-sm uppercase tracking-wider shadow-md hover:brightness-110 active:scale-95 transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
           >
             <SlidersHorizontal size={14} />
-            <span>Filter</span>
+            <span>{isUrdu ? 'فلٹر' : 'Filter'}</span>
           </button>
         </div>
 
         {/* 3. Quick Category Horizontal Filters */}
         <section className="mb-8">
-          <div className="flex justify-between items-center mb-3">
-            <h2 className="text-lg sm:text-xl font-extrabold text-[#dae2fd] tracking-tight">
-              Categories
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg sm:text-xl font-extrabold tracking-tight text-[var(--color-text-main)] uppercase">
+              {isUrdu ? 'کیٹیگریز' : 'Categories'}
             </h2>
             <button
               type="button"
               onClick={() => setTab('inventory')}
-              className="text-xs font-bold text-[#00d2ff] hover:underline flex items-center gap-1 cursor-pointer"
+              className="text-xs font-bold text-[var(--color-amber-accent)] hover:underline flex items-center gap-1 cursor-pointer"
             >
-              <span>View All</span>
+              <span>{isUrdu ? 'سب دیکھیں' : 'View All'}</span>
               <ChevronRight size={14} />
             </button>
           </div>
 
-          <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar -mx-3 px-3 sm:mx-0 sm:px-0">
+          <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
             {categories.map((cat) => {
               const Icon = cat.icon;
               const isSelected = activeCategory === cat.id;
@@ -179,20 +181,20 @@ export function HomeFeed({
                   }}
                   className={`flex flex-col items-center justify-center min-w-[92px] sm:min-w-[104px] h-24 sm:h-26 rounded-2xl transition-all cursor-pointer border ${
                     isSelected
-                      ? 'bg-[#222a3d] border-[#00d2ff] shadow-lg shadow-[#00d2ff]/20 scale-105'
-                      : 'bg-[#171f33] border-[#00d2ff]/10 hover:border-[#00d2ff]/40 hover:bg-[#1e293b]'
+                      ? 'bg-[var(--color-surface-elevated)] border-[var(--color-amber-accent)] shadow-lg shadow-[var(--color-amber-accent)]/10 scale-105'
+                      : 'bg-[var(--color-surface)] border-[var(--color-outline)] hover:border-[var(--color-amber-accent)]/50 hover:bg-[var(--color-surface-highest)]'
                   }`}
                 >
                   <div
                     className={`w-11 h-11 rounded-xl flex items-center justify-center transition-colors ${
                       isSelected
-                        ? 'bg-[#00d2ff] text-[#003543]'
-                        : 'bg-[#222a3d] text-[#00d2ff] group-hover:bg-[#00d2ff] group-hover:text-[#003543]'
+                        ? 'bg-[var(--color-amber-accent)] text-white'
+                        : 'bg-[var(--color-bg-deep)] text-[var(--color-text-secondary)]'
                     }`}
                   >
-                    <Icon size={20} />
+                    <Icon size={18} />
                   </div>
-                  <span className="text-xs font-bold text-[#dae2fd] mt-2 tracking-tight">
+                  <span className="text-xs font-bold text-[var(--color-text-main)] mt-2 tracking-tight">
                     {cat.label}
                   </span>
                 </button>
@@ -206,22 +208,22 @@ export function HomeFeed({
           <div className="flex justify-between items-center mb-4">
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-lg sm:text-2xl font-extrabold text-[#dae2fd] tracking-tight">
-                  Featured Verified Vehicles
+                <h2 className="text-lg sm:text-2xl font-extrabold tracking-tight text-[var(--color-text-main)] uppercase">
+                  {isUrdu ? 'نمایاں تصدیق شدہ گاڑیاں' : 'Featured Verified Vehicles'}
                 </h2>
-                <ShieldCheck size={20} className="text-[#00d2ff]" />
+                <ShieldCheck size={20} className="text-[var(--color-amber-accent)]" />
               </div>
-              <p className="text-xs sm:text-sm text-[#859399]">
-                Inspected & 360° Certified across Islamabad, Lahore, Karachi & Peshawar
+              <p className="text-xs sm:text-sm text-[var(--color-text-secondary)]">
+                {isUrdu ? 'اسلام آباد، لاہور، کراچی اور پشاور میں 360° تصدیق شدہ گاڑیاں' : 'Inspected & 360° Certified across Islamabad, Lahore, Karachi & Peshawar'}
               </p>
             </div>
 
             <button
               type="button"
               onClick={() => setTab('inventory')}
-              className="hidden sm:flex items-center gap-1 text-xs font-bold text-[#00d2ff] hover:underline cursor-pointer"
+              className="hidden sm:flex items-center gap-1 text-xs font-bold text-[var(--color-amber-accent)] hover:underline cursor-pointer"
             >
-              <span>Explore Marketplace</span>
+              <span>{isUrdu ? 'مارکیٹ پلیس دریافت کریں' : 'Explore Marketplace'}</span>
               <ArrowRight size={14} />
             </button>
           </div>
@@ -240,48 +242,48 @@ export function HomeFeed({
               ))}
             </div>
           ) : (
-            <div className="p-8 rounded-2xl bg-[#171f33] border border-[#00d2ff]/20 text-center">
-              <Car size={36} className="mx-auto text-[#00d2ff]/60 mb-2" />
-              <h3 className="font-bold text-[#dae2fd]">No vehicles found in this category</h3>
-              <p className="text-xs text-[#859399] mt-1">Try switching categories or view all live inventory.</p>
+            <div className="p-12 rounded-3xl bg-[var(--color-surface)] border border-[var(--color-outline)] text-center max-w-lg mx-auto shadow-sm">
+              <Car size={36} className="mx-auto text-[var(--color-text-muted)] mb-3" />
+              <h3 className="font-bold text-[var(--color-text-main)]">{isUrdu ? 'کوئی گاڑی نہیں ملی' : 'No vehicles found in this category'}</h3>
+              <p className="text-xs text-[var(--color-text-secondary)] mt-1">{isUrdu ? 'کوئی اور کیٹیگری منتخب کریں یا تمام گاڑیاں دیکھیں' : 'Try switching categories or view all live inventory.'}</p>
               <button
                 type="button"
                 onClick={() => setActiveCategory('All')}
-                className="mt-4 px-4 py-2 rounded-xl bg-[#00d2ff] text-[#003543] font-bold text-xs uppercase tracking-wider cursor-pointer"
+                className="mt-5 px-5 py-2.5 rounded-xl bg-[var(--color-amber-accent)] hover:brightness-105 text-white font-bold text-xs uppercase tracking-wider cursor-pointer transition-all"
               >
-                Reset Filter
+                {isUrdu ? 'فلٹر ری سیٹ کریں' : 'Reset Filter'}
               </button>
             </div>
           )}
         </section>
 
         {/* 5. Elite Showroom Partners & Verified Hubs */}
-        <section className="mb-10 p-4 sm:p-6 rounded-2xl bg-gradient-to-b from-[#171f33] to-[#131b2e] border border-[#00d2ff]/25 shadow-2xl">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <section className="mb-10 p-5 sm:p-8 rounded-3xl bg-[var(--color-surface)] border border-[var(--color-outline)] shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
             <div>
               <div className="flex items-center gap-2">
-                <Store size={20} className="text-[#ffb95f]" />
-                <h2 className="text-lg sm:text-2xl font-extrabold text-[#dae2fd] tracking-tight">
-                  Elite Showroom Partners
+                <Store size={20} className="text-[var(--color-amber-accent)]" />
+                <h2 className="text-lg sm:text-2xl font-extrabold tracking-tight text-[var(--color-text-main)] uppercase">
+                  {isUrdu ? 'ایلیٹ شو روم پارٹنرز' : 'Elite Showroom Partners'}
                 </h2>
               </div>
-              <p className="text-xs sm:text-sm text-[#859399]">
-                Verified luxury dealerships & certified delivery bays
+              <p className="text-xs sm:text-sm text-[var(--color-text-secondary)]">
+                {isUrdu ? 'تصدیق شدہ ڈیلرشپ اور بااختیار آٹو ہبز' : 'Verified luxury dealerships & certified delivery bays'}
               </p>
             </div>
 
             <button
               type="button"
               onClick={() => setTab('dealers')}
-              className="text-xs font-bold text-[#ffb95f] hover:underline flex items-center gap-1 cursor-pointer"
+              className="text-xs font-bold text-[var(--color-amber-accent)] hover:underline flex items-center gap-1 cursor-pointer"
             >
-              <span>View All Showrooms</span>
+              <span>{isUrdu ? 'تمام شو رومز دیکھیں' : 'View All Showrooms'}</span>
               <ChevronRight size={14} />
             </button>
           </div>
 
           {/* City Filter Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-4 no-scrollbar">
+          <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-6 no-scrollbar">
             {cityTabs.map((c) => {
               const isSelected = activeCity === c.id;
               return (
@@ -292,16 +294,16 @@ export function HomeFeed({
                     cinematicAudio.playClick();
                     setActiveCity(c.id);
                   }}
-                  className={`px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
+                  className={`px-4 py-2 rounded-full font-semibold text-xs transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer border ${
                     isSelected
-                      ? 'bg-[#00d2ff] text-[#003543] shadow-md shadow-[#00d2ff]/20 font-bold'
-                      : 'bg-[#222a3d] text-[#bbc9cf] hover:text-[#dae2fd] hover:bg-[#2d3449] border border-[#3c494e]'
+                      ? 'bg-[var(--color-amber-accent)] text-white border-[var(--color-amber-accent)] shadow-md'
+                      : 'bg-[var(--color-bg-deep)] text-[var(--color-text-secondary)] border-[var(--color-outline)] hover:text-[var(--color-text-main)]'
                   }`}
                 >
                   <MapPin size={12} />
                   <span>{c.label}</span>
                   <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
-                    isSelected ? 'bg-[#003543]/20 text-[#003543]' : 'bg-[#171f33] text-[#00d2ff]'
+                    isSelected ? 'bg-white/20 text-white' : 'bg-[var(--color-surface)] text-[var(--color-amber-accent)]'
                   }`}>
                     {c.count}
                   </span>
@@ -311,7 +313,7 @@ export function HomeFeed({
           </div>
 
           {/* Showroom Cards List */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {filteredShowrooms.slice(0, 3).map((dealer) => (
               <div
                 key={dealer.id}
@@ -319,9 +321,9 @@ export function HomeFeed({
                   cinematicAudio.playClick();
                   onSelectDealer?.(dealer.id);
                 }}
-                className="group flex flex-col bg-[#0b1326] rounded-2xl overflow-hidden border border-[#00d2ff]/20 hover:border-[#00d2ff]/50 shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+                className="group flex flex-col bg-[var(--color-surface-highest)] rounded-2xl overflow-hidden border border-[var(--color-outline)] hover:border-[var(--color-amber-accent)] shadow-sm transition-all duration-300 hover:-translate-y-1 cursor-pointer"
               >
-                <div className="relative h-44 w-full overflow-hidden bg-[#171f33]">
+                <div className="relative h-44 w-full overflow-hidden bg-[var(--color-bg-deep)]">
                   {dealer.coverImage || dealer.logo ? (
                     <img
                       src={dealer.coverImage || dealer.logo}
@@ -330,39 +332,38 @@ export function HomeFeed({
                       loading="lazy"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-[#859399]">
+                    <div className="w-full h-full flex items-center justify-center text-[var(--color-text-muted)]">
                       <Building2 size={36} />
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0b1326] via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   
                   {/* Rating Badge */}
-                  <div className="absolute top-3 right-3 bg-[#060e20]/80 backdrop-blur-md px-2.5 py-1 rounded-full flex items-center gap-1 border border-[#ffb95f]/30 text-[#ffb95f] text-xs font-bold shadow-md">
-                    <Star size={12} fill="#ffb95f" />
+                  <div className="absolute top-3 right-3 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-full flex items-center gap-1 border border-[var(--color-amber-accent)]/30 text-[var(--color-amber-accent)] text-xs font-bold shadow-md">
+                    <Star size={12} fill="currentColor" />
                     <span>{dealer.rating || '4.9'}</span>
-                    <span className="text-[10px] text-[#859399]">(128)</span>
                   </div>
 
                   {/* Certified Hub Badge */}
-                  <div className="absolute top-3 left-3 bg-[#060e20]/80 backdrop-blur-md px-2.5 py-1 rounded-full flex items-center gap-1 border border-[#00d2ff]/30 text-[#00d2ff] text-[10px] font-bold shadow-md uppercase tracking-wider">
-                    <ShieldCheck size={12} />
-                    <span>Certified Hub</span>
+                  <div className="absolute top-3 left-3 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-full flex items-center gap-1 border border-white/15 text-white text-[10px] font-bold shadow-md uppercase tracking-wider">
+                    <ShieldCheck size={12} className="text-[var(--color-amber-accent)]" />
+                    <span>{isUrdu ? 'تصدیق شدہ' : 'Certified Hub'}</span>
                   </div>
                 </div>
 
                 <div className="p-4 flex flex-col justify-between flex-1 gap-3">
                   <div>
                     <div className="flex items-start justify-between">
-                      <h3 className="text-base font-bold text-[#dae2fd] group-hover:text-[#00d2ff] transition-colors">
+                      <h3 className="text-base font-bold text-[var(--color-text-main)] group-hover:text-[var(--color-amber-accent)] transition-colors">
                         {dealer.name}
                       </h3>
-                      <span className="text-xs font-bold text-[#ffb95f]">
-                        {dealer.vehiclesCount || '28'} Cars
+                      <span className="text-xs font-bold text-[var(--color-amber-accent)] shrink-0">
+                        {dealer.vehiclesCount || '28'} {isUrdu ? 'گاڑیاں' : 'Cars'}
                       </span>
                     </div>
 
-                    <p className="text-xs text-[#859399] flex items-center gap-1 mt-1">
-                      <MapPin size={12} className="text-[#00d2ff] shrink-0" />
+                    <p className="text-xs text-[var(--color-text-secondary)] flex items-center gap-1 mt-1">
+                      <MapPin size={12} className="text-[var(--color-amber-accent)] shrink-0" />
                       <span className="truncate">{dealer.location || 'Pakistan'}</span>
                     </p>
                   </div>
@@ -370,9 +371,9 @@ export function HomeFeed({
                   {/* Action Button */}
                   <button
                     type="button"
-                    className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#00d2ff] to-[#47d6ff] text-[#003543] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 hover:brightness-110 active:scale-95 transition-all shadow-md shadow-[#00d2ff]/20 cursor-pointer"
+                    className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[var(--color-amber-accent)] to-[var(--color-secondary-orange)] text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 hover:brightness-110 active:scale-95 transition-all shadow-md cursor-pointer"
                   >
-                    <span>Visit Showroom</span>
+                    <span>{isUrdu ? 'شو روم وزٹ کریں' : 'Visit Showroom'}</span>
                     <ArrowRight size={13} />
                   </button>
                 </div>
@@ -381,14 +382,14 @@ export function HomeFeed({
           </div>
 
           {/* Partner Callout */}
-          <div className="mt-6 p-4 rounded-xl bg-gradient-to-r from-[#222a3d] to-[#171f33] border border-[#ffb95f]/30 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
+          <div className="mt-8 p-5 rounded-2xl bg-[var(--color-bg-deep)] border border-[var(--color-outline)] flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
             <div>
-              <span className="text-sm font-bold text-[#dae2fd] flex items-center gap-1.5">
-                <Sparkles size={16} className="text-[#ffb95f]" />
-                Own an Auto Showroom or Dealership in Pakistan?
+              <span className="text-sm font-bold text-[var(--color-text-main)] flex items-center gap-1.5">
+                <Sparkles size={16} className="text-[var(--color-amber-accent)]" />
+                {isUrdu ? 'کیا آپ پاکستان میں شوروم یا آٹو ڈیلرشپ کے مالک ہیں؟' : 'Own an Auto Showroom or Dealership in Pakistan?'}
               </span>
-              <p className="text-xs text-[#bbc9cf] mt-0.5">
-                Join Bazar360 Elite Showroom Network & reach verified high-intent buyers nationwide.
+              <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
+                {isUrdu ? 'بازار360 ایلیٹ نیٹ ورک میں شامل ہوں اور ملک بھر کے سنجیدہ خریداروں تک پہنچیں۔' : 'Join Bazar360 Elite Showroom Network & reach verified high-intent buyers nationwide.'}
               </p>
             </div>
 
@@ -398,9 +399,9 @@ export function HomeFeed({
                 cinematicAudio.playClick();
                 setTab('dealers');
               }}
-              className="px-5 py-2.5 rounded-xl bg-[#ffb95f] hover:bg-[#ee9800] text-[#2a1700] font-extrabold text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer shrink-0 active:scale-95"
+              className="px-5 py-3 rounded-xl bg-[var(--color-amber-accent)] hover:brightness-105 text-white font-extrabold text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer shrink-0 active:scale-95"
             >
-              Partner Up
+              {isUrdu ? 'پارٹنر بنیں' : 'Partner Up'}
             </button>
           </div>
         </section>

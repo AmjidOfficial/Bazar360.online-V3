@@ -179,20 +179,29 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if isOwner(userId) || isAdmin();
       allow create: if isOwner(userId) && 
-                    (!('role' in incoming()) || (incoming().role != 'Admin' && incoming().role != 'Super Admin'));
-      allow update: if isOwner(userId) && (
-        incoming().diff(existing()).affectedKeys().hasOnly([
-          'displayName', 'phoneNumber', 'city', 'state', 'socials', 'socialMedia', 
-          'profilePhoto', 'photoURL', 'logoUrl', 'coverImage', 'preferredLanguage', 'preferredTheme', 
-          'whatsappNumber', 'updatedAt', 'lastLogin', 'notificationSettings', 'privacySettings',
-          'address', 'dob', 'gender', 'bio', 'status', 'email'
-        ])
+                    (!('role' in incoming()) || (incoming().role != 'Admin' && incoming().role != 'Super Admin') || isAdmin());
+      allow update: if (
+        isOwner(userId) && (
+          !('role' in incoming()) || 
+          incoming().role == existing().role || 
+          (incoming().role != 'Admin' && incoming().role != 'Super Admin') || 
+          isAdmin()
+        )
       ) || isAdmin();
       allow delete: if isAdmin();
+
+      match /{allSubcollections=**} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
     }
     
     match /profiles/{userId} {
-      allow read, write: if isOwner(userId) || isAdmin();
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId) || isAdmin();
+
+      match /{allSubcollections=**} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
     }
 
     // ==========================================
