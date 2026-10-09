@@ -49,7 +49,7 @@ export default function ContactView({ lang, onOpenSupportDrawer }: ContactViewPr
       // About Us Translation
       aboutHeading: "Our Journey & Vision",
       aboutSub: "Peshawar's most trusted, digitally-integrated premium automotive marketplace.",
-      aboutDesc1: "Bazar360 is a cutting-edge automotive platform that connects buyers directly with certified showrooms and individual sellers across Khyber Pakhtunkhwa. Founded with a vision to eliminate fraud, reduce intermediary commissions, and digitize the trading process, we offer an elite web-experience featuring high-speed data sync, multi-locale search capabilities, and live showroom virtual storefronts.",
+      aboutDesc1: "Bazar360 is a cutting-edge automotive platform that connects buyers directly with certified showrooms and individual sellers across Khyber Pakhtunkhwa. Founded with a vision to eliminate fraud, reduce intermediary commissions, and digitize the trading process, we offer an elite web-experience featuring offline persistence, multi-locale search capabilities, and live showroom virtual storefronts.",
       aboutDesc2: "Whether you are looking to purchase a modern electric vehicle, trade a rugged 4x4, or establish a customized digital showroom with scannable QR tags and direct URLs, Bazar360 provides the standard, high-fidelity infrastructure you need.",
       
       stat1Title: "Active Vehicle Postings",
@@ -63,9 +63,9 @@ export default function ContactView({ lang, onOpenSupportDrawer }: ContactViewPr
 
       teamHeading: "Meet Our Founders & Directors",
       teamSub: "The core architects of Bazar360 guiding dealership integrations and digital operations.",
-      partner: "Services & Bazar360 Partner",
+      partner: "Services & Auto Choice Partner",
       partnerName: "Malak Mazhar",
-      partnerBio: "Co-Founder and managing partner of Bazar360's flagship Bazar360 showroom. Leads business strategy, physical showroom coordination, and dealership operations.",
+      partnerBio: "Co-Founder and managing partner of Bazar360's flagship Auto Choice showroom. Leads business strategy, physical showroom coordination, and offline operations.",
       founder: "Founder",
       founderName: "Muhammad Amjid",
       founderBio: "Visionary Founder and technological architect. Oversees core platform security, international investor relationships, and multi-tenant engineering expansion.",
@@ -86,7 +86,7 @@ export default function ContactView({ lang, onOpenSupportDrawer }: ContactViewPr
       successTitle: "Ticket Received Successfully!",
       successDesc: "Thank you for contacting Bazar360 support. An executive officer will message you on WhatsApp or Call your phone shortly.",
       addressLabel: "Corporate Headquarters",
-      address: "Peshawar Motorway Interchange, Bazar360 Flagship Showroom, Ring Road, Peshawar, Pakistan",
+      address: "Peshawar Motorway Interchange, Auto Choice Flagship Showroom, Ring Road, Peshawar, Pakistan",
       timingTitle: "Support Hours",
       timingDesc: "9:00 AM - Midnight (PKT) | 7 Days a week",
 
@@ -157,7 +157,7 @@ export default function ContactView({ lang, onOpenSupportDrawer }: ContactViewPr
     {
       q: lang === 'en' ? "How do I check if a showroom listing is verified?" : "میں کیسے چیک کروں کہ شو روم کی گاڑی تصدیق شدہ ہے؟",
       a: lang === 'en' 
-        ? "Look for the green 'Verified Showroom' shield badge on listings. This indicates the vehicle physically resides in one of our partner showrooms (like Bazar360 Peshawar) and has been pre-inspected by Bazar360 staff with papers verified."
+        ? "Look for the green 'Verified Showroom' shield badge on listings. This indicates the vehicle physically resides in one of our partner showrooms (like Auto Choice Peshawar) and has been pre-inspected by Bazar360 staff with papers verified."
         : "گاڑیوں کی تفصیلات پر سبز 'تصدیق شدہ شو روم' بیج دیکھیں۔ اس کا مطلب ہے کہ گاڑی ہمارے پارٹنر شو روم (جیسے آٹو چوائس پشاور) میں موجود ہے اور اس کے کاغذات کی تصدیق کی جا چکی ہے۔"
     },
     {
@@ -181,7 +181,7 @@ export default function ContactView({ lang, onOpenSupportDrawer }: ContactViewPr
     {
       q: lang === 'en' ? "What precautions should I take when buying a car?" : "گاڑی خریدتے وقت مجھے کیا احتیاطی تدابیر اختیار کرنی چاہئیں؟",
       a: lang === 'en'
-        ? "Always inspect the vehicle and original documents (Registration Book, File, Tax Token Status) physically before transferring funds. We strongly recommend meeting verified sellers in public spots or visiting our partner showroom hubs (e.g., Bazar360 Ring Road Peshawar) to conduct transactions safely."
+        ? "Always inspect the vehicle and original documents (Registration Book, File, Tax Token Status) physically before transferring funds. We strongly recommend meeting verified sellers in public spots or visiting our partner showroom hubs (e.g., Auto Choice Ring Road Peshawar) to conduct transactions safely."
         : "رقم منتقل کرنے سے پہلے ہمیشہ گاڑی اور اصل دستاویزات (رجسٹریشن بک، فائل، ٹیکس ٹوکن) کا جسمانی طور پر معائنہ کریں۔ ہم پرزور مشورہ دیتے ہیں کہ گاڑی کا سودا فزیکل شو رومز میں کریں۔"
     }
   ];
@@ -209,7 +209,7 @@ export default function ContactView({ lang, onOpenSupportDrawer }: ContactViewPr
 
   return (
     <div 
-      className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-8 animate-fade-in text-slate-900 dark:text-[var(--color-text-header)] ${isRtl ? 'text-right' : 'text-left'}`}
+      className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-8 animate-fade-in text-slate-900 dark:text-white ${isRtl ? 'text-right' : 'text-left'}`}
       dir={isRtl ? 'rtl' : 'ltr'}
       id="corporate-support-hub-page"
     >
@@ -221,20 +221,20 @@ export default function ContactView({ lang, onOpenSupportDrawer }: ContactViewPr
               <Award className="text-orange-500" />
               {t.title}
             </h1>
-            <p className="text-xs md:text-sm text-text-muted dark:text-gray-400 font-sans">
+            <p className="text-xs md:text-sm text-slate-500 dark:text-gray-400 font-sans">
               {t.subtitle}
             </p>
           </div>
         </div>
 
         {/* 🎛️ Unified Tab Controller (Premium Horizontal Rail) */}
-        <div className="flex flex-wrap items-center gap-2 mt-6 p-1.5 bg-slate-100 dark:bg-[var(--color-bg-primary)] border border-slate-200 dark:border-white/5 rounded-2xl md:max-w-max">
+        <div className="flex flex-wrap items-center gap-2 mt-6 p-1.5 bg-slate-100 dark:bg-[#0b0f19] border border-slate-200 dark:border-white/5 rounded-2xl md:max-w-max">
           <button
             onClick={() => setActiveTab('about')}
             className={`px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-2 min-h-[44px] ${
               activeTab === 'about'
                 ? 'bg-orange-500 text-slate-950 shadow-md shadow-orange-500/10'
-                : 'text-slate-600 dark:text-text-muted hover:bg-slate-200 dark:hover:bg-white/5'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5'
             }`}
           >
             <Users size={14} />
@@ -246,7 +246,7 @@ export default function ContactView({ lang, onOpenSupportDrawer }: ContactViewPr
             className={`px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-2 min-h-[44px] ${
               activeTab === 'help'
                 ? 'bg-orange-500 text-slate-950 shadow-md shadow-orange-500/10'
-                : 'text-slate-600 dark:text-text-muted hover:bg-slate-200 dark:hover:bg-white/5'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5'
             }`}
           >
             <HelpCircle size={14} />
@@ -258,7 +258,7 @@ export default function ContactView({ lang, onOpenSupportDrawer }: ContactViewPr
             className={`px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-2 min-h-[44px] ${
               activeTab === 'contact'
                 ? 'bg-orange-500 text-slate-950 shadow-md shadow-orange-500/10'
-                : 'text-slate-600 dark:text-text-muted hover:bg-slate-200 dark:hover:bg-white/5'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5'
             }`}
           >
             <MessageSquare size={14} />
@@ -270,7 +270,7 @@ export default function ContactView({ lang, onOpenSupportDrawer }: ContactViewPr
             className={`px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-2 min-h-[44px] ${
               activeTab === 'terms'
                 ? 'bg-orange-500 text-slate-950 shadow-md shadow-orange-500/10'
-                : 'text-slate-600 dark:text-text-muted hover:bg-slate-200 dark:hover:bg-white/5'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5'
             }`}
           >
             <ShieldCheck size={14} />
@@ -348,7 +348,7 @@ export default function ContactView({ lang, onOpenSupportDrawer }: ContactViewPr
                     <div>
                       <span className="text-[9px] font-mono font-bold text-orange-500 uppercase tracking-widest">{t.partner}</span>
                       <h4 className="text-base font-sans font-black text-[var(--color-text-main)] uppercase leading-none mt-1">{t.partnerName}</h4>
-                      <p className="text-[10px] font-mono text-[var(--color-accent-main)] mt-1">● WhatsApp Active Helpline</p>
+                      <p className="text-[10px] font-mono text-emerald-500 mt-1">● WhatsApp Active Helpline</p>
                     </div>
                   </div>
                   <p className="text-xs text-[var(--color-text-muted)] leading-relaxed font-sans">
@@ -360,7 +360,7 @@ export default function ContactView({ lang, onOpenSupportDrawer }: ContactViewPr
                   href="https://wa.me/923159085086" 
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-6 w-full py-3 bg-[var(--color-accent-main)] hover:bg-emerald-600 text-slate-950 text-center text-xs font-black uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 min-h-[44px]"
+                  className="mt-6 w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-center text-xs font-black uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 min-h-[44px]"
                 >
                   <Phone size={14} />
                   <span>Connect with Mazhar</span>
@@ -377,7 +377,7 @@ export default function ContactView({ lang, onOpenSupportDrawer }: ContactViewPr
                     <div>
                       <span className="text-[9px] font-mono font-bold text-sky-400 uppercase tracking-widest">{t.founder}</span>
                       <h4 className="text-base font-sans font-black text-[var(--color-text-main)] uppercase leading-none mt-1">{t.founderName}</h4>
-                      <p className="text-[10px] font-mono text-[var(--color-accent-main)] mt-1">● WhatsApp Active Helpline</p>
+                      <p className="text-[10px] font-mono text-emerald-500 mt-1">● WhatsApp Active Helpline</p>
                     </div>
                   </div>
                   <p className="text-xs text-[var(--color-text-muted)] leading-relaxed font-sans">
@@ -558,7 +558,7 @@ export default function ContactView({ lang, onOpenSupportDrawer }: ContactViewPr
                 </form>
               ) : (
                 <div className="text-center space-y-6 py-10">
-                  <div className="w-16 h-16 bg-[var(--color-accent-main)]/10 border border-[var(--color-accent-main)]/20 text-[var(--color-accent-main)] rounded-full flex items-center justify-center mx-auto">
+                  <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto">
                     <CheckCircle size={36} />
                   </div>
                   <div className="space-y-2">
@@ -623,7 +623,7 @@ export default function ContactView({ lang, onOpenSupportDrawer }: ContactViewPr
                 3. Showroom Owner Mandates
               </h3>
               <p className="leading-relaxed">
-                All partner showroom owners (such as Showroom HQ, Bazar360 Peshawar, etc.) must maintain accurate listings on Bazar360. If a vehicle is sold physically at the showroom premises, the listing must be updated or marked 'Sold' within 12 hours of transaction completion to prevent false leads.
+                All partner showroom owners (such as Showroom HQ, Auto Choice Peshawar, etc.) must maintain accurate listings on Bazar360. If a vehicle is sold physically at the showroom premises, the listing must be updated or marked 'Sold' within 12 hours of transaction completion to prevent false leads.
               </p>
             </section>
 

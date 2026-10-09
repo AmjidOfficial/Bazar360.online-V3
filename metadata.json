@@ -1,8 +1,7 @@
 {
   "name": "Bazar360.online",
-  "description": "Bazar360.online - Connect, Buy, Sell • Everything You Need. Pakistan's premier direct automotive marketplace, certified showroom hub, and vehicle classifieds ecosystem.",
+  "description": "Auto Choice: The Right Choice is Pakistan's premier automotive marketplace, certified showroom hub, and vehicle classifieds ecosystem.",
   "requestFramePermissions": [
-
     "publickey-credentials-create",
     "publickey-credentials-get"
   ],

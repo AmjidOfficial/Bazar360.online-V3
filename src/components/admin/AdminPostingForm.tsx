@@ -70,7 +70,7 @@ export default function AdminPostingForm({
   
   // Images list
   const [images, setImages] = useState<string[]>([
-    ''
+    'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800'
   ]);
   const [newImageUrl, setNewImageUrl] = useState('');
 
@@ -97,6 +97,16 @@ export default function AdminPostingForm({
 
   const handleRemoveImage = (index: number) => {
     setImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleGenerateDemoImages = () => {
+    const demos = [
+      'https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=800'
+    ];
+    setImages(demos);
+    console.log('Injected premium demonstration images');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -137,7 +147,7 @@ export default function AdminPostingForm({
         mileage: Number(mileage),
         fuelType,
         transmission,
-        imageUrl: images[0] || '',
+        imageUrl: images[0] || 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800',
         verified: true, // Admin posted is pre-verified!
         featured: true, // Admin posted gets featured placement!
         approved: true, // Admin posted is pre-approved!
@@ -158,7 +168,7 @@ export default function AdminPostingForm({
         registrationCity,
         documentType,
         tokenTaxPaid,
-        images: images.length > 0 ? images : [''],
+        images: images.length > 0 ? images : ['https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800'],
         assemblyType,
         isSold: false,
         isPaused: false,
@@ -193,7 +203,7 @@ export default function AdminPostingForm({
       setDescription('');
       setSelectedShowroom(null);
       setSearchTerm('');
-      setImages(['']);
+      setImages(['https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800']);
     } catch (err: any) {
       console.error('Error posting vehicle:', err);
       toast.error(err.message || 'Error occurred while saving listing.');
@@ -209,7 +219,7 @@ export default function AdminPostingForm({
           🚀 Advanced Automotive Posting Engine
         </h4>
         <p className="text-[10px] text-[var(--color-text-muted)] mt-1">
-          Authorized Admin-tier posting interface. Listings bypass moderation queues, getting flagged as <span className="text-[var(--color-accent-main)] font-bold">VERIFIED</span> and <span className="text-orange-400 font-bold">FEATURED</span> instantly.
+          Authorized Admin-tier posting interface. Listings bypass moderation queues, getting flagged as <span className="text-emerald-400 font-bold">VERIFIED</span> and <span className="text-orange-400 font-bold">FEATURED</span> instantly.
         </p>
       </div>
 
@@ -246,11 +256,11 @@ export default function AdminPostingForm({
               onClick={() => setPostType('showroom')}
               className={`p-3 rounded-xl border text-left flex items-center gap-3 transition-all cursor-pointer ${
                 postType === 'showroom'
-                  ? 'bg-[var(--color-accent-main)]/10 border-[var(--color-accent-main)]/30 text-[var(--color-text-main)]'
+                  ? 'bg-emerald-500/10 border-emerald-500/30 text-[var(--color-text-main)]'
                   : 'bg-[var(--color-bg-secondary)] border-[var(--color-border-main)] text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'
               }`}
             >
-              <div className={`p-1.5 rounded-lg ${postType === 'showroom' ? 'bg-[var(--color-accent-main)]/20 text-[var(--color-accent-main)]' : 'bg-black/20'}`}>
+              <div className={`p-1.5 rounded-lg ${postType === 'showroom' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-black/20'}`}>
                 <Store size={16} />
               </div>
               <div>
@@ -268,13 +278,13 @@ export default function AdminPostingForm({
               </label>
               
               {selectedShowroom ? (
-                <div className="p-3 bg-[var(--color-accent-main)]/10 border border-[var(--color-accent-main)]/20 rounded-xl flex justify-between items-center">
+                <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex justify-between items-center">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-[var(--color-accent-main)]/20 text-[var(--color-accent-main)] font-mono font-black flex items-center justify-center text-xs">
+                    <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 font-mono font-black flex items-center justify-center text-xs">
                       {selectedShowroom.avatarLetter || 'S'}
                     </div>
                     <div>
-                      <p className="text-xs font-black text-[var(--color-accent-main)] uppercase">{selectedShowroom.name}</p>
+                      <p className="text-xs font-black text-emerald-400 uppercase">{selectedShowroom.name}</p>
                       <p className="text-[8px] text-[var(--color-text-muted)] font-mono">Linked Showroom ID: <span className="font-bold">{selectedShowroom.id}</span></p>
                     </div>
                   </div>
@@ -295,7 +305,7 @@ export default function AdminPostingForm({
                     <Search className="absolute left-3 top-2.5 text-[var(--color-text-muted)]" size={14} />
                     <input
                       type="text"
-                      placeholder="Type showroom name or location (e.g. Bazar360)..."
+                      placeholder="Type showroom name or location (e.g. Auto Choice)..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="w-full bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] pl-9 pr-4 py-2 rounded-xl text-xs focus:border-orange-500 outline-none text-[var(--color-text-main)]"
@@ -564,6 +574,13 @@ export default function AdminPostingForm({
             <label className="text-[10px] font-black uppercase tracking-widest text-[var(--color-text-muted)] flex items-center gap-1.5">
               <ImageIcon size={13} className="text-orange-500" /> Media & Vehicle Images
             </label>
+            <button
+              type="button"
+              onClick={handleGenerateDemoImages}
+              className="text-[9px] font-bold text-orange-500 hover:underline flex items-center gap-0.5 cursor-pointer"
+            >
+              Inject Demo Suite
+            </button>
           </div>
 
           <div className="space-y-3">
@@ -578,7 +595,7 @@ export default function AdminPostingForm({
               <button
                 type="button"
                 onClick={handleAddImage}
-                className="px-4 bg-orange-500 hover:bg-orange-600 text-[var(--color-text-header)] font-bold text-xs rounded-xl flex items-center gap-1 transition-colors cursor-pointer"
+                className="px-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl flex items-center gap-1 transition-colors cursor-pointer"
               >
                 <Plus size={14} /> Add
               </button>
@@ -601,7 +618,7 @@ export default function AdminPostingForm({
                       className="w-full h-16 object-cover rounded-lg"
                       onError={(e) => {
                         // fallback broken image
-                        (e.target as HTMLImageElement).src = '';
+                        (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800';
                       }}
                     />
                     <div className="flex items-center justify-between text-[8px] text-[var(--color-text-muted)] pr-1">
@@ -625,7 +642,7 @@ export default function AdminPostingForm({
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 bg-gradient-to-r from-orange-500 to-[#FF6B00] hover:opacity-95 text-[var(--color-text-header)] font-black uppercase text-xs tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-orange-500/10"
+          className="w-full py-3 bg-gradient-to-r from-orange-500 to-[#FF6B00] hover:opacity-95 text-white font-black uppercase text-xs tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-orange-500/10"
         >
           {loading ? 'Publishing Vehicle Stock...' : 'Publish Live Stock Listing'}
         </button>

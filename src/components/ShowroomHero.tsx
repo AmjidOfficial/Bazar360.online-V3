@@ -32,7 +32,7 @@ const TAGLINE_DATA = {
       "Hassle-Free Buying Experience.",
       "From Our Floor to Your Door.",
     ],
-    icon: <Clock className="text-[var(--color-accent-main)]" size={16} />
+    icon: <Clock className="text-emerald-400" size={16} />
   },
   Short: {
     taglines: [
@@ -57,18 +57,16 @@ export const ShowroomHero: React.FC<ShowroomHeroProps> = ({ dealer }) => {
   }, [categoryData.taglines.length]);
 
   return (
-    <div className="relative h-56 sm:h-72 md:h-96 lg:h-[420px] xl:h-[460px] w-full overflow-hidden bg-bg-primary group" id="home">
+    <div className="relative h-64 md:h-80 w-full overflow-hidden bg-slate-900" id="home">
       {/* Cover Image */}
       <img 
         src={dealer.coverImage || babKhyberImg} 
-        alt={`${dealer.name} Full HD Cover`} 
-        className="w-full h-full object-cover object-center scale-100 group-hover:scale-105 transition-transform duration-1000 ease-out opacity-65 mix-blend-overlay brightness-105" 
-        style={{ imageRendering: 'crisp-edges' }}
-        loading="eager"
+        alt={`${dealer.name} Cover`} 
+        className="w-full h-full object-cover opacity-60 mix-blend-overlay" 
+        loading="lazy"
       />
-      <div className="absolute inset-0 bg-bg-primary/40" />
-      <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg-primary)] via-transparent to-black/50" />
-      <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-transparent to-slate-950/80" />
+      <div className="absolute inset-0 bg-black/50" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg-primary)] via-transparent to-black/30" />
       
       {/* Dynamic Tagline Engine */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none px-6">
@@ -82,15 +80,15 @@ export const ShowroomHero: React.FC<ShowroomHeroProps> = ({ dealer }) => {
               transition={{ duration: 0.8, ease: "easeOut" }}
               className="space-y-4"
             >
-              <h1 className="text-3xl md:text-5xl font-sans font-black tracking-tight text-[var(--color-text-header)] drop-shadow-2xl">
+              <h1 className="text-3xl md:text-5xl font-sans font-black tracking-tight text-white drop-shadow-2xl">
                 {categoryData.taglines[taglineIndex]}
               </h1>
               <div className="flex items-center justify-center gap-3">
-                <div className="h-[1px] w-8 bg-[var(--color-accent-secondary)]/50" />
-                <p className="text-xs md:text-sm font-sans text-[var(--color-accent-secondary)] font-bold uppercase tracking-[0.2em] drop-shadow-md">
+                <div className="h-[1px] w-8 bg-orange-500/50" />
+                <p className="text-xs md:text-sm font-sans text-orange-400 font-bold uppercase tracking-[0.2em] drop-shadow-md">
                   {dealer.subtitle || "Premium Automotive Partner"}
                 </p>
-                <div className="h-[1px] w-8 bg-[var(--color-accent-secondary)]/50" />
+                <div className="h-[1px] w-8 bg-orange-500/50" />
               </div>
             </motion.div>
           </AnimatePresence>
@@ -100,7 +98,7 @@ export const ShowroomHero: React.FC<ShowroomHeroProps> = ({ dealer }) => {
       {/* Verified Badge */}
       {dealer.verified && (
         <div className="absolute top-6 left-6 z-10">
-          <span className="bg-[var(--color-accent-main)]/20 border border-[var(--color-accent-main)]/40 text-[var(--color-accent-main)] px-3.5 py-1.5 rounded-full text-[9px] font-sans font-black uppercase tracking-widest shadow-xl backdrop-blur-md flex items-center gap-2">
+          <span className="bg-[#38BDF8]/20 border border-[#38BDF8]/40 text-[#38BDF8] px-3.5 py-1.5 rounded-full text-[9px] font-sans font-black uppercase tracking-widest shadow-xl backdrop-blur-md flex items-center gap-2">
             <ShieldCheck size={12} />
             Verified Showroom
           </span>

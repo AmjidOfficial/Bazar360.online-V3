@@ -18,8 +18,8 @@ export function ShowroomShareQR({ isOpen, onClose, dealer, accentColor = '#FF6B0
   const qrRef = useRef<HTMLDivElement>(null);
 
   // Generate dynamic sharing link
-  const cleanSlug = dealer.slug || dealer.id || dealer.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
-  const shareUrl = `https://bazar360.online/dealers/${cleanSlug}`;
+  const cleanSlug = dealer.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+  const shareUrl = `${window.location.origin}/showroom/${cleanSlug}`;
 
   const handleCopyLink = async () => {
     try {
@@ -91,30 +91,30 @@ export function ShowroomShareQR({ isOpen, onClose, dealer, accentColor = '#FF6B0
             transition={{ type: 'spring', damping: 25, stiffness: 350 }}
             className={`relative max-w-sm w-full rounded-3xl border ${
               isDark 
-                ? 'bg-slate-900/90 border-white/10 text-white' 
-                : 'bg-white/90 border-slate-200 text-slate-900'
-            } p-6 shadow-2xl backdrop-blur-xl overflow-hidden`}
+                ? 'bg-[#0f1118] border-white/5 text-white' 
+                : 'bg-white border-slate-100 text-slate-900'
+            } p-6 shadow-2xl overflow-hidden`}
           >
             {/* Ambient Background Glow matching accent color */}
             <div 
-              className="absolute -top-12 -left-12 w-32 h-32 rounded-full blur-3xl opacity-20"
+              className="absolute -top-12 -left-12 w-32 h-32 rounded-full blur-3xl opacity-10"
               style={{ backgroundColor: accentColor }}
             />
             <div 
-              className="absolute -bottom-12 -right-12 w-32 h-32 rounded-full blur-3xl opacity-20"
+              className="absolute -bottom-12 -right-12 w-32 h-32 rounded-full blur-3xl opacity-10"
               style={{ backgroundColor: accentColor }}
             />
 
             {/* Header */}
-            <div className="flex items-center justify-between mb-6 relative z-10">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/5 relative z-10">
               <div className="flex items-center gap-2">
                 <Share2 size={16} style={{ color: accentColor }} />
-                <h3 className="font-bold text-sm uppercase tracking-wider">Share Showroom</h3>
+                <h3 className="font-display font-bold text-sm uppercase tracking-wider">Share Showroom</h3>
               </div>
               <button
                 onClick={onClose}
-                className={`p-1.5 rounded-full transition-colors cursor-pointer ${
-                  isDark ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-slate-100 text-slate-400'
+                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                  isDark ? 'hover:bg-white/5 text-gray-400 hover:text-white' : 'hover:bg-slate-100 text-slate-500 hover:text-slate-900'
                 }`}
               >
                 <X size={16} />
@@ -122,35 +122,49 @@ export function ShowroomShareQR({ isOpen, onClose, dealer, accentColor = '#FF6B0
             </div>
 
             {/* Content Body */}
-            <div className="flex flex-col items-center text-center space-y-6 relative z-10">
+            <div className="flex flex-col items-center text-center space-y-5 relative z-10">
               <div>
-                <h4 className="font-bold text-lg">{dealer.name}</h4>
-                <p className={`text-[10px] uppercase font-mono tracking-widest mt-1 ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>
-                  Digital Showroom Gateway
+                <h4 className="font-bold text-lg font-sans">{dealer.name}</h4>
+                <p className={`text-[10px] uppercase font-mono tracking-widest mt-0.5 ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>
+                  Instant Device Gateway
                 </p>
               </div>
 
               {/* QR Canvas frame */}
               <div className="relative group">
-                {/* Glowing Border Line */}
+                {/* Glowing Border Line with scanning effect */}
                 <div 
-                  className="absolute -inset-1 rounded-3xl blur-md opacity-20 group-hover:opacity-40 transition-opacity duration-500"
+                  className="absolute -inset-1.5 rounded-3xl blur-md opacity-20 group-hover:opacity-40 transition-opacity duration-500 animate-pulse"
                   style={{ backgroundColor: accentColor }}
                 />
                 
                 <div className={`relative p-5 rounded-3xl border ${
                   isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200'
-                } flex items-center justify-center`}>
-                  <div ref={qrRef} className="bg-white p-2 rounded-2xl">
+                } flex items-center justify-center overflow-hidden`}>
+                  
+                  {/* Dynamic Laser Scan Effect */}
+                  <div 
+                    className="absolute inset-x-0 h-0.5 opacity-50 animate-bounce pointer-events-none"
+                    style={{ 
+                      backgroundColor: accentColor, 
+                      boxShadow: `0 0 12px 2px ${accentColor}`,
+                      top: '15%'
+                    }}
+                  />
+
+                  {/* High Quality SVG QR Code with excavate to allow central icon */}
+                  <div ref={qrRef} className="bg-white p-3 rounded-2xl">
                     <QRCodeSVG
                       value={shareUrl}
                       size={qrSize}
                       bgColor="#ffffff"
-                      fgColor="#0f172a"
+                      fgColor={accentColor}
                       level="Q"
                       includeMargin={false}
                       imageSettings={{
                         src: logoUrl,
+                        x: undefined,
+                        y: undefined,
                         height: 40,
                         width: 40,
                         excavate: true,
@@ -160,45 +174,45 @@ export function ShowroomShareQR({ isOpen, onClose, dealer, accentColor = '#FF6B0
                 </div>
               </div>
 
-              <div className="w-full space-y-4">
-                <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-slate-500'} leading-relaxed`}>
-                  Scan to instantly access our live catalog of premium fleet vehicles.
+              <div className="w-full space-y-2">
+                <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-slate-500'} leading-relaxed px-4`}>
+                  Scan this code with a mobile camera to instantly access our live catalog of premium fleet vehicles.
                 </p>
+              </div>
 
-                {/* Action Rows */}
-                <div className="w-full grid grid-cols-2 gap-3 pt-2">
-                  <button
-                    onClick={handleCopyLink}
-                    className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold font-mono transition-all uppercase tracking-wider border cursor-pointer ${
-                      copied
-                        ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-                        : isDark
-                          ? 'bg-white/5 hover:bg-white/10 border-white/10 text-gray-200'
-                          : 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-800'
-                    }`}
-                  >
-                    {copied ? (
-                      <>
-                        <CheckCircle size={14} />
-                        COPIED
-                      </>
-                    ) : (
-                      <>
-                        <Copy size={14} />
-                        COPY LINK
-                      </>
-                    )}
-                  </button>
+              {/* Action Rows */}
+              <div className="w-full grid grid-cols-2 gap-3 pt-2">
+                <button
+                  onClick={handleCopyLink}
+                  className={`flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl text-xs font-bold font-mono transition-all uppercase tracking-wider border cursor-pointer ${
+                    copied
+                      ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                      : isDark
+                        ? 'bg-white/5 hover:bg-white/10 border-white/5 text-gray-200'
+                        : 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-800'
+                  }`}
+                >
+                  {copied ? (
+                    <>
+                      <CheckCircle size={13} />
+                      COPIED
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={13} />
+                      COPY LINK
+                    </>
+                  )}
+                </button>
 
-                  <button
-                    onClick={handleDownloadQR}
-                    className="flex items-center justify-center gap-2 py-3 px-4 text-white font-bold font-mono text-xs uppercase tracking-wider rounded-xl transition-all hover:brightness-110 cursor-pointer shadow-lg"
-                    style={{ backgroundColor: accentColor }}
-                  >
-                    <Download size={14} />
-                    SAVE PNG
-                  </button>
-                </div>
+                <button
+                  onClick={handleDownloadQR}
+                  className="flex items-center justify-center gap-1.5 py-2.5 px-4 text-white font-bold font-mono text-xs uppercase tracking-wider rounded-xl transition-all hover:scale-102 active:scale-98 cursor-pointer shadow-lg"
+                  style={{ backgroundColor: accentColor }}
+                >
+                  <Download size={13} />
+                  SAVE PNG
+                </button>
               </div>
             </div>
           </motion.div>

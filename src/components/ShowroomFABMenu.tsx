@@ -43,45 +43,20 @@ export default function ShowroomFABMenu({
             transition={{ duration: 0.2 }}
             className="flex flex-col items-end gap-3"
           >
-            {/* In-App Direct Message */}
-            <motion.button
-              whileHover={{ scale: 1.05, x: -2 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => {
-                setIsOpen(false);
-                window.dispatchEvent(new CustomEvent('open-b360-messaging', {
-                  detail: {
-                    recipientUser: {
-                      uid: 'showroom-owner-auto-choice',
-                      displayName: 'Showroom Representative',
-                      role: 'dealer'
-                    },
-                    initialMessage: 'Hello! I am inquiring about your showroom inventory.'
-                  }
-                }));
-              }}
-              className="flex items-center gap-3 bg-emerald-950/80 border border-[var(--color-accent-main)]/30 shadow-xl px-4 py-2.5 rounded-2xl hover:bg-emerald-900/80 group transition-all duration-300 border-none cursor-pointer"
-            >
-              <span className="text-xs font-sans font-black uppercase tracking-wider text-[var(--color-accent-main)]">
-                Message Showroom
-              </span>
-              <div className="w-10 h-10 bg-[var(--color-accent-main)] text-black rounded-full flex items-center justify-center shadow-lg shadow-[var(--color-accent-main)]/20">
-                <MessageCircle size={18} className="stroke-[2.5]" />
-              </div>
-            </motion.button>
-
-            {/* Direct Phone Contact Action */}
+            {/* WhatsApp Contact Action */}
             <motion.a
               whileHover={{ scale: 1.05, x: -2 }}
               whileTap={{ scale: 0.95 }}
-              href="tel:+923159085086"
+              href={`https://wa.me/${cleanNumber}`}
+              target="_blank"
+              rel="noopener noreferrer"
               onClick={() => setIsOpen(false)}
-              className="flex items-center gap-3 bg-bg-secondary border border-sky-500/20 shadow-xl px-4 py-2.5 rounded-2xl hover:bg-bg-tertiary group transition-all duration-300 border-none"
+              className="flex items-center gap-3 bg-white dark:bg-slate-900 border border-emerald-500/20 shadow-xl px-4 py-2.5 rounded-2xl hover:bg-emerald-50 dark:hover:bg-emerald-950/20 group transition-all duration-300 border-none"
             >
-              <span className="text-xs font-sans font-black uppercase tracking-wider text-sky-400">
-                Call Support
+              <span className="text-xs font-sans font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                WhatsApp Contact
               </span>
-              <div className="w-10 h-10 bg-sky-500 text-[var(--color-text-header)] rounded-full flex items-center justify-center shadow-lg shadow-sky-500/20">
+              <div className="w-10 h-10 bg-[#25D366] text-white rounded-full flex items-center justify-center shadow-lg shadow-[#25D366]/20">
                 <MessageCircle size={18} className="stroke-[2.5]" />
               </div>
             </motion.a>
@@ -91,12 +66,12 @@ export default function ShowroomFABMenu({
               whileHover={{ scale: 1.05, x: -2 }}
               whileTap={{ scale: 0.95 }}
               onClick={handlePostAd}
-              className="flex items-center gap-3 bg-white dark:bg-bg-secondary border border-orange-500/20 shadow-xl px-4 py-2.5 rounded-2xl hover:bg-orange-50 dark:hover:bg-orange-950/20 group transition-all duration-300 border-none cursor-pointer"
+              className="flex items-center gap-3 bg-white dark:bg-slate-900 border border-orange-500/20 shadow-xl px-4 py-2.5 rounded-2xl hover:bg-orange-50 dark:hover:bg-orange-950/20 group transition-all duration-300 border-none cursor-pointer"
             >
               <span className="text-xs font-sans font-black uppercase tracking-wider text-orange-600 dark:text-orange-400">
                 Post an Ad
               </span>
-              <div className="w-10 h-10 bg-[var(--color-brand-orange)] text-[var(--color-text-header)] rounded-full flex items-center justify-center shadow-lg shadow-[#FF6B00]/20">
+              <div className="w-10 h-10 bg-[#FF6B00] text-white rounded-full flex items-center justify-center shadow-lg shadow-[#FF6B00]/20">
                 <Plus size={18} className="stroke-[2.5]" />
               </div>
             </motion.button>
@@ -111,8 +86,8 @@ export default function ShowroomFABMenu({
         onClick={() => setIsOpen(!isOpen)}
         className={`w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 cursor-pointer border ${
           isOpen 
-            ? 'bg-bg-secondary dark:bg-white text-[var(--color-text-header)] dark:text-slate-900 border-border-main dark:border-slate-200 shadow-slate-950/20' 
-            : 'bg-gradient-to-r from-orange-50 to-orange-100 hover:from-orange-100 hover:to-orange-200 dark:from-slate-950 dark:to-slate-900 text-orange-500 border-orange-200/50 dark:border-border-main shadow-orange-500/10'
+            ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-800 dark:border-slate-200 shadow-slate-950/20' 
+            : 'bg-gradient-to-r from-orange-50 to-orange-100 hover:from-orange-100 hover:to-orange-200 dark:from-slate-950 dark:to-slate-900 text-orange-500 border-orange-200/50 dark:border-slate-800 shadow-orange-500/10'
         }`}
         title="Showroom Actions"
       >

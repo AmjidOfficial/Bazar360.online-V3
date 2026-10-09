@@ -66,7 +66,7 @@ export default function LogoutConfirmModal({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={!isLoggingOut ? onClose : undefined}
-            className="fixed inset-0 bg-bg-primary/80 backdrop-blur-md"
+            className="fixed inset-0 bg-slate-950/80 backdrop-blur-md"
           />
 
           {/* Dialog Container */}
@@ -75,11 +75,11 @@ export default function LogoutConfirmModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: 20 }}
             transition={{ type: 'spring', damping: 26, stiffness: 340 }}
-            className="relative w-full max-w-md z-10 text-[var(--color-text-header)]"
+            className="relative w-full max-w-md z-10 text-white"
           >
             <GlassCard
               radius="24px"
-              className="relative bg-[var(--color-bg-primary)] border border-white/10 p-6 sm:p-8 shadow-2xl overflow-hidden"
+              className="relative bg-[#0b121f] border border-white/10 p-6 sm:p-8 shadow-2xl overflow-hidden"
             >
               {/* Glowing Top Accent Gradient Line */}
               <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-rose-500 via-amber-500 to-orange-500 z-20" />
@@ -88,7 +88,7 @@ export default function LogoutConfirmModal({
               <button
                 onClick={onClose}
                 disabled={isLoggingOut}
-                className="absolute top-4 right-4 p-2 rounded-full bg-bg-secondary/60 hover:bg-bg-tertiary border border-white/10 text-text-muted hover:text-[var(--color-text-header)] transition-colors cursor-pointer z-30"
+                className="absolute top-4 right-4 p-2 rounded-full bg-slate-900/60 hover:bg-slate-800 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer z-30"
                 aria-label="Close modal"
               >
                 <X size={16} />
@@ -105,10 +105,10 @@ export default function LogoutConfirmModal({
                   </div>
 
                   <div className="space-y-1">
-                    <h3 className="text-xl font-black uppercase tracking-tight text-[var(--color-text-header)] font-display">
+                    <h3 className="text-xl font-black uppercase tracking-tight text-white font-display">
                       {t.title}
                     </h3>
-                    <p className="text-[11px] font-mono text-text-muted uppercase tracking-wider">
+                    <p className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">
                       {t.subtitle}
                     </p>
                   </div>
@@ -116,20 +116,20 @@ export default function LogoutConfirmModal({
 
                 {/* User Info Capsule (If Logged In) */}
                 {currentUser && (
-                  <div className="bg-[var(--color-bg-secondary)] border border-white/5 rounded-2xl p-3.5 flex items-center gap-3">
+                  <div className="bg-[#131c2e] border border-white/5 rounded-2xl p-3.5 flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center text-orange-400 font-bold text-base shrink-0">
                       {currentUser.displayName ? currentUser.displayName.charAt(0).toUpperCase() : <User size={18} />}
                     </div>
                     <div className="min-w-0 flex-1 text-left">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-[var(--color-text-header)] truncate">
+                        <span className="text-xs font-bold text-white truncate">
                           {currentUser.displayName || 'Bazar360 Member'}
                         </span>
                         <span className="bg-orange-500/20 text-orange-400 border border-orange-500/30 text-[9px] font-mono font-black uppercase tracking-wider px-2 py-0.5 rounded-full shrink-0">
                           {currentUser.role || 'Member'}
                         </span>
                       </div>
-                      <p className="text-[11px] text-text-muted truncate font-mono">
+                      <p className="text-[11px] text-slate-400 truncate font-mono">
                         {currentUser.email}
                       </p>
                     </div>
@@ -137,9 +137,9 @@ export default function LogoutConfirmModal({
                 )}
 
                 {/* Confirmation Body Message */}
-                <div className="bg-[var(--color-bg-secondary)] border border-white/5 rounded-2xl p-4 text-xs text-text-muted leading-relaxed text-center font-sans">
+                <div className="bg-[#080d17] border border-white/5 rounded-2xl p-4 text-xs text-slate-300 leading-relaxed text-center font-sans">
                   <p>{t.message}</p>
-                  <p className="text-[10px] font-mono text-text-muted mt-2 border-t border-white/5 pt-2 flex items-center justify-center gap-1.5">
+                  <p className="text-[10px] font-mono text-slate-500 mt-2 border-t border-white/5 pt-2 flex items-center justify-center gap-1.5">
                     <Sparkles size={11} className="text-amber-400 shrink-0" />
                     <span>{t.sessionNote}</span>
                   </p>
@@ -153,7 +153,7 @@ export default function LogoutConfirmModal({
                     type="button"
                     onClick={onClose}
                     disabled={isLoggingOut}
-                    className="py-3 px-4 rounded-xl bg-bg-secondary/80 hover:bg-bg-tertiary border border-white/10 text-xs font-black uppercase tracking-wider text-text-muted hover:text-[var(--color-text-header)] transition-all cursor-pointer text-center"
+                    className="py-3 px-4 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-white/10 text-xs font-black uppercase tracking-wider text-slate-300 hover:text-white transition-all cursor-pointer text-center"
                   >
                     {t.cancel}
                   </motion.button>
@@ -164,7 +164,7 @@ export default function LogoutConfirmModal({
                     type="button"
                     onClick={handleConfirm}
                     disabled={isLoggingOut}
-                    className="py-3 px-4 rounded-xl bg-gradient-to-r from-rose-600 via-rose-500 to-orange-500 hover:from-rose-500 hover:to-orange-400 text-xs font-black uppercase tracking-wider text-[var(--color-text-header)] shadow-lg shadow-rose-600/20 transition-all cursor-pointer flex items-center justify-center gap-2"
+                    className="py-3 px-4 rounded-xl bg-gradient-to-r from-rose-600 via-rose-500 to-orange-500 hover:from-rose-500 hover:to-orange-400 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-rose-600/20 transition-all cursor-pointer flex items-center justify-center gap-2"
                   >
                     {isLoggingOut ? (
                       <>

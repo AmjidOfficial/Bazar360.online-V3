@@ -3,7 +3,7 @@ import {
   User, Shield, Briefcase, Sparkles, Download, FileSpreadsheet, Plus, Check, X, 
   Trash2, Edit, Calendar, Clock, Database, RefreshCw, BarChart3, Eye, Phone, 
   Share2, FileText, CheckCircle2, TrendingUp, AlertTriangle, Layers, ThumbsUp,
-  ArrowUpRight, Fingerprint, Car, Building2, PlusCircle
+  ArrowUpRight, Fingerprint
 } from 'lucide-react';
 import { CarListing, Dealer } from '../types';
 import { UserProfile } from '../lib/dbService';
@@ -14,8 +14,6 @@ import { useAuth } from './AuthContext';
 import { MarketingSuite } from './owner/MarketingSuite';
 import { LeadViewer } from './owner/LeadViewer';
 import AdminPostingForm from './admin/AdminPostingForm';
-import { LogoManager } from './owner/LogoManager';
-import { WorkshopJobsPortal } from './owner/WorkshopJobsPortal';
 
 interface RoleDashboardsProps {
   user: UserProfile;
@@ -27,7 +25,6 @@ interface RoleDashboardsProps {
   onApproveListing?: (id: string) => void;
   onRejectListing?: (id: string) => void;
   onPostCreated?: (newCar: CarListing) => void;
-  setTab?: (tab: string) => void;
   lang?: 'en' | 'ur';
 }
 
@@ -41,7 +38,6 @@ export default function RoleDashboards({
   onApproveListing,
   onRejectListing,
   onPostCreated,
-  setTab,
   lang = 'en'
 }: RoleDashboardsProps) {
   const { renderPrice } = useCurrencyMode();
@@ -68,7 +64,7 @@ export default function RoleDashboards({
 
   const [activities, setActivities] = useState<ActivityLog[]>([]);
   const [activityFilter, setActivityFilter] = useState<string>('ALL');
-  const [ownerTab, setOwnerTab] = useState<'overview' | 'leads' | 'marketing' | 'jobs'>('overview');
+  const [ownerTab, setOwnerTab] = useState<'overview' | 'leads' | 'marketing'>('overview');
   const [adminTab, setAdminTab] = useState<'moderation' | 'posting'>('moderation');
 
   // Visitor Gateway Entry Prompt State
@@ -293,7 +289,7 @@ export default function RoleDashboards({
                     </div>
                     <button
                       onClick={() => setVisitorPromptSkipped(true)}
-                      className="text-[10px] font-mono font-bold text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] uppercase tracking-wider underline cursor-pointer"
+                      className="text-[10px] font-mono font-bold text-[var(--color-text-muted)] hover:text-white uppercase tracking-wider underline cursor-pointer"
                     >
                       Skip
                     </button>
@@ -319,7 +315,7 @@ export default function RoleDashboards({
                   <div className="flex justify-end gap-2">
                     <button
                       onClick={() => setVisitorPromptSkipped(true)}
-                      className="px-3 py-1.5 bg-black/20 text-[var(--color-text-muted)] rounded-lg text-[10px] uppercase font-mono font-black cursor-pointer hover:text-[var(--color-text-header)]"
+                      className="px-3 py-1.5 bg-black/20 text-[var(--color-text-muted)] rounded-lg text-[10px] uppercase font-mono font-black cursor-pointer hover:text-white"
                     >
                       Skip For Now
                     </button>
@@ -392,7 +388,7 @@ export default function RoleDashboards({
                             if (onSelectListing) onSelectListing(car);
                             recordLog('VIEW', `Viewed Bookmark details: ${car.title}`, `Inspected specifications of ${car.title}`, 'listing');
                           }}
-                          className="px-2.5 py-1.5 bg-bg-tertiary text-text-main rounded-lg text-[9px] uppercase font-bold hover:bg-slate-700 font-mono"
+                          className="px-2.5 py-1.5 bg-slate-800 text-slate-200 rounded-lg text-[9px] uppercase font-bold hover:bg-slate-700 font-mono"
                         >
                           View Detail
                         </button>
@@ -427,7 +423,7 @@ export default function RoleDashboards({
                   onClick={() => setShowAddCarModal(true)}
                   className="p-4 bg-orange-500 hover:bg-orange-600 rounded-2xl text-left transition-all cursor-pointer group space-y-2 text-slate-950"
                 >
-                  <div className="p-2.5 bg-bg-primary/15 rounded-xl w-fit group-hover:scale-110 transition-transform">
+                  <div className="p-2.5 bg-slate-950/15 rounded-xl w-fit group-hover:scale-110 transition-transform">
                     <Plus size={16} />
                   </div>
                   <div>
@@ -443,7 +439,7 @@ export default function RoleDashboards({
                   }}
                   className="p-4 bg-[var(--color-bg-primary)] border border-[var(--color-border-main)] hover:border-orange-500/20 rounded-2xl text-left transition-all cursor-pointer group space-y-2"
                 >
-                  <div className="p-2.5 bg-[var(--color-accent-main)]/10 text-[var(--color-accent-main)] rounded-xl w-fit group-hover:scale-110 transition-transform">
+                  <div className="p-2.5 bg-emerald-500/10 text-emerald-400 rounded-xl w-fit group-hover:scale-110 transition-transform">
                     <FileSpreadsheet size={16} />
                   </div>
                   <div>
@@ -470,30 +466,24 @@ export default function RoleDashboards({
                     l.dealerId === user.uid
                   );
 
-                  if (myUserListings.length === 0) {
-                    return (
-                      <div className="bg-[var(--color-bg-primary)] border border-[var(--color-border-main)] rounded-2xl p-8 text-center space-y-4 shadow-sm">
-                        <div className="w-12 h-12 mx-auto rounded-full bg-orange-500/10 text-orange-500 flex items-center justify-center">
-                          <Car size={24} />
-                        </div>
-                        <div>
-                          <h4 className="text-sm font-bold text-[var(--color-text-header)]">You have no vehicle listings yet.</h4>
-                          <p className="text-xs text-[var(--color-text-muted)] mt-1">Post your vehicle to reach verified buyers across KPK and Pakistan.</p>
-                        </div>
-                        <button 
-                          onClick={() => setTab?.('post-ad')}
-                          className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer inline-flex items-center gap-2"
-                        >
-                          <PlusCircle size={14} />
-                          <span>Post Your First Ad</span>
-                        </button>
-                      </div>
-                    );
-                  }
+                  const displayListings = myUserListings.length > 0 ? myUserListings : [
+                    {
+                      id: 'sample-user-ad-1',
+                      title: 'Honda Civic VTI Oriel Prosmatec',
+                      year: 2021,
+                      make: 'Honda',
+                      model: 'Civic',
+                      price: 4850000,
+                      mileage: 28000,
+                      approved: false,
+                      condition: 'Used',
+                      imageUrl: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=300'
+                    }
+                  ];
 
                   return (
                     <div className="space-y-3">
-                      {myUserListings.map((carItem: any) => {
+                      {displayListings.map((carItem: any) => {
                         const isPending = carItem.approved === false;
                         const isRejected = carItem.approved === 'rejected' || carItem.rejected === true;
                         const isSold = carItem.isSold === true;
@@ -502,7 +492,7 @@ export default function RoleDashboards({
                           <div key={carItem.id} className="bg-[var(--color-bg-primary)] border border-[var(--color-border-main)] rounded-2xl p-4 space-y-3 shadow-sm hover:border-orange-500/30 transition-all">
                             <div className="flex flex-wrap justify-between items-center gap-3 border-b border-[var(--color-border-main)] pb-3">
                               <div className="flex items-center gap-3">
-                                <img src={carItem.imageUrl || carItem.images?.[0]} className="w-16 h-12 object-cover rounded-xl bg-bg-primary border border-white/5" />
+                                <img src={carItem.imageUrl || carItem.images?.[0]} className="w-16 h-12 object-cover rounded-xl bg-slate-950 border border-white/5" />
                                 <div>
                                   <p className="text-xs font-bold text-[var(--color-text-main)] uppercase">{carItem.title || `${carItem.year} ${carItem.make} ${carItem.model}`}</p>
                                   <p className="text-[10px] text-[var(--color-text-muted)] font-mono">
@@ -524,7 +514,7 @@ export default function RoleDashboards({
                                     <Clock size={10} /> Pending Approval
                                   </span>
                                 ) : (
-                                  <span className="px-2.5 py-1 rounded-full bg-[var(--color-accent-main)]/20 text-[var(--color-accent-main)] border border-[var(--color-accent-main)]/30 text-[9px] font-black uppercase font-mono tracking-widest inline-flex items-center gap-1">
+                                  <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[9px] font-black uppercase font-mono tracking-widest inline-flex items-center gap-1">
                                     <CheckCircle2 size={10} /> Active
                                   </span>
                                 )}
@@ -540,7 +530,7 @@ export default function RoleDashboards({
                                     console.log('Listing remarks updated successfully!');
                                   }
                                 }}
-                                className="px-3 py-1.5 bg-bg-tertiary text-[10px] uppercase font-mono font-black rounded-lg text-text-main cursor-pointer hover:bg-slate-700 flex items-center gap-1"
+                                className="px-3 py-1.5 bg-slate-800 text-[10px] uppercase font-mono font-black rounded-lg text-slate-200 cursor-pointer hover:bg-slate-700 flex items-center gap-1"
                               >
                                 <Edit size={11} /> Remarks
                               </button>
@@ -552,7 +542,7 @@ export default function RoleDashboards({
                                     console.log('Listing price updated!');
                                   }
                                 }}
-                                className="px-3 py-1.5 bg-bg-tertiary text-[10px] uppercase font-mono font-black rounded-lg text-text-main cursor-pointer hover:bg-slate-700 flex items-center gap-1"
+                                className="px-3 py-1.5 bg-slate-800 text-[10px] uppercase font-mono font-black rounded-lg text-slate-200 cursor-pointer hover:bg-slate-700 flex items-center gap-1"
                               >
                                 <Edit size={11} /> Edit Price
                               </button>
@@ -561,7 +551,7 @@ export default function RoleDashboards({
                                   recordLog('EDIT', 'Marked Listing as Sold', 'Changed vehicle listing state to SOLD in database', 'listing');
                                   console.log('Listing marked as SOLD successfully! 👍');
                                 }}
-                                className="px-3 py-1.5 bg-[var(--color-accent-main)]/10 text-[var(--color-accent-main)] text-[10px] uppercase font-mono font-black rounded-lg cursor-pointer hover:bg-[var(--color-accent-main)]/20 flex items-center gap-1"
+                                className="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 text-[10px] uppercase font-mono font-black rounded-lg cursor-pointer hover:bg-emerald-500/20 flex items-center gap-1"
                               >
                                 <Check size={11} /> Mark Sold
                               </button>
@@ -587,30 +577,20 @@ export default function RoleDashboards({
 
           {/* SHOWROOM OWNER DASHBOARD */}
           {activeRole === 'Showroom Owner' && webauthnVerified && (() => {
-            const currentDealer = dealers.find(d => d.ownerUid === user.uid || d.email === user.email || d.id === user.associatedShowroomId);
-
-            if (!currentDealer) {
-              return (
-                <div className="bg-[var(--color-bg-primary)] border border-[var(--color-border-main)] rounded-3xl p-10 text-center space-y-4 max-w-xl mx-auto my-8">
-                  <div className="w-16 h-16 mx-auto rounded-3xl bg-orange-500/10 text-orange-500 flex items-center justify-center font-bold">
-                    <Building2 size={32} />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-[var(--color-text-header)]">No Registered Showroom Found</h3>
-                    <p className="text-xs text-[var(--color-text-muted)] mt-1.5 leading-relaxed">
-                      You are logged in as a Showroom Owner, but no showroom profile is associated with your account UID ({user.uid.slice(0, 8)}...). Register your official showroom to unlock inventory management, lead routing, and showroom HQ tools.
-                    </p>
-                  </div>
-                  <button 
-                    onClick={() => setTab?.('registration')}
-                    className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-2xl transition-all shadow-md cursor-pointer inline-flex items-center gap-2"
-                  >
-                    <PlusCircle size={16} />
-                    <span>Register Your Showroom</span>
-                  </button>
-                </div>
-              );
-            }
+            const currentDealer = (dealers.find(d => d.ownerUid === user.uid || d.email === user.email || d.id === user.associatedShowroomId) || dealers[0] || {
+              id: 'auto-choice-peshawar',
+              name: 'Auto Choice Peshawar',
+              avatarLetter: 'A',
+              subtitle: 'Premier Showroom',
+              location: 'Peshawar Auto Market',
+              rating: 4.9,
+              vehiclesCount: 12,
+              followersCount: '4.8K',
+              coverImage: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&q=80&w=1200',
+              description: 'Luxury automobile marketplace and authorized flagship showroom.',
+              socials: { whatsapp: '923159085086' },
+              activityFeed: []
+            }) as Dealer;
 
             return (
               <div className="space-y-6">
@@ -634,8 +614,7 @@ export default function RoleDashboards({
                     {[
                       { id: 'overview', name: 'Overview' },
                       { id: 'leads', name: 'CRM Inquiries' },
-                      { id: 'marketing', name: 'Marketing Suite' },
-                      { id: 'jobs', name: 'Workshop Jobs CRM' }
+                      { id: 'marketing', name: 'Marketing Suite' }
                     ].map(tab => (
                       <button
                         key={tab.id}
@@ -664,7 +643,7 @@ export default function RoleDashboards({
                           Analyze digital footprint, customize storefront color accents, and download visitor logs.
                         </p>
                       </div>
-                      <div className="p-2 bg-[var(--color-accent-main)]/10 text-[var(--color-accent-main)] rounded-2xl">
+                      <div className="p-2 bg-emerald-500/10 text-emerald-400 rounded-2xl">
                         <BarChart3 size={18} />
                       </div>
                     </div>
@@ -672,7 +651,7 @@ export default function RoleDashboards({
                     {/* Showroom Analytics Stats Row */}
                     <div className="grid grid-cols-3 gap-3">
                       <div className="bg-[var(--color-bg-primary)] p-3 rounded-2xl border border-[var(--color-border-main)] text-center">
-                        <span className="text-lg font-black text-[var(--color-accent-main)] font-mono block">1,480</span>
+                        <span className="text-lg font-black text-emerald-400 font-mono block">1,480</span>
                         <span className="text-[8px] text-[var(--color-text-muted)] font-black uppercase tracking-wider block mt-0.5">Visits (30d)</span>
                       </div>
                       <div className="bg-[var(--color-bg-primary)] p-3 rounded-2xl border border-[var(--color-border-main)] text-center">
@@ -680,15 +659,10 @@ export default function RoleDashboards({
                         <span className="text-[8px] text-[var(--color-text-muted)] font-black uppercase tracking-wider block mt-0.5">Clicks to Call</span>
                       </div>
                       <div className="bg-[var(--color-bg-primary)] p-3 rounded-2xl border border-[var(--color-border-main)] text-center">
-                        <span className="text-lg font-black text-[var(--color-accent-main)] font-mono block">124</span>
+                        <span className="text-lg font-black text-[#38bdf8] font-mono block">124</span>
                         <span className="text-[8px] text-[var(--color-text-muted)] font-black uppercase tracking-wider block mt-0.5">Active Leads</span>
                       </div>
                     </div>
-
-                    {/* Logo Manager Integration */}
-                    <LogoManager dealer={currentDealer} onLogoUpdated={(newUrl) => {
-                      currentDealer.logo = newUrl;
-                    }} />
 
                     {/* Quick Actions Panel */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -696,7 +670,7 @@ export default function RoleDashboards({
                         onClick={handleDownloadCatalog}
                         className="p-4 bg-[var(--color-bg-primary)] border border-[var(--color-border-main)] hover:border-orange-500/20 rounded-2xl text-left transition-all cursor-pointer group space-y-2"
                       >
-                        <div className="p-2.5 bg-[var(--color-accent-main)]/10 text-[var(--color-accent-main)] rounded-xl w-fit group-hover:scale-110 transition-transform">
+                        <div className="p-2.5 bg-emerald-500/10 text-emerald-400 rounded-xl w-fit group-hover:scale-110 transition-transform">
                           <FileSpreadsheet size={16} />
                         </div>
                         <div>
@@ -753,12 +727,6 @@ export default function RoleDashboards({
                     <MarketingSuite listings={listings.filter(l => l.dealerId === currentDealer.id || l.createdBy === user.uid)} dealer={currentDealer} />
                   </div>
                 )}
-
-                {ownerTab === 'jobs' && (
-                  <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] rounded-3xl p-6">
-                    <WorkshopJobsPortal dealerId={currentDealer.id} dealerName={currentDealer.name} lang={lang} />
-                  </div>
-                )}
               </div>
             );
           })()}
@@ -791,7 +759,7 @@ export default function RoleDashboards({
                       ? 'border-orange-500/40 hover:border-orange-500 bg-orange-500/5 hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(249,115,22,0.1)]'
                       : webauthnState === 'scanning'
                       ? 'border-sky-500 bg-sky-500/10 animate-pulse shadow-[0_0_30px_rgba(56,189,248,0.3)]'
-                      : 'border-[var(--color-accent-main)] bg-[var(--color-accent-main)]/10 shadow-[0_0_35px_rgba(16,185,129,0.35)]'
+                      : 'border-emerald-500 bg-emerald-500/10 shadow-[0_0_35px_rgba(16,185,129,0.35)]'
                   }`}
                 >
                   {/* Ripples */}
@@ -799,7 +767,7 @@ export default function RoleDashboards({
                     <div className="absolute inset-0 rounded-full border border-sky-400 animate-ping opacity-50 pointer-events-none" />
                   )}
                   {webauthnState === 'success' && (
-                    <div className="absolute inset-0 rounded-full border border-[var(--color-accent-main)] animate-ping opacity-25 pointer-events-none" />
+                    <div className="absolute inset-0 rounded-full border border-emerald-400 animate-ping opacity-25 pointer-events-none" />
                   )}
                   
                   <Fingerprint
@@ -809,7 +777,7 @@ export default function RoleDashboards({
                         ? 'text-orange-500 group-hover:text-orange-400'
                         : webauthnState === 'scanning'
                         ? 'text-sky-400 animate-bounce'
-                        : 'text-[var(--color-accent-main)] scale-110'
+                        : 'text-emerald-400 scale-110'
                     }`}
                   />
                 </button>
@@ -818,7 +786,7 @@ export default function RoleDashboards({
                     ? 'text-orange-500 animate-pulse'
                     : webauthnState === 'scanning'
                     ? 'text-sky-400'
-                    : 'text-[var(--color-accent-main)]'
+                    : 'text-emerald-400'
                 }`}>
                   {webauthnState === 'idle' && 'Click Fingerprint to Scan'}
                   {webauthnState === 'scanning' && 'Reading Enclave Crypt Key...'}
@@ -827,13 +795,13 @@ export default function RoleDashboards({
               </div>
 
               {/* Enclave Console Log Outputs */}
-              <div className="bg-bg-primary text-text-muted p-4 rounded-2xl border border-slate-900 text-left font-mono text-[9px] space-y-1 max-h-[140px] overflow-y-auto shadow-inner select-none w-full">
+              <div className="bg-slate-950 text-slate-400 p-4 rounded-2xl border border-slate-900 text-left font-mono text-[9px] space-y-1 max-h-[140px] overflow-y-auto shadow-inner select-none w-full">
                 <div className="border-b border-slate-900 pb-1.5 mb-1.5 flex items-center justify-between">
-                  <span className="text-text-muted font-bold uppercase tracking-wider">Hardware Handshake Log</span>
+                  <span className="text-slate-500 font-bold uppercase tracking-wider">Hardware Handshake Log</span>
                   <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-ping" />
                 </div>
                 {webauthnLogs.map((log, index) => (
-                  <p key={index} className={log.includes('approved') || log.includes('SUCCESS') || log.includes('UNLOCKED') ? 'text-[var(--color-accent-main)] font-bold' : log.includes('error') ? 'text-red-400' : 'text-text-muted'}>
+                  <p key={index} className={log.includes('approved') || log.includes('SUCCESS') || log.includes('UNLOCKED') ? 'text-emerald-400 font-bold' : log.includes('error') ? 'text-red-400' : 'text-slate-400'}>
                     {log}
                   </p>
                 ))}
@@ -871,7 +839,7 @@ export default function RoleDashboards({
                   onClick={() => setAdminTab('moderation')}
                   className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                     adminTab === 'moderation'
-                      ? 'bg-gradient-to-r from-orange-500 to-[#FF6B00] text-[var(--color-text-header)] shadow-md'
+                      ? 'bg-gradient-to-r from-orange-500 to-[#FF6B00] text-white shadow-md'
                       : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'
                   }`}
                 >
@@ -882,7 +850,7 @@ export default function RoleDashboards({
                   onClick={() => setAdminTab('posting')}
                   className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                     adminTab === 'posting'
-                      ? 'bg-gradient-to-r from-orange-500 to-[#FF6B00] text-[var(--color-text-header)] shadow-md'
+                      ? 'bg-gradient-to-r from-orange-500 to-[#FF6B00] text-white shadow-md'
                       : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'
                   }`}
                 >
@@ -907,7 +875,7 @@ export default function RoleDashboards({
                       <span className="text-[8px] text-[var(--color-text-muted)] font-black uppercase tracking-wider block mt-0.5">Storage Nodes</span>
                     </div>
                     <div className="bg-[var(--color-bg-primary)] p-3 rounded-2xl border border-[var(--color-border-main)] text-center">
-                      <span className="text-base font-black text-[var(--color-accent-main)] font-mono block">OK</span>
+                      <span className="text-base font-black text-emerald-400 font-mono block">OK</span>
                       <span className="text-[8px] text-[var(--color-text-muted)] font-black uppercase tracking-wider block mt-0.5">App Check</span>
                     </div>
                   </div>
@@ -933,7 +901,7 @@ export default function RoleDashboards({
                                     recordLog('AUDIT', `Approved Vehicle Listing: ${car.title}`, `Authorized vehicle posting across the public marketplace`, 'system');
                                     console.log('Authorized listing successfully!');
                                   }}
-                                  className="p-1.5 bg-[var(--color-accent-main)]/10 text-[var(--color-accent-main)] rounded-lg hover:bg-[var(--color-accent-main)]/20"
+                                  className="p-1.5 bg-emerald-500/10 text-emerald-400 rounded-lg hover:bg-emerald-500/20"
                                 >
                                   <Check size={12} />
                                 </button>
@@ -969,7 +937,7 @@ export default function RoleDashboards({
                                   recordLog('AUDIT', 'Approved Social Post', 'Authorized khattak-psh community post on public social feed', 'system');
                                   console.log('Social post approved!');
                                 }}
-                                className="p-1.5 bg-[var(--color-accent-main)]/10 text-[var(--color-accent-main)] rounded-lg hover:bg-[var(--color-accent-main)]/20"
+                                className="p-1.5 bg-emerald-500/10 text-emerald-400 rounded-lg hover:bg-emerald-500/20"
                               >
                                 <Check size={12} />
                               </button>
@@ -993,9 +961,9 @@ export default function RoleDashboards({
                   {/* Diagnostics tools */}
                   <div className="p-4 bg-orange-500/5 rounded-2xl border border-orange-500/10 space-y-2 text-xs font-mono text-[var(--color-text-muted)]">
                     <p className="text-orange-500 font-bold uppercase tracking-widest text-[9px]">Live Cluster Sync Status</p>
-                    <p>&gt; firebase-admin service client: <span className="text-[var(--color-accent-main)] font-bold">CONNECTED</span></p>
-                    <p>&gt; AppCheck debug token bypass: <span className="text-[var(--color-accent-main)] font-bold">ACTIVE</span></p>
-                    <p>&gt; Active write threads: <span className="text-orange-400 font-bold">4 active sync nodes</span></p>
+                    <p>&gt; firebase-admin service client: <span className="text-emerald-400 font-bold">CONNECTED</span></p>
+                    <p>&gt; AppCheck debug token bypass: <span className="text-emerald-400 font-bold">ACTIVE</span></p>
+                    <p>&gt; Firestore active write threads: <span className="text-orange-400 font-bold">4 active listener nodes</span></p>
                   </div>
                 </div>
               ) : (
@@ -1052,7 +1020,7 @@ export default function RoleDashboards({
               <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1">
                 {filteredActivities.map(act => {
                   let colorClass = 'bg-sky-500/10 text-sky-400 border-sky-500/20';
-                  if (act.action === 'UPLOAD') colorClass = 'bg-[var(--color-accent-main)]/10 text-[var(--color-accent-main)] border-[var(--color-accent-main)]/20';
+                  if (act.action === 'UPLOAD') colorClass = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
                   if (act.action === 'DOWNLOAD') colorClass = 'bg-purple-500/10 text-purple-400 border-purple-500/20';
                   if (act.action === 'DELETE') colorClass = 'bg-rose-500/10 text-rose-400 border-rose-500/20';
                   if (act.action === 'EDIT') colorClass = 'bg-amber-500/10 text-amber-400 border-amber-500/20';

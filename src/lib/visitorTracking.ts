@@ -4,276 +4,266 @@ import {
   setDoc, 
   updateDoc, 
   arrayUnion, 
-  increment 
+  increment,
+  collection,
+  addDoc
 } from 'firebase/firestore';
 import { db } from '../firebase';
-import { dbTrackLeadAction } from './dbService';
+import { VisitorProfile, VisitorCategory, LeadCategory } from '../types';
 
-export interface VisitorData {
-  visitorId: string;
-  firstSeen: string;
-  lastSeen: string;
-  frequencyCategory: '1st Time' | '2nd Time' | '3rd Time' | 'Regular';
-  sessionCount: number;
-  totalViews: number;
-  searchHistory: string[];
-  viewHistory: string[];
-  clicksToCall: number;
-  clicksToWhatsApp: number;
-  deviceMetrics: {
-    viewportWidth: number;
-    viewportHeight: number;
-    userAgent: string;
-  };
-}
-
-// Generate an elegant, short UUID
-function generateUUID(): string {
+function generateVisitorId(): string {
   return 'vst-' + Math.random().toString(36).substring(2, 11) + '-' + Date.now().toString().slice(-4);
 }
 
-// Retrieve or initialize the visitor session
-export async function initializeVisitorTracking(): Promise<VisitorData> {
+function detectDeviceAndOS(): { deviceType: 'Mobile' | 'Tablet' | 'Desktop'; browser: string; operatingSystem: string } {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+    return { deviceType: 'Desktop', browser: 'Chrome', operatingSystem: 'Linux' };
+  }
+
+  const ua = navigator.userAgent;
+  let deviceType: 'Mobile' | 'Tablet' | 'Desktop' = 'Desktop';
+  if (/iPad|Tablet|Android(?!.*Mobile)/i.test(ua)) {
+    deviceType = 'Tablet';
+  } else if (/Mobile|iPhone|Android|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua)) {
+    deviceType = 'Mobile';
+  }
+
+  let browser = 'Chrome';
+  if (ua.includes('Firefox')) browser = 'Firefox';
+  else if (ua.includes('Safari') && !ua.includes('Chrome')) browser = 'Safari';
+  else if (ua.includes('Edg')) browser = 'Edge';
+
+  let operatingSystem = 'Windows';
+  if (ua.includes('Mac OS')) operatingSystem = 'macOS';
+  else if (ua.includes('Android')) operatingSystem = 'Android';
+  else if (ua.includes('iPhone') || ua.includes('iPad')) operatingSystem = 'iOS';
+  else if (ua.includes('Linux')) operatingSystem = 'Linux';
+
+  return { deviceType, browser, operatingSystem };
+}
+
+export function calculateLeadScoreAndCategory(
+  searchCount: number,
+  viewCount: number,
+  callCount: number,
+  whatsAppCount: number,
+  leadCount: number,
+  favoriteCount: number,
+  timeOnSiteSeconds: number
+): { leadScore: number; leadCategory: LeadCategory } {
+  let score = 5; // Base score
+  score += Math.min(20, searchCount * 3);
+  score += Math.min(25, viewCount * 4);
+  score += Math.min(25, whatsAppCount * 15);
+  score += Math.min(25, callCount * 15);
+  score += Math.min(30, leadCount * 25);
+  score += Math.min(15, favoriteCount * 5);
+  score += Math.min(15, Math.floor(timeOnSiteSeconds / 60) * 2);
+
+  const finalScore = Math.min(100, Math.max(0, score));
+
+  let category: LeadCategory = 'Cold';
+  if (finalScore >= 81) category = 'VIP';
+  else if (finalScore >= 56) category = 'Hot';
+  else if (finalScore >= 26) category = 'Warm';
+
+  return { leadScore: finalScore, leadCategory: category };
+}
+
+export async function initializeVisitorTracking(): Promise<VisitorProfile> {
   let visitorId = '';
   try {
     visitorId = localStorage.getItem('bazar360_visitor_id') || '';
   } catch (e) {
-    console.warn('Storage restrictions active, creating temporary tracking session.');
+    console.warn('Storage disabled, using session visitor ID.');
   }
 
-  let isNewVisitor = false;
   if (!visitorId) {
-    visitorId = generateUUID();
-    isNewVisitor = true;
+    visitorId = generateVisitorId();
     try {
       localStorage.setItem('bazar360_visitor_id', visitorId);
     } catch (e) {}
   }
 
-  const visitorRef = doc(db, 'visitors', visitorId);
+  const { deviceType, browser, operatingSystem } = detectDeviceAndOS();
+  const referrer = typeof document !== 'undefined' ? document.referrer || 'Direct' : 'Direct';
   const nowStr = new Date().toISOString();
-  
-  // Detect standard device metrics
-  const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
-  const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
-  const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : 'Bazar360 Server Probe';
 
-  let hasNewSession = false;
+  let isNewSession = false;
   try {
-    if (typeof window !== 'undefined' && !sessionStorage.getItem('bazar360_session_active')) {
-      hasNewSession = true;
-      sessionStorage.setItem('bazar360_session_active', 'true');
+    if (typeof sessionStorage !== 'undefined' && !sessionStorage.getItem('bazar360_active_session')) {
+      isNewSession = true;
+      sessionStorage.setItem('bazar360_active_session', 'true');
     }
   } catch (e) {
-    hasNewSession = true; // fallback
+    isNewSession = true;
   }
 
-  let visitor: VisitorData;
+  const visitorRef = doc(db, 'visitors', visitorId);
+  let profile: VisitorProfile;
 
   try {
     const snap = await getDoc(visitorRef);
     if (snap.exists()) {
-      const data = snap.data() as VisitorData;
-      
-      const newSessionCount = hasNewSession ? (data.sessionCount + 1) : data.sessionCount;
-      
-      // Determine frequency categorization based on real session logs
-      let category: '1st Time' | '2nd Time' | '3rd Time' | 'Regular' = '1st Time';
-      if (newSessionCount === 2) category = '2nd Time';
-      else if (newSessionCount === 3) category = '3rd Time';
-      else if (newSessionCount >= 4) category = 'Regular';
+      const existing = snap.data() as VisitorProfile;
+      const sessionCount = isNewSession ? (existing.sessionCount || 1) + 1 : existing.sessionCount || 1;
+      const visitCount = existing.visitCount + 1;
 
-      visitor = {
-        ...data,
-        lastSeen: nowStr,
-        sessionCount: newSessionCount,
-        frequencyCategory: category,
-        deviceMetrics: { viewportWidth, viewportHeight, userAgent }
-      };
+      let visitorCategory: VisitorCategory = 'First Time Visitor';
+      if (sessionCount === 2) visitorCategory = 'Second Time Visitor';
+      else if (sessionCount === 3) visitorCategory = 'Third Time Visitor';
+      else if (sessionCount >= 4) visitorCategory = 'Regular Visitor';
 
-      // Commit update asynchronously
-      await updateDoc(visitorRef, {
-        lastSeen: nowStr,
-        sessionCount: newSessionCount,
-        frequencyCategory: category,
-        'deviceMetrics.viewportWidth': viewportWidth,
-        'deviceMetrics.viewportHeight': viewportHeight,
-        'deviceMetrics.userAgent': userAgent
-      });
-    } else {
-      // First-time visitor creation
-      visitor = {
+      const { leadScore, leadCategory } = calculateLeadScoreAndCategory(
+        existing.searchHistory?.length || 0,
+        existing.vehicleViews?.length || 0,
+        existing.callClicks || 0,
+        existing.whatsAppClicks || 0,
+        existing.leadSubmissions || 0,
+        existing.favorites?.length || 0,
+        existing.timeOnSiteSeconds || 0
+      );
+
+      profile = {
+        ...existing,
         visitorId,
-        firstSeen: nowStr,
-        lastSeen: nowStr,
-        frequencyCategory: '1st Time',
-        sessionCount: 1,
-        totalViews: 0,
-        searchHistory: [],
-        viewHistory: [],
-        clicksToCall: 0,
-        clicksToWhatsApp: 0,
-        deviceMetrics: { viewportWidth, viewportHeight, userAgent }
+        visitCount,
+        sessionCount,
+        visitorCategory,
+        leadScore,
+        leadCategory,
+        deviceType,
+        browser,
+        operatingSystem,
+        referrer,
+        lastSeenAt: nowStr,
       };
 
-      await setDoc(visitorRef, visitor);
+      await updateDoc(visitorRef, {
+        visitCount,
+        sessionCount,
+        visitorCategory,
+        leadScore,
+        leadCategory,
+        deviceType,
+        browser,
+        operatingSystem,
+        referrer,
+        lastSeenAt: nowStr
+      }).catch(() => {});
+    } else {
+      profile = {
+        visitorId,
+        visitCount: 1,
+        sessionCount: 1,
+        deviceType,
+        browser,
+        operatingSystem,
+        country: 'Pakistan',
+        city: 'Peshawar',
+        referrer,
+        searchHistory: [],
+        vehicleViews: [],
+        showroomViews: [],
+        favorites: [],
+        sharesCount: 0,
+        whatsAppClicks: 0,
+        callClicks: 0,
+        leadSubmissions: 0,
+        timeOnSiteSeconds: 15,
+        visitorCategory: 'First Time Visitor',
+        leadCategory: 'Cold',
+        leadScore: 10,
+        firstSeenAt: nowStr,
+        lastSeenAt: nowStr,
+      };
+
+      await setDoc(visitorRef, profile).catch(() => {});
     }
   } catch (err) {
-    console.warn('Visitor tracking engine using local cache proxy:', err);
-    // Offline / Sandboxed Fallback
-    visitor = {
+    profile = {
       visitorId,
-      firstSeen: nowStr,
-      lastSeen: nowStr,
-      frequencyCategory: '1st Time',
+      visitCount: 1,
       sessionCount: 1,
-      totalViews: 0,
+      deviceType,
+      browser,
+      operatingSystem,
+      country: 'Pakistan',
+      city: 'Peshawar',
+      referrer,
       searchHistory: [],
-      viewHistory: [],
-      clicksToCall: 0,
-      clicksToWhatsApp: 0,
-      deviceMetrics: { viewportWidth, viewportHeight, userAgent }
+      vehicleViews: [],
+      showroomViews: [],
+      favorites: [],
+      sharesCount: 0,
+      whatsAppClicks: 0,
+      callClicks: 0,
+      leadSubmissions: 0,
+      timeOnSiteSeconds: 15,
+      visitorCategory: 'First Time Visitor',
+      leadCategory: 'Cold',
+      leadScore: 10,
+      firstSeenAt: nowStr,
+      lastSeenAt: nowStr,
     };
   }
 
-  // Also save in localStorage for synchronous fast retrieval in UI
-  try {
-    localStorage.setItem('bazar360_visitor_profile', JSON.stringify(visitor));
-  } catch (e) {}
+  // Log page view in visitor_logs
+  logVisitorAction(visitorId, 'PAGE_VIEW', { path: typeof window !== 'undefined' ? window.location.pathname : '/' });
 
-  return visitor;
+  return profile;
 }
 
-// Log an organic search query
-export async function trackSearchQuery(queryText: string): Promise<void> {
-  if (!queryText.trim()) return;
-  
-  let visitorId = '';
-  try {
-    visitorId = localStorage.getItem('bazar360_visitor_id') || '';
-  } catch (e) {}
-  
+export async function logVisitorAction(
+  visitorId: string, 
+  action: 'PAGE_VIEW' | 'SEARCH' | 'VEHICLE_VIEW' | 'WHATSAPP_CLICK' | 'CALL_CLICK' | 'LEAD_SUBMIT' | 'SHARE',
+  metadata?: Record<string, any>
+): Promise<void> {
   if (!visitorId) return;
 
+  const nowStr = new Date().toISOString();
   try {
-    // Save to local cache first
-    const cached = localStorage.getItem('bazar360_visitor_profile');
-    if (cached) {
-      const parsed = JSON.parse(cached) as VisitorData;
-      if (!parsed.searchHistory.includes(queryText)) {
-        parsed.searchHistory.push(queryText);
-        localStorage.setItem('bazar360_visitor_profile', JSON.stringify(parsed));
-      }
-    }
-
-    const visitorRef = doc(db, 'visitors', visitorId);
-    await updateDoc(visitorRef, {
-      searchHistory: arrayUnion(queryText),
-      lastSeen: new Date().toISOString()
-    });
-  } catch (e) {
-    console.log('Search log cached locally.');
-  }
-}
-
-// Log a vehicle listing click / details view
-export async function trackVehicleView(listingId: string): Promise<void> {
-  if (!listingId) return;
-  
-  let visitorId = '';
-  try {
-    visitorId = localStorage.getItem('bazar360_visitor_id') || '';
-  } catch (e) {}
-  
-  if (!visitorId) return;
-
-  try {
-    // Save to local cache first
-    const cached = localStorage.getItem('bazar360_visitor_profile');
-    if (cached) {
-      const parsed = JSON.parse(cached) as VisitorData;
-      parsed.totalViews += 1;
-      if (!parsed.viewHistory.includes(listingId)) {
-        parsed.viewHistory.push(listingId);
-      }
-      localStorage.setItem('bazar360_visitor_profile', JSON.stringify(parsed));
-    }
-
-    const visitorRef = doc(db, 'visitors', visitorId);
-    await updateDoc(visitorRef, {
-      viewHistory: arrayUnion(listingId),
-      totalViews: increment(1),
-      lastSeen: new Date().toISOString()
-    });
-
-    // Dispatch to BAZAR360 Lead Intelligence engine
-    dbTrackLeadAction({
-      userName: 'Visitor User',
-      userPhone: '',
-      userEmail: 'guest@bazar360.online',
-      actionType: 'vehicle_view',
-      details: `Viewed vehicle listing: ${listingId}`,
-      leadSource: typeof window !== 'undefined' && window.innerWidth < 768 ? 'Mobile' : 'Web',
-      leadScore: 30, // 30 points for vehicle view
-      leadCategory: 'Cold',
-      visitorCategory: 'Guest',
-      timeOnSite: 20,
-      sessionHistory: []
+    await addDoc(collection(db, 'visitor_logs'), {
+      visitorId,
+      path: typeof window !== 'undefined' ? window.location.pathname : '/',
+      action,
+      metadata: metadata || {},
+      timestamp: nowStr
     }).catch(() => {});
-  } catch (e) {
-    console.log('View log cached locally.');
-  }
-}
 
-// Log a high-intent CTR action (WhatsApp click or direct Call click)
-export async function trackHighIntentClick(action: 'whatsapp' | 'call'): Promise<void> {
-  let visitorId = '';
-  try {
-    visitorId = localStorage.getItem('bazar360_visitor_id') || '';
-  } catch (e) {}
-  
-  if (!visitorId) return;
-
-  try {
+    // Update visitor aggregate totals
     const visitorRef = doc(db, 'visitors', visitorId);
-    if (action === 'whatsapp') {
+    if (action === 'SEARCH' && metadata?.query) {
       await updateDoc(visitorRef, {
-        clicksToWhatsApp: increment(1),
-        lastSeen: new Date().toISOString()
-      });
-      dbTrackLeadAction({
-        userName: 'Visitor User',
-        userPhone: '',
-        userEmail: 'guest@bazar360.online',
-        actionType: 'whatsapp_click',
-        details: 'Clicked WhatsApp contact button',
-        leadSource: typeof window !== 'undefined' && window.innerWidth < 768 ? 'Mobile' : 'Web',
-        leadScore: 100, // 100 points for whatsapp
-        leadCategory: 'Cold',
-        visitorCategory: 'Guest',
-        timeOnSite: 30,
-        sessionHistory: []
+        searchHistory: arrayUnion(metadata.query),
+        lastSeenAt: nowStr
       }).catch(() => {});
-    } else {
+    } else if (action === 'VEHICLE_VIEW' && metadata?.vehicleId) {
       await updateDoc(visitorRef, {
-        clicksToCall: increment(1),
-        lastSeen: new Date().toISOString()
-      });
-      dbTrackLeadAction({
-        userName: 'Visitor User',
-        userPhone: '',
-        userEmail: 'guest@bazar360.online',
-        actionType: 'call_click',
-        details: 'Clicked direct phone call dialer',
-        leadSource: typeof window !== 'undefined' && window.innerWidth < 768 ? 'Mobile' : 'Web',
-        leadScore: 100, // 100 points for phone call click
-        leadCategory: 'Cold',
-        visitorCategory: 'Guest',
-        timeOnSite: 30,
-        sessionHistory: []
+        vehicleViews: arrayUnion({
+          vehicleId: metadata.vehicleId,
+          title: metadata.title || 'Vehicle',
+          timestamp: nowStr
+        }),
+        lastSeenAt: nowStr
+      }).catch(() => {});
+    } else if (action === 'WHATSAPP_CLICK') {
+      await updateDoc(visitorRef, {
+        whatsAppClicks: increment(1),
+        lastSeenAt: nowStr
+      }).catch(() => {});
+    } else if (action === 'CALL_CLICK') {
+      await updateDoc(visitorRef, {
+        callClicks: increment(1),
+        lastSeenAt: nowStr
+      }).catch(() => {});
+    } else if (action === 'LEAD_SUBMIT') {
+      await updateDoc(visitorRef, {
+        leadSubmissions: increment(1),
+        lastSeenAt: nowStr
       }).catch(() => {});
     }
-  } catch (e) {
-    console.log('CTR intent cached locally.');
+  } catch (err) {
+    console.warn('[VisitorTracking] Log failed:', err);
   }
 }

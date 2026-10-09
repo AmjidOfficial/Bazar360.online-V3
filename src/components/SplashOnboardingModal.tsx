@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, ArrowRight, ShieldCheck, Car, CheckCircle, ChevronRight, X } from 'lucide-react';
+import { Sparkles, ArrowRight, ShieldCheck, Car, CheckCircle, ChevronRight } from 'lucide-react';
 import { CarListing } from '../types';
 
 interface SplashOnboardingModalProps {
@@ -19,21 +19,21 @@ export function SplashOnboardingModal({ isOpen, onClose, lang, listings = [], on
       title: "Drive Your Dream",
       subtitle: "Verified & Secure",
       desc: "Beautiful cars. Verified spaces. Better drive.",
-      image: '',
+      image: "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1200&q=80",
       tag: "Bazar360 Certified"
     },
     {
-      title: "Bazar360 Fleet",
+      title: "Auto Choice Fleet",
       subtitle: "Direct Showrooms",
       desc: "Immaculate SUVs, Hybrid Sedans & Sports collection.",
-      image: '',
+      image: "https://images.unsplash.com/photo-1542362567-b07eac79094d?auto=format&fit=crop&w=1200&q=80",
       tag: "Top Rated 4.9★"
     },
     {
       title: "Instant Selling",
       subtitle: "Fast & Transparent",
       desc: "Sell your car directly to verified buyers nationwide.",
-      image: '',
+      image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80",
       tag: "Zero Brokerage"
     }
   ];
@@ -57,7 +57,7 @@ export function SplashOnboardingModal({ isOpen, onClose, lang, listings = [], on
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[var(--color-bg-primary)]/95 backdrop-blur-2xl overflow-y-auto"
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#05110D]/95 backdrop-blur-2xl overflow-y-auto"
       >
         {/* Ambient Dark Emerald Glass Glow */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-emerald-600/20 rounded-full blur-[120px] pointer-events-none" />
@@ -86,21 +86,11 @@ export function SplashOnboardingModal({ isOpen, onClose, lang, listings = [], on
           animate={{ scale: 1, y: 0, opacity: 1 }}
           exit={{ scale: 0.9, y: 20, opacity: 0 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="relative w-full max-w-sm rounded-[36px] bg-[var(--color-bg-secondary)]/80 backdrop-blur-3xl border border-[var(--color-accent-main)]/20 p-6 md:p-8 text-center shadow-[0_25px_60px_rgba(0,0,0,0.8)] z-10 flex flex-col items-center justify-between min-h-[520px]"
+          className="relative w-full max-w-sm rounded-[36px] bg-[#0A1A14]/80 backdrop-blur-3xl border border-emerald-500/20 p-6 md:p-8 text-center shadow-[0_25px_60px_rgba(0,0,0,0.8)] z-10 flex flex-col items-center justify-between min-h-[520px]"
         >
-          {/* Dismiss X Button */}
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2.5 text-gray-400 hover:text-white rounded-full bg-black/20 hover:bg-black/40 transition-all cursor-pointer z-20 border border-white/10"
-            aria-label="Skip splash onboarding"
-            title="Skip onboarding"
-          >
-            <X size={16} />
-          </button>
-
           {/* Top Brand Emblem & Interlocking Logos */}
           <div className="flex flex-col items-center gap-2 pt-2">
-            <div className="w-16 h-16 rounded-full bg-[var(--color-accent-main)]/10 border border-[var(--color-accent-main)]/30 flex items-center justify-center text-[var(--color-accent-main)] shadow-[0_0_25px_rgba(16,185,129,0.25)]">
+            <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.25)]">
               <svg className="w-9 h-9 fill-current" viewBox="0 0 24 24">
                 <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z" />
               </svg>
@@ -108,10 +98,10 @@ export function SplashOnboardingModal({ isOpen, onClose, lang, listings = [], on
 
             {/* Dual Brand Logos Header matching Prompt */}
             <div className="space-y-0.5">
-              <h1 className="text-2xl font-black font-display tracking-tight text-[var(--color-text-header)] flex items-center justify-center gap-2">
-                <span>Bazar360</span>
+              <h1 className="text-2xl font-black font-display tracking-tight text-white flex items-center justify-center gap-2">
+                <span>Auto Choice</span>
               </h1>
-              <p className="text-[10px] font-mono tracking-widest text-[var(--color-accent-main)] uppercase font-semibold">
+              <p className="text-[10px] font-mono tracking-widest text-emerald-400 uppercase font-semibold">
                 Powered by Bazar360.online
               </p>
             </div>
@@ -119,11 +109,11 @@ export function SplashOnboardingModal({ isOpen, onClose, lang, listings = [], on
 
           {/* Slide Content Area matching Screen 1 in Attached Image */}
           <div className="my-auto py-6 space-y-3 w-full">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold font-mono bg-[var(--color-accent-main)]/20 text-emerald-300 border border-[var(--color-accent-main)]/30">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
               <ShieldCheck size={12} /> {currentSlide.tag}
             </span>
 
-            <h2 className="text-xl md:text-2xl font-bold text-[var(--color-text-header)] tracking-tight">
+            <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight">
               {currentSlide.title}
             </h2>
 
@@ -139,7 +129,7 @@ export function SplashOnboardingModal({ isOpen, onClose, lang, listings = [], on
                   onClick={() => setActiveSlide(idx)}
                   className={`h-2 rounded-full transition-all duration-300 ${
                     activeSlide === idx 
-                      ? 'w-6 bg-[var(--color-accent-main)] shadow-[0_0_8px_rgba(16,185,129,0.8)]' 
+                      ? 'w-6 bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.8)]' 
                       : 'w-2 bg-emerald-900/60 hover:bg-emerald-700/60'
                   }`}
                   aria-label={`Go to slide ${idx + 1}`}

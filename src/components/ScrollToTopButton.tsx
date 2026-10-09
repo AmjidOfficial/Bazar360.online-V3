@@ -44,7 +44,7 @@ export function ScrollToTopButton({ currentTab }: ScrollToTopButtonProps) {
           transition={{ duration: 0.2 }}
           onClick={scrollToTop}
           aria-label="Back to Top"
-          className="fixed bottom-24 md:bottom-28 left-4 md:left-6 z-40 p-3.5 rounded-full bg-gradient-to-r from-[#7C3AED] to-[#3B82F6] hover:from-[#8B5CF6] hover:to-[#2563EB] text-white shadow-xl shadow-[#7C3AED]/30 border border-[#7C3AED]/40 active:scale-95 transition-all cursor-pointer flex items-center justify-center group"
+          className="fixed bottom-24 md:bottom-28 left-4 md:left-6 z-40 p-3.5 rounded-full bg-orange-500 hover:bg-orange-600 text-white shadow-xl shadow-orange-500/25 border border-orange-400/30 active:scale-95 transition-all cursor-pointer flex items-center justify-center group"
         >
           <ArrowUp size={20} className="group-hover:-translate-y-0.5 transition-transform" />
         </motion.button>

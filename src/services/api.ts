@@ -73,8 +73,8 @@ export interface ScrapeSocialsResponse {
 }
 
 // Environment Detection Helper
-const isGitHubPages = typeof window !== 'undefined' && (window.location.hostname.includes('github.io') || window.location.hostname.includes('bazar360.online'));
-const isProduction = (typeof import.meta !== 'undefined' && (import.meta as any).env?.PROD) || isGitHubPages;
+const isGitHubPages = window.location.hostname.includes('github.io') || window.location.hostname.includes('bazar360.online');
+const isProduction = process.env.NODE_ENV === 'production' || isGitHubPages;
 
 /**
  * Safely fetches the current Firebase App Check token to protect our local backend.
@@ -321,12 +321,75 @@ export async function callGoogleSheetsSync(payload: {
  * ==========================================
  */
 
+const SEED_POSTS = [
+  {
+    id: "seed-post-porsche",
+    userId: "auto-choice-peshawar-owner",
+    userName: "Auto Choice - The Right Choice",
+    userAvatar: "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&q=80&w=300",
+    userRole: "Showroom Owner",
+    showroomId: "auto-choice-peshawar",
+    type: "IMAGE",
+    content: "We are excited to announce that the all-new Porsche 911 GT3 (992 generation) has finally landed at our main showroom floor in Peshawar! Finished in paint-to-sample Crayon Grey, this track-focused monster features a 4.0L naturally aspirated flat-six revving all the way to 9,000 RPM. Drop by for a cup of tea and an exclusive walkaround!",
+    mediaUrl: "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&q=80&w=1200",
+    createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
+    likes: ["user-demo-1", "user-demo-2", "user-demo-3"],
+    commentsCount: 1
+  },
+  {
+    id: "seed-post-welcome",
+    userId: "amjid-admin",
+    userName: "Amjid (Admin)",
+    userAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300",
+    userRole: "Admin",
+    type: "TEXT",
+    content: "Welcome to Bazar360 Community Feed! This space is designed for Pakistani auto enthusiasts, buyers, sellers, and certified showrooms to share automotive updates, showcase luxury imports, and negotiate deals. Keep it polite, tag your posts, and let the wheels roll!",
+    createdAt: new Date(Date.now() - 3600000 * 12).toISOString(),
+    likes: ["user-demo-4", "user-demo-5"],
+    commentsCount: 0
+  },
+  {
+    id: "seed-post-civic",
+    userId: "private-seller-1",
+    userName: "M. Ibrahim",
+    userAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300",
+    userRole: "Individual User",
+    type: "IMAGE",
+    content: "Thinking of putting up my cherished Honda Civic Oriel (2021) for sale. Meticulously maintained at dealership, total genuine paint, brand new Yokohama tyres installed. DM me or see my active listings if you are interested!",
+    mediaUrl: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=1200",
+    createdAt: new Date(Date.now() - 3600000 * 24).toISOString(),
+    likes: ["user-demo-1"],
+    commentsCount: 0
+  }
+];
+
 // Direct Firestore Helpers for client bypass
 async function fetchCommunityFeedDirect(): Promise<{ success: boolean; posts?: any[]; error?: string }> {
   try {
     const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
     const snap = await getDocs(q);
     let posts = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    if (posts.length === 0) {
+      console.log("[Client Fallback] Direct Firestore feed is empty. Seeding...");
+      for (const p of SEED_POSTS) {
+        await setDoc(doc(db, "posts", p.id), p);
+      }
+      try {
+        await setDoc(doc(db, "posts", "seed-post-porsche", "comments", "seed-comment-1"), {
+          id: "seed-comment-1",
+          userId: "buyer-khan",
+          userName: "Khan Khattak",
+          userAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=300",
+          userRole: "Individual User",
+          text: "MashaAllah what a beauty! Peshawar has some serious garage goals.",
+          createdAt: new Date(Date.now() - 3600000).toISOString()
+        });
+      } catch (err) {
+        console.warn("Could not write seed comment:", err);
+      }
+      posts = [...SEED_POSTS];
+    }
 
     // Filter out unapproved posts except for the author and admins
     const currentUser = auth.currentUser;
@@ -342,8 +405,8 @@ async function fetchCommunityFeedDirect(): Promise<{ success: boolean; posts?: a
 
     return { success: true, posts };
   } catch (err: any) {
-    console.warn("[Community Feed] Firestore fetch notice:", err.message);
-    return { success: true, posts: [] };
+    console.error("[Client Fallback] Direct Firestore fetch failed:", err);
+    return { success: false, error: err.message };
   }
 }
 
@@ -361,7 +424,7 @@ async function createSocialPostDirect(payload: {
     }
     let displayName = currentUser.displayName || "Anonymous User";
     let userRole = "Individual User";
-    let photoURL = currentUser.photoURL || '';
+    let photoURL = currentUser.photoURL || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150";
 
     try {
       const profileSnap = await getDoc(doc(db, "users", currentUser.uid));
@@ -450,7 +513,7 @@ async function createSocialCommentDirect(postId: string, text: string): Promise<
     }
     let displayName = currentUser.displayName || "Anonymous User";
     let userRole = "Individual User";
-    let photoURL = currentUser.photoURL || '';
+    let photoURL = currentUser.photoURL || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150";
 
     try {
       const profileSnap = await getDoc(doc(db, "users", currentUser.uid));

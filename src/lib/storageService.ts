@@ -54,24 +54,54 @@ export async function compressAndResizeImage(
         // AUTOMATIC WATERMARK STAMP FOR BAZAR360.ONLINE
         try {
           ctx.save();
-          const fontSize = Math.max(12, Math.round(width * 0.022));
+          const fontSize = Math.max(12, Math.round(width * 0.024));
           ctx.font = `bold ${fontSize}px "Plus Jakarta Sans", "Inter", sans-serif`;
           const text = "Bazar360.online";
           const textMetrics = ctx.measureText(text);
           const textWidth = textMetrics.width;
           
-          const padding = fontSize * 1.2;
-          const x = width - textWidth - padding;
-          const y = height - padding;
+          const paddingX = fontSize * 1.2;
+          const paddingY = fontSize * 0.6;
+          const pillWidth = textWidth + paddingX * 2;
+          const pillHeight = fontSize + paddingY * 2;
           
-          // Draw a clean, elegant semi-transparent text stamp with subtle drop-shadow
-          ctx.fillStyle = "rgba(255, 255, 255, 0.45)"; // Sleek semi-transparent white
-          ctx.shadowColor = "rgba(0, 0, 0, 0.6)";      // Dark shadow for high contrast
-          ctx.shadowBlur = 4;
-          ctx.shadowOffsetX = 1;
-          ctx.shadowOffsetY = 1;
+          const marginRight = Math.max(12, Math.round(width * 0.03));
+          const marginBottom = Math.max(12, Math.round(height * 0.03));
           
-          ctx.fillText(text, x, y);
+          const pillX = width - pillWidth - marginRight;
+          const pillY = height - pillHeight - marginBottom;
+          
+          const radius = pillHeight / 2;
+          ctx.beginPath();
+          ctx.moveTo(pillX + radius, pillY);
+          ctx.lineTo(pillX + pillWidth - radius, pillY);
+          ctx.quadraticCurveTo(pillX + pillWidth, pillY, pillX + pillWidth, pillY + radius);
+          ctx.lineTo(pillX + pillWidth, pillY + pillHeight - radius);
+          ctx.quadraticCurveTo(pillX + pillWidth, pillY + pillHeight, pillX + pillWidth - radius, pillY + pillHeight);
+          ctx.lineTo(pillX + radius, pillY + pillHeight);
+          ctx.quadraticCurveTo(pillX, pillY + pillHeight, pillX, pillY + pillHeight - radius);
+          ctx.lineTo(pillX, pillY + radius);
+          ctx.quadraticCurveTo(pillX, pillY, pillX + radius, pillY);
+          ctx.closePath();
+          
+          ctx.fillStyle = "rgba(11, 15, 25, 0.72)";
+          ctx.fill();
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          
+          const dotRadius = fontSize * 0.22;
+          const dotX = pillX + paddingX + dotRadius;
+          const dotY = pillY + paddingY + fontSize / 2 + 1;
+          
+          ctx.beginPath();
+          ctx.arc(dotX, dotY, dotRadius, 0, 2 * Math.PI);
+          ctx.fillStyle = "#F97316"; // Brand Orange
+          ctx.fill();
+          
+          ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+          ctx.textBaseline = "middle";
+          ctx.fillText(text, dotX + dotRadius * 2 + 6, dotY);
           ctx.restore();
         } catch (watermarkErr) {
           console.warn('[Watermark Pipeline] Failed to draw watermark:', watermarkErr);

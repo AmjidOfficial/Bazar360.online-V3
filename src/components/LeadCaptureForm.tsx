@@ -8,15 +8,7 @@ import { dbSaveLead } from '../lib/dbService';
 
 const LeadSchema = z.object({
   userName: z.string().min(2, "Name is required"),
-  userPhone: z.string().min(10, "Phone is required").transform((val) => {
-    let clean = val.trim();
-    if (clean.startsWith('0')) return '+92' + clean.substring(1);
-    if (!clean.startsWith('+92') && clean.length > 0) {
-      if (clean.startsWith('92')) return '+' + clean;
-      return '+92' + clean;
-    }
-    return clean;
-  }),
+  userPhone: z.string().min(10, "Phone is required"),
   vehicleTitle: z.string().min(1, "Vehicle is required"),
   inquiryMessage: z.string().optional(),
 });
@@ -68,21 +60,21 @@ export default function LeadCaptureForm({ vehicleId, vehicleTitle, showroomOwner
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 bg-bg-secondary/40 p-3.5 rounded-2xl border border-white/5">
-      <h3 className="text-lg font-bold text-text-main font-sans tracking-tight">Request Info</h3>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 bg-slate-900/40 p-6 rounded-2xl border border-white/5">
+      <h3 className="text-lg font-bold text-slate-100 font-sans tracking-tight">Request Info</h3>
       
-      <input {...register("userName")} placeholder="Your Name" className="w-full bg-bg-primary border border-border-main rounded-md p-3 text-text-main" />
+      <input {...register("userName")} placeholder="Your Name" className="w-full bg-slate-950 border border-slate-800 rounded-md p-3 text-slate-200" />
       {errors.userName && <p className="text-red-500 text-xs">{errors.userName.message}</p>}
       
-      <input {...register("userPhone")} placeholder="Phone Number" className="w-full bg-bg-primary border border-border-main rounded-md p-3 text-text-main" />
+      <input {...register("userPhone")} placeholder="Phone Number" className="w-full bg-slate-950 border border-slate-800 rounded-md p-3 text-slate-200" />
       {errors.userPhone && <p className="text-red-500 text-xs">{errors.userPhone.message}</p>}
       
-      <textarea {...register("inquiryMessage")} placeholder="Inquiry Message" className="w-full bg-bg-primary border border-border-main rounded-md p-3 text-text-main" />
+      <textarea {...register("inquiryMessage")} placeholder="Inquiry Message" className="w-full bg-slate-950 border border-slate-800 rounded-md p-3 text-slate-200" />
       
       <button 
         type="submit"
         disabled={submitting}
-        className="w-full bg-[var(--color-brand-orange)] hover:bg-[var(--color-brand-orange)]/90 text-[var(--color-text-header)] font-bold py-2.5 px-6 rounded-md uppercase tracking-wider text-xs transition-all shadow-md flex items-center justify-center gap-2"
+        className="w-full bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white font-bold py-2.5 px-6 rounded-md uppercase tracking-wider text-xs transition-all shadow-md flex items-center justify-center gap-2"
       >
         {submitting ? 'Submitting...' : <><Send size={12} /> Submit Inquiry</>}
       </button>

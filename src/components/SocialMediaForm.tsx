@@ -80,10 +80,10 @@ export default function SocialMediaForm({ userId, initialLinks, onSaveSuccess }:
   };
 
   return (
-    <form id="social-media-form" onSubmit={handleSave} className="bg-bg-secondary border border-border-main p-6 rounded-xl space-y-5 shadow-md">
+    <form id="social-media-form" onSubmit={handleSave} className="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-5 shadow-md">
       <div>
-        <h3 className="text-sm font-bold text-[var(--color-text-header)] uppercase tracking-wider mb-1">Social Media & Connections</h3>
-        <p className="text-xs text-text-muted">Establish professional endpoints for clients, distributors, and representatives.</p>
+        <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-1">Social Media & Connections</h3>
+        <p className="text-xs text-slate-400">Establish professional endpoints for clients, distributors, and representatives.</p>
       </div>
 
       {error && (
@@ -94,7 +94,7 @@ export default function SocialMediaForm({ userId, initialLinks, onSaveSuccess }:
       )}
 
       {success && (
-        <div className="bg-emerald-950/50 border border-[var(--color-accent-main)]/30 p-3 rounded-lg flex items-center gap-2.5 text-xs text-emerald-200">
+        <div className="bg-emerald-950/50 border border-emerald-500/30 p-3 rounded-lg flex items-center gap-2.5 text-xs text-emerald-200">
           <Check size={14} className="shrink-0" />
           <span>Social links updated successfully!</span>
         </div>
@@ -103,8 +103,8 @@ export default function SocialMediaForm({ userId, initialLinks, onSaveSuccess }:
       <div className="space-y-4">
         {/* Website */}
         <div>
-          <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-            <Globe size={12} className="text-text-muted" />
+          <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+            <Globe size={12} className="text-slate-400" />
             <span>Official Website</span>
           </label>
           <input
@@ -112,14 +112,14 @@ export default function SocialMediaForm({ userId, initialLinks, onSaveSuccess }:
             placeholder="https://yourwebsite.com"
             value={links.website || ''}
             onChange={(e) => handleChange('website', e.target.value)}
-            className="w-full bg-bg-primary border border-border-main text-xs text-[var(--color-text-header)] rounded-md px-3.5 py-2 focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none transition-all placeholder:text-slate-600 font-sans"
+            className="w-full bg-slate-950 border border-slate-800 text-xs text-white rounded-md px-3.5 py-2 focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none transition-all placeholder:text-slate-600 font-sans"
           />
         </div>
 
         {/* WhatsApp */}
         <div>
-          <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-            <MessageCircle size={12} className="text-[var(--color-accent-main)]" />
+          <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+            <MessageCircle size={12} className="text-emerald-500" />
             <span>WhatsApp Business Number (International Format)</span>
           </label>
           <input
@@ -127,13 +127,13 @@ export default function SocialMediaForm({ userId, initialLinks, onSaveSuccess }:
             placeholder="e.g. 923001234567 (with country code, no + or spaces)"
             value={links.whatsapp || ''}
             onChange={(e) => handleChange('whatsapp', e.target.value)}
-            className="w-full bg-bg-primary border border-border-main text-xs text-[var(--color-text-header)] rounded-md px-3.5 py-2 focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none transition-all placeholder:text-slate-600 font-sans"
+            className="w-full bg-slate-950 border border-slate-800 text-xs text-white rounded-md px-3.5 py-2 focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none transition-all placeholder:text-slate-600 font-sans"
           />
         </div>
 
         {/* Facebook */}
         <div>
-          <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+          <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
             <Facebook size={12} className="text-blue-500" />
             <span>Facebook Page URL</span>
           </label>
@@ -142,13 +142,13 @@ export default function SocialMediaForm({ userId, initialLinks, onSaveSuccess }:
             placeholder="https://facebook.com/yourpage"
             value={links.facebook || ''}
             onChange={(e) => handleChange('facebook', e.target.value)}
-            className="w-full bg-bg-primary border border-border-main text-xs text-[var(--color-text-header)] rounded-md px-3.5 py-2 focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none transition-all placeholder:text-slate-600 font-sans"
+            className="w-full bg-slate-950 border border-slate-800 text-xs text-white rounded-md px-3.5 py-2 focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none transition-all placeholder:text-slate-600 font-sans"
           />
         </div>
 
         {/* Instagram */}
         <div>
-          <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+          <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
             <Instagram size={12} className="text-pink-500" />
             <span>Instagram Profile URL</span>
           </label>
@@ -157,13 +157,13 @@ export default function SocialMediaForm({ userId, initialLinks, onSaveSuccess }:
             placeholder="https://instagram.com/yourhandle"
             value={links.instagram || ''}
             onChange={(e) => handleChange('instagram', e.target.value)}
-            className="w-full bg-bg-primary border border-border-main text-xs text-[var(--color-text-header)] rounded-md px-3.5 py-2 focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none transition-all placeholder:text-slate-600 font-sans"
+            className="w-full bg-slate-950 border border-slate-800 text-xs text-white rounded-md px-3.5 py-2 focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none transition-all placeholder:text-slate-600 font-sans"
           />
         </div>
 
         {/* TikTok */}
         <div>
-          <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+          <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
             <Link size={12} className="text-cyan-500" />
             <span>TikTok Profile URL</span>
           </label>
@@ -172,7 +172,7 @@ export default function SocialMediaForm({ userId, initialLinks, onSaveSuccess }:
             placeholder="https://tiktok.com/@yourhandle"
             value={links.tiktok || ''}
             onChange={(e) => handleChange('tiktok', e.target.value)}
-            className="w-full bg-bg-primary border border-border-main text-xs text-[var(--color-text-header)] rounded-md px-3.5 py-2 focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none transition-all placeholder:text-slate-600 font-sans"
+            className="w-full bg-slate-950 border border-slate-800 text-xs text-white rounded-md px-3.5 py-2 focus:border-[#FF6B00] focus:ring-1 focus:ring-[#FF6B00] outline-none transition-all placeholder:text-slate-600 font-sans"
           />
         </div>
       </div>
@@ -180,7 +180,7 @@ export default function SocialMediaForm({ userId, initialLinks, onSaveSuccess }:
       <button
         type="submit"
         disabled={saving}
-        className="w-full bg-[var(--color-brand-orange)] hover:hover:bg-[var(--color-brand-orange)] text-[var(--color-text-header)] py-2.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+        className="w-full bg-[#FF6B00] hover:bg-[#E05B00] text-white py-2.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
       >
         {saving ? (
           <>

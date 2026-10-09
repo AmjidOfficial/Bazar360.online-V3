@@ -12,9 +12,7 @@ export const LeadSchema = z.object({
   userEmail: z.string().optional(),
   vehicleTitle: z.string().optional(),
   vehiclePrice: z.number().optional(),
-  inquiryMessage: z.string().optional(),
-  vehicleImage: z.string().optional(),
-}).passthrough();
+});
 
 export type LeadInput = z.infer<typeof LeadSchema>;
 

@@ -1,7 +1,10 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+// BAZAR360 Unified Enterprise Theme Provider
+// Enforces single dark luxury system permanently across all pages and components.
 
-export type ThemeType = 'light' | 'dark';
-export type ThemeClassType = ThemeType;
+import React, { createContext, useContext, useEffect } from 'react';
+
+export type ThemeType = 'dark';
+export type ThemeClassType = string;
 
 interface ThemeContextType {
   theme: ThemeType;
@@ -11,51 +14,30 @@ interface ThemeContextType {
   toggleTheme: () => void;
 }
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+const ThemeContext = createContext<ThemeContextType>({
+  theme: 'dark',
+  currentTheme: 'dark',
+  isDark: true,
+  setTheme: () => {},
+  toggleTheme: () => {},
+});
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeType>(() => {
-    try {
-      const saved = localStorage.getItem('bazar360_theme') as ThemeType;
-      if (saved === 'light' || saved === 'dark') return saved;
-    } catch {
-      // Storage restricted in sandbox iframe
-    }
-    return 'light'; // Default to light premium theme
-  });
-
-  const toggleTheme = () => {
-    setThemeState(prev => (prev === 'light' ? 'dark' : 'light'));
-  };
-
-  const setTheme = (newTheme: ThemeType) => {
-    setThemeState(newTheme);
-  };
-
-  const isDark = theme === 'dark';
-
   useEffect(() => {
-    const root = document.documentElement;
-    root.classList.remove('light', 'dark');
-    root.classList.add(theme);
-    try {
-      localStorage.setItem('bazar360_theme', theme);
-    } catch {
-      // Storage restricted in sandbox iframe
+    if (typeof document !== 'undefined') {
+      const root = document.documentElement;
+      root.classList.remove('light');
+      root.classList.add('dark');
     }
-  }, [theme]);
+  }, []);
 
   return (
-    <ThemeContext.Provider value={{ theme, currentTheme: theme, isDark, setTheme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme: 'dark', currentTheme: 'dark', isDark: true, setTheme: () => {}, toggleTheme: () => {} }}>
       {children}
     </ThemeContext.Provider>
   );
 }
 
 export function useTheme() {
-  const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
-  return context;
+  return useContext(ThemeContext);
 }

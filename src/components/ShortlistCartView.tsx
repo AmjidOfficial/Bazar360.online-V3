@@ -68,7 +68,7 @@ export function ShortlistCartView({
       const disc = Math.round(subtotal * 0.05); // 5% promotional discount
       setDiscountAmount(disc);
       setAppliedPromo(promoCode.toUpperCase());
-      toast.success(isUrdu ? 'پرومو کوڈ کامیابی سے لاگو ہو گیا! 5% رعایت' : 'Promo code applied successfully! 5% discount');
+      toast.success(isUrdu ? 'پرومو کوڈ کامیابی سے لاگو ہو گیا!' : 'Promo code applied successfully (5% off)!');
     } else {
       toast.error(isUrdu ? 'غلط پرومو کوڈ' : 'Invalid Promo Code. Try "AUTOCHOICE" or "BAZAR360"');
     }
@@ -79,7 +79,7 @@ export function ShortlistCartView({
       {/* Header Bar */}
       <div className="flex items-center justify-between border-b border-[var(--color-border-main)] pb-4 mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-[var(--color-accent-main)]/15 border border-[var(--color-accent-main)]/30 flex items-center justify-center text-[var(--color-accent-main)] shadow-md">
+          <div className="w-10 h-10 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-md">
             <ShoppingBag size={22} className="stroke-[2.5]" />
           </div>
           <div>
@@ -87,7 +87,7 @@ export function ShortlistCartView({
               {isUrdu ? 'میرا شارٹ لسٹ اور باسکٹ' : 'My Shortlist & Cart'}
             </h1>
             <p className="text-xs text-[var(--color-text-muted)] font-mono">
-              Bazar360 Certified Direct Showroom Inquiry Basket ({items.length} {items.length === 1 ? 'Vehicle' : 'Vehicles'})
+              Auto Choice Certified Direct Showroom Inquiry Basket ({items.length} {items.length === 1 ? 'Vehicle' : 'Vehicles'})
             </p>
           </div>
         </div>
@@ -104,7 +104,7 @@ export function ShortlistCartView({
 
       {items.length === 0 ? (
         <div className="text-center py-16 px-4 bg-[var(--color-bg-secondary)] rounded-3xl border border-[var(--color-border-main)]">
-          <Car size={48} className="mx-auto text-[var(--color-accent-main)]/50 mb-3" />
+          <Car size={48} className="mx-auto text-emerald-400/50 mb-3" />
           <h3 className="text-lg font-bold text-[var(--color-text-header)]">
             {isUrdu ? 'آپ کا باسیٹ خالی ہے' : 'Your Shortlist Basket is Empty'}
           </h3>
@@ -127,7 +127,7 @@ export function ShortlistCartView({
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] shadow-lg hover:border-[var(--color-accent-main)]/40 transition-all group"
+                    className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] shadow-lg hover:border-emerald-500/40 transition-all group"
                   >
                     {/* Item Thumbnail */}
                     <div className="w-full sm:w-28 h-24 rounded-xl overflow-hidden bg-black/40 shrink-0 relative">
@@ -137,7 +137,7 @@ export function ShortlistCartView({
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         referrerPolicy="no-referrer"
                       />
-                      <span className="absolute top-1 left-1 bg-[var(--color-accent-main)] text-black text-[8px] font-black uppercase px-1.5 py-0.5 rounded shadow">
+                      <span className="absolute top-1 left-1 bg-emerald-500 text-black text-[8px] font-black uppercase px-1.5 py-0.5 rounded shadow">
                         Certified
                       </span>
                     </div>
@@ -145,7 +145,7 @@ export function ShortlistCartView({
                     {/* Item Info */}
                     <div className="flex-1 min-w-0 text-left space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-mono text-[var(--color-accent-main)] font-bold uppercase">
+                        <span className="text-[10px] font-mono text-emerald-400 font-bold uppercase">
                           {car.make} • {car.year}
                         </span>
                       </div>
@@ -156,7 +156,7 @@ export function ShortlistCartView({
                         {car.fuelType || 'Petrol'} • {car.transmission || 'Automatic'} • {car.registrationCity || car.location || 'Peshawar'}
                       </p>
 
-                      <div className="text-sm font-black text-[var(--color-accent-main)] font-mono pt-1">
+                      <div className="text-sm font-black text-emerald-400 font-mono pt-1">
                         {formatPkrPrice(itemTotal)}
                       </div>
                     </div>
@@ -208,7 +208,7 @@ export function ShortlistCartView({
             {/* Promo Code Input Box */}
             <form onSubmit={handleApplyPromo} className="space-y-2 text-left">
               <label className="text-[11px] font-mono font-bold uppercase text-[var(--color-text-muted)] flex items-center gap-1.5">
-                <Tag size={13} className="text-[var(--color-accent-main)]" />
+                <Tag size={13} className="text-emerald-400" />
                 {isUrdu ? 'پرومو / واؤچر کوڈ' : 'Promo / Voucher Code'}
               </label>
               <div className="flex items-center gap-2">
@@ -217,18 +217,18 @@ export function ShortlistCartView({
                   value={promoCode}
                   onChange={(e) => setPromoCode(e.target.value)}
                   placeholder="e.g. AUTOCHOICE or BAZAR360"
-                  className="flex-1 bg-black/40 border border-[var(--color-border-main)] focus:border-[var(--color-accent-main)] rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none uppercase font-mono"
+                  className="flex-1 bg-black/40 border border-[var(--color-border-main)] focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none uppercase font-mono"
                 />
                 <button
                   type="submit"
-                  className="px-4 py-2.5 bg-[var(--color-accent-main)] hover:bg-emerald-600 text-black font-black text-xs uppercase rounded-xl transition-all shadow cursor-pointer shrink-0"
+                  className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-black font-black text-xs uppercase rounded-xl transition-all shadow cursor-pointer shrink-0"
                 >
                   Apply
                 </button>
               </div>
 
               {appliedPromo && (
-                <p className="text-[10px] font-mono font-bold text-[var(--color-accent-main)] flex items-center gap-1 mt-1">
+                <p className="text-[10px] font-mono font-bold text-emerald-400 flex items-center gap-1 mt-1">
                   <CheckCircle2 size={12} /> Voucher "{appliedPromo}" Applied (5% Discount)
                 </p>
               )}
@@ -243,7 +243,7 @@ export function ShortlistCartView({
 
               <div className="flex justify-between text-[var(--color-text-muted)]">
                 <span className="flex items-center gap-1">
-                  <ShieldCheck size={12} className="text-[var(--color-accent-main)]" />
+                  <ShieldCheck size={12} className="text-emerald-400" />
                   Digital 360° Inspection Fee
                 </span>
                 <span className="font-bold text-[var(--color-text-header)]">{formatPkrPrice(inspectionFee)}</span>
@@ -251,20 +251,20 @@ export function ShortlistCartView({
 
               <div className="flex justify-between text-[var(--color-text-muted)]">
                 <span className="flex items-center gap-1">
-                  <FileCheck size={12} className="text-[var(--color-accent-main)]" />
+                  <FileCheck size={12} className="text-emerald-400" />
                   Est. Token Tax Clearance
                 </span>
                 <span className="font-bold text-[var(--color-text-header)]">{formatPkrPrice(estimatedTax)}</span>
               </div>
 
               {discountAmount > 0 && (
-                <div className="flex justify-between text-[var(--color-accent-main)] font-bold">
+                <div className="flex justify-between text-emerald-400 font-bold">
                   <span>Promo Discount</span>
                   <span>- {formatPkrPrice(discountAmount)}</span>
                 </div>
               )}
 
-              <div className="flex justify-between text-base font-black text-[var(--color-text-header)] border-t border-dashed border-white/20 pt-3 text-[var(--color-accent-main)]">
+              <div className="flex justify-between text-base font-black text-[var(--color-text-header)] border-t border-dashed border-white/20 pt-3 text-emerald-400">
                 <span>Grand Total</span>
                 <span>{formatPkrPrice(grandTotal)}</span>
               </div>
@@ -281,7 +281,7 @@ export function ShortlistCartView({
 
             {/* Security Guarantee badge below button matching Screen 4 in attached photo */}
             <div className="pt-2 text-center flex items-center justify-center gap-2 text-[10px] font-mono text-[var(--color-text-muted)]">
-              <Lock size={12} className="text-[var(--color-accent-main)] shrink-0" />
+              <Lock size={12} className="text-emerald-400 shrink-0" />
               <span>100% Verified Inspection Guarantee & Direct Showroom Deal</span>
             </div>
           </div>

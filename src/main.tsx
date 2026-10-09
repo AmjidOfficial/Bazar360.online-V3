@@ -1,13 +1,15 @@
+// BAZAR360 Enterprise Master Entrypoint
+// Pure unified luxury dark system (#0F172A). Zero theme switchers.
+
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { HelmetProvider } from 'react-helmet-async';
-import { ThemeProvider } from './components/ThemeContext';
-import { AuthProvider } from './components/AuthContext';
-import App from './App.tsx';
-import ErrorBoundary from './components/ErrorBoundary';
+import { AuthProvider } from './core/auth/AuthContext';
+import { ErrorBoundary } from './core/ErrorBoundary';
+import App from './App';
 import './index.css';
 
-console.log('[BAZAR360] 1. Initializing runtime and loading main.tsx entrypoint...');
+console.log('[BAZAR360] Initializing enterprise automotive platform...');
 
 // Deep link redirect restoration for GitHub Pages (404.html redirection parameter)
 try {
@@ -22,7 +24,7 @@ try {
       try {
         window.history.replaceState(null, '', cleanPath);
       } catch (e) {
-        console.warn('URL restoration note:', e);
+        console.warn('URL restoration notice:', e);
       }
     }
   }
@@ -32,23 +34,16 @@ try {
 
 const rootElement = document.getElementById('root');
 if (rootElement) {
-  console.log('[BAZAR360] 2. Found #root element in DOM. Mounting React tree...');
   const root = createRoot(rootElement);
   root.render(
     <StrictMode>
       <ErrorBoundary>
         <HelmetProvider>
-          <ThemeProvider>
-            <AuthProvider>
-              <App />
-            </AuthProvider>
-          </ThemeProvider>
+          <AuthProvider>
+            <App />
+          </AuthProvider>
         </HelmetProvider>
       </ErrorBoundary>
     </StrictMode>
   );
-  console.log('[BAZAR360] 3. React createRoot.render dispatched successfully.');
-} else {
-  console.error('[BAZAR360] FATAL: Root element #root not found in document.');
 }
-

@@ -1,48 +1,59 @@
 /* AccessibilityTheme.css */
-/* Deliberate high-contrast font and background definitions to satisfy WCAG 2.1 AA and AAA standards */
+/* WCAG 2.2 AA compliant token definitions and accessible focus rings */
 
-:root, .light, .dark {
-  --color-bg-primary: #FFFFFF;
-  --color-bg-secondary: #F8FAFC;
-  --color-text-main: #334155;
-  --color-text-muted: #64748B;
-  --color-border-main: #E2E8F0;
-  --color-accent-main: #007979;
-  --color-accent-hover: #0F766E;
-  --color-action: #F59E0B;
+:root {
+  --color-bg-primary: #080C0A;
+  --color-bg-secondary: #111815;
+  --color-text-main: #F1F5F9;
+  --color-text-header: #FFFFFF;
+  --color-text-muted: #94A3B8;
+  --color-border-main: rgba(255, 255, 255, 0.10);
+  --color-accent-main: #F59E0B;
+  --color-accent-hover: #D97706;
+  --shadow-bento: 0 4px 24px rgba(0, 0, 0, 0.45);
 }
 
-/* Ensure focus visibility for interactive keyboard controls */
+.light {
+  --color-bg-primary: #F8FAFC;
+  --color-bg-secondary: #FFFFFF;
+  --color-text-main: #0F172A;
+  --color-text-header: #020617;
+  --color-text-muted: #475569;
+  --color-border-main: rgba(15, 23, 42, 0.12);
+  --color-accent-main: #D97706;
+  --color-accent-hover: #B45309;
+  --shadow-bento: 0 10px 30px -10px rgba(15, 23, 42, 0.08), 0 2px 8px -2px rgba(15, 23, 42, 0.04);
+}
+
+.dark {
+  --color-bg-primary: #080C0A;
+  --color-bg-secondary: #111815;
+  --color-text-main: #F1F5F9;
+  --color-text-header: #FFFFFF;
+  --color-text-muted: #94A3B8;
+  --color-border-main: rgba(255, 255, 255, 0.10);
+  --color-accent-main: #F59E0B;
+  --color-accent-hover: #D97706;
+  --shadow-bento: 0 4px 24px rgba(0, 0, 0, 0.45);
+}
+
+/* Accessible focus visibility for interactive keyboard controls */
 button:focus-visible, 
 input:focus-visible, 
 select:focus-visible, 
-textarea:focus-visible {
-  outline: 2px solid #007979 !important;
-  outline-offset: 2px !important;
+textarea:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--color-accent-main);
+  outline-offset: 2px;
 }
 
-/* Strong readable input field values */
-input, select, textarea {
-  color: #0F172A !important;
-  background-color: #FFFFFF !important;
-}
-
-/* Overrule standard washed-out styles */
-.text-gray-400, .text-zinc-400, .text-slate-400 {
-  color: var(--color-text-muted) !important;
-}
-
-.text-gray-500, .text-zinc-500, .text-slate-500 {
-  color: var(--color-text-muted) !important;
-}
-
-/* WCAG AAA/AA Check for input placeholders */
-::placeholder {
-  color: #94A3B8 !important;
-  opacity: 1 !important;
-}
-.dark ::placeholder {
-  color: #94A3B8 !important;
-  opacity: 1 !important;
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 

@@ -91,7 +91,7 @@ export function RoleTailoredSettings({
             </span>
           )}
           {lastSavedAt && !isSaving && (
-            <span className="text-[10px] font-mono text-[var(--color-accent-main)]">
+            <span className="text-[10px] font-mono text-emerald-400">
               Synced: {lastSavedAt.toLocaleTimeString()}
             </span>
           )}
@@ -113,7 +113,7 @@ export function RoleTailoredSettings({
               type="text"
               value={formData.displayName}
               onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
-              className="w-full bg-bg-primary border border-[var(--color-border-main)] rounded-xl px-3 py-2 text-xs text-[var(--color-text-main)]"
+              className="w-full bg-slate-950 border border-[var(--color-border-main)] rounded-xl px-3 py-2 text-xs text-[var(--color-text-main)]"
             />
           </div>
 
@@ -125,7 +125,7 @@ export function RoleTailoredSettings({
               type="text"
               value={formData.phoneNumber}
               onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-              className="w-full bg-bg-primary border border-[var(--color-border-main)] rounded-xl px-3 py-2 text-xs text-[var(--color-text-main)]"
+              className="w-full bg-slate-950 border border-[var(--color-border-main)] rounded-xl px-3 py-2 text-xs text-[var(--color-text-main)]"
             />
           </div>
 
@@ -137,7 +137,7 @@ export function RoleTailoredSettings({
               type="text"
               value={formData.address}
               onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-              className="w-full bg-bg-primary border border-[var(--color-border-main)] rounded-xl px-3 py-2 text-xs text-[var(--color-text-main)]"
+              className="w-full bg-slate-950 border border-[var(--color-border-main)] rounded-xl px-3 py-2 text-xs text-[var(--color-text-main)]"
             />
           </div>
 
@@ -145,14 +145,14 @@ export function RoleTailoredSettings({
             <label className="text-[10px] font-bold uppercase text-[var(--color-text-muted)] tracking-widest block mb-1">
               Display Currency Mode
             </label>
-            <div className="grid grid-cols-3 gap-1 bg-bg-primary p-1 rounded-xl border border-[var(--color-border-main)]">
+            <div className="grid grid-cols-3 gap-1 bg-slate-950 p-1 rounded-xl border border-[var(--color-border-main)]">
               {(['PKR', 'USD', 'DUAL'] as const).map((mode) => (
                 <button
                   key={mode}
                   type="button"
                   onClick={() => changeCurrencyMode(mode)}
                   className={`py-1 text-[10px] font-black uppercase rounded-lg cursor-pointer transition-all ${
-                    currencyMode === mode ? 'bg-amber-500 text-slate-950 shadow' : 'text-text-muted hover:text-[var(--color-text-header)]'
+                    currencyMode === mode ? 'bg-amber-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white'
                   }`}
                 >
                   {mode}
@@ -179,8 +179,8 @@ export function RoleTailoredSettings({
                 type="text"
                 value={formData.showroomName}
                 onChange={(e) => setFormData({ ...formData, showroomName: e.target.value })}
-                className="w-full bg-bg-primary border border-[var(--color-border-main)] rounded-xl px-3 py-2 text-xs text-[var(--color-text-main)]"
-                placeholder="e.g. Bazar360 Showroom Peshawar"
+                className="w-full bg-slate-950 border border-[var(--color-border-main)] rounded-xl px-3 py-2 text-xs text-[var(--color-text-main)]"
+                placeholder="e.g. Auto Choice Showroom Peshawar"
               />
             </div>
 
@@ -192,8 +192,37 @@ export function RoleTailoredSettings({
                 type="text"
                 value={formData.whatsappHotline}
                 onChange={(e) => setFormData({ ...formData, whatsappHotline: e.target.value })}
-                className="w-full bg-bg-primary border border-[var(--color-border-main)] rounded-xl px-3 py-2 text-xs text-[var(--color-text-main)]"
+                className="w-full bg-slate-950 border border-[var(--color-border-main)] rounded-xl px-3 py-2 text-xs text-[var(--color-text-main)]"
               />
+            </div>
+          </div>
+
+          {/* Theme Selector */}
+          <div>
+            <label className="text-[10px] font-bold uppercase text-[var(--color-text-muted)] tracking-widest block mb-2">
+              Showroom Theme & Aesthetic Theme
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {[
+                { id: 'theme-cosmic-dark', name: 'Cosmic Dark', bg: 'bg-slate-950 border-slate-700' },
+                { id: 'theme-luxury-light', name: 'Luxury Light', bg: 'bg-stone-100 border-stone-300 text-slate-900' },
+                { id: 'theme-emerald', name: 'Emerald', bg: 'bg-emerald-950 border-emerald-700' },
+                { id: 'theme-gold', name: 'Golden Luxury', bg: 'bg-amber-950 border-amber-600' },
+              ].map(t => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => {
+                    setTheme(t.id as any);
+                    setFormData({ ...formData, themeChoice: t.id });
+                  }}
+                  className={`p-3 rounded-xl border text-xs font-bold text-center cursor-pointer transition-all ${t.bg} ${
+                    theme === t.id ? 'ring-2 ring-amber-500 scale-105 shadow-md' : 'opacity-80'
+                  }`}
+                >
+                  {t.name}
+                </button>
+              ))}
             </div>
           </div>
         </div>
@@ -201,13 +230,13 @@ export function RoleTailoredSettings({
 
       {/* SECTION 3: Admin & Founder Platform Settings (Only Founders & Admins) */}
       {isFounderOrAdmin && (
-        <div className="bg-bg-secondary/80 border border-amber-500/30 p-6 rounded-2xl shadow-sm space-y-4">
+        <div className="bg-slate-900/80 border border-amber-500/30 p-6 rounded-2xl shadow-sm space-y-4">
           <h3 className="text-sm font-black uppercase text-amber-400 tracking-wider flex items-center gap-2 pb-2 border-b border-amber-500/20">
             <Shield size={16} /> Founder & Admin Governance Controls
           </h3>
 
           <div className="space-y-3">
-            <label className="flex items-center gap-3 p-3 bg-bg-primary rounded-xl border border-border-main cursor-pointer">
+            <label className="flex items-center gap-3 p-3 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer">
               <input
                 type="checkbox"
                 checked={formData.autoApproveListings}
@@ -215,12 +244,12 @@ export function RoleTailoredSettings({
                 className="w-4 h-4 accent-amber-500 rounded"
               />
               <div>
-                <span className="text-xs font-bold text-[var(--color-text-header)] uppercase block">Auto-Approve Verified Listings</span>
-                <span className="text-[10px] text-text-muted">Bypass moderation queue for verified showroom owners.</span>
+                <span className="text-xs font-bold text-white uppercase block">Auto-Approve Verified Listings</span>
+                <span className="text-[10px] text-slate-400">Bypass moderation queue for verified showroom owners.</span>
               </div>
             </label>
 
-            <label className="flex items-center gap-3 p-3 bg-bg-primary rounded-xl border border-border-main cursor-pointer">
+            <label className="flex items-center gap-3 p-3 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer">
               <input
                 type="checkbox"
                 checked={formData.auditLogging}
@@ -228,8 +257,8 @@ export function RoleTailoredSettings({
                 className="w-4 h-4 accent-amber-500 rounded"
               />
               <div>
-                <span className="text-xs font-bold text-[var(--color-text-header)] uppercase block">Full Security Audit Logging</span>
-                <span className="text-[10px] text-text-muted">Record all system write operations and user privilege shifts.</span>
+                <span className="text-xs font-bold text-white uppercase block">Full Security Audit Logging</span>
+                <span className="text-[10px] text-slate-400">Record all Firestore write operations and user privilege shifts.</span>
               </div>
             </label>
           </div>

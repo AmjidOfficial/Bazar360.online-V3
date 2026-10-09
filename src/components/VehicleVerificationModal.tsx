@@ -49,7 +49,7 @@ export function VehicleVerificationModal({ car, isOpen, onClose }: VehicleVerifi
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-bg-primary/80 backdrop-blur-md"
+            className="fixed inset-0 bg-slate-950/80 backdrop-blur-md"
           />
 
           {/* Modal Card */}
@@ -58,8 +58,8 @@ export function VehicleVerificationModal({ car, isOpen, onClose }: VehicleVerifi
             animate={{ scale: 1, y: 0, opacity: 1 }}
             exit={{ scale: 0.95, y: 30, opacity: 0 }}
             className={`relative rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl z-10 border text-left ${
-              (theme as string) === 'dark'
-                ? 'bg-[var(--color-bg-secondary)] border-white/10 text-[var(--color-text-header)]'
+              theme === 'dark'
+                ? 'bg-[#0a0d14] border-white/10 text-white'
                 : 'bg-white border-slate-200 text-slate-900'
             }`}
           >
@@ -67,20 +67,20 @@ export function VehicleVerificationModal({ car, isOpen, onClose }: VehicleVerifi
             <div className="relative h-40 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-700 p-6 flex flex-col justify-between overflow-hidden">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.15),transparent)] pointer-events-none" />
               <div className="flex justify-between items-start">
-                <div className="flex items-center gap-2 bg-[var(--color-accent-main)]/25 border border-white/20 px-3 py-1 rounded-full backdrop-blur-sm">
-                  <ShieldCheck size={14} className="text-[var(--color-text-header)] animate-pulse" />
-                  <span className="text-[10px] font-mono font-black uppercase tracking-widest text-[var(--color-text-header)]">Bazar360 Certified</span>
+                <div className="flex items-center gap-2 bg-emerald-500/25 border border-white/20 px-3 py-1 rounded-full backdrop-blur-sm">
+                  <ShieldCheck size={14} className="text-white animate-pulse" />
+                  <span className="text-[10px] font-mono font-black uppercase tracking-widest text-white">Bazar360 Certified</span>
                 </div>
                 <button
                   onClick={onClose}
-                  className="p-1.5 rounded-full bg-black/25 hover:bg-black/40 text-[var(--color-text-header)] transition-colors cursor-pointer"
+                  className="p-1.5 rounded-full bg-black/25 hover:bg-black/40 text-white transition-colors cursor-pointer"
                 >
                   <X size={16} />
                 </button>
               </div>
 
               <div className="space-y-1">
-                <h3 className="text-2xl font-black font-display tracking-tight text-[var(--color-text-header)]">
+                <h3 className="text-2xl font-black font-display tracking-tight text-white">
                   {car.year} {car.title || `${car.make} ${car.model}`}
                 </h3>
                 <p className="text-xs text-emerald-100 font-mono uppercase tracking-wider flex items-center gap-2">
@@ -98,10 +98,10 @@ export function VehicleVerificationModal({ car, isOpen, onClose }: VehicleVerifi
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-b border-dashed border-[var(--color-border-main)] pb-6">
                 <div className="space-y-1.5">
                   <div className="flex justify-between text-xs font-bold font-mono text-[var(--color-text-muted)] uppercase">
-                    <span className="flex items-center gap-1"><Gauge size={12} className="text-[var(--color-accent-main)]" /> Odometer</span>
+                    <span className="flex items-center gap-1"><Gauge size={12} className="text-emerald-500" /> Odometer</span>
                     <span>{mileageRating}%</span>
                   </div>
-                  <div className="h-2 w-full bg-bg-tertiary rounded-full overflow-hidden">
+                  <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
                     <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full" style={{ width: `${mileageRating}%` }} />
                   </div>
                 </div>
@@ -111,7 +111,7 @@ export function VehicleVerificationModal({ car, isOpen, onClose }: VehicleVerifi
                     <span className="flex items-center gap-1"><FileText size={12} className="text-cyan-500" /> Documents</span>
                     <span>{docsRating}%</span>
                   </div>
-                  <div className="h-2 w-full bg-bg-tertiary rounded-full overflow-hidden">
+                  <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
                     <div className="h-full bg-gradient-to-r from-cyan-500 to-blue-400 rounded-full" style={{ width: `${docsRating}%` }} />
                   </div>
                 </div>
@@ -121,7 +121,7 @@ export function VehicleVerificationModal({ car, isOpen, onClose }: VehicleVerifi
                     <span className="flex items-center gap-1"><Wrench size={12} className="text-yellow-500" /> Structure</span>
                     <span>{bodyPaintRating}%</span>
                   </div>
-                  <div className="h-2 w-full bg-bg-tertiary rounded-full overflow-hidden">
+                  <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
                     <div className="h-full bg-gradient-to-r from-yellow-500 to-amber-400 rounded-full" style={{ width: `${bodyPaintRating}%` }} />
                   </div>
                 </div>
@@ -132,13 +132,13 @@ export function VehicleVerificationModal({ car, isOpen, onClose }: VehicleVerifi
 
                 {/* 1. Odometer Authenticity */}
                 <div className="flex gap-4">
-                  <div className="p-3 h-11 w-11 rounded-xl bg-[var(--color-accent-main)]/10 border border-[var(--color-accent-main)]/25 flex items-center justify-center text-[var(--color-accent-main)] shrink-0">
+                  <div className="p-3 h-11 w-11 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-500 shrink-0">
                     <Gauge size={20} />
                   </div>
                   <div className="space-y-2 flex-1">
                     <div className="flex items-center justify-between">
                       <h4 className="text-sm font-black uppercase tracking-wider text-[var(--color-text-main)] font-sans">1. Odometer Authenticity</h4>
-                      <span className="bg-[var(--color-accent-main)]/15 text-[var(--color-accent-main)] border border-[var(--color-accent-main)]/30 px-2.5 py-0.5 rounded-full text-[9px] font-mono font-black uppercase tracking-widest">
+                      <span className="bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 px-2.5 py-0.5 rounded-full text-[9px] font-mono font-black uppercase tracking-widest">
                         Verified Genuine
                       </span>
                     </div>
@@ -148,11 +148,11 @@ export function VehicleVerificationModal({ car, isOpen, onClose }: VehicleVerifi
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-slate-100/50 dark:bg-white/5 p-3 rounded-xl border border-slate-200/50 dark:border-white/5 text-[11px]">
                       <div className="flex justify-between">
                         <span className="text-[var(--color-text-muted)] font-mono">ECU Query Status:</span>
-                        <span className="font-bold font-mono text-[var(--color-accent-main)]">Passed (Matches Cluster)</span>
+                        <span className="font-bold font-mono text-emerald-500">Passed (Matches Cluster)</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-[var(--color-text-muted)] font-mono">Service Log Match:</span>
-                        <span className="font-bold font-mono text-[var(--color-accent-main)]">Excellent (Dealership Sync)</span>
+                        <span className="font-bold font-mono text-emerald-500">Excellent (Dealership Sync)</span>
                       </div>
                       <div className="flex justify-between sm:col-span-2 border-t border-[var(--color-border-main)]/50 pt-1.5 mt-1">
                         <span className="text-[var(--color-text-muted)] font-mono">Mechanical Wear & Tear:</span>
@@ -184,17 +184,17 @@ export function VehicleVerificationModal({ car, isOpen, onClose }: VehicleVerifi
                       </div>
                       <div className="flex justify-between">
                         <span className="text-[var(--color-text-muted)] font-mono">Provincial Excise:</span>
-                        <span className="font-bold font-mono text-[var(--color-accent-main)]">Verified & Clear</span>
+                        <span className="font-bold font-mono text-emerald-500">Verified & Clear</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-[var(--color-text-muted)] font-mono">Token Tax Status:</span>
-                        <span className={`font-bold font-mono ${car.tokenTaxPaid ? 'text-[var(--color-accent-main)]' : 'text-yellow-500'}`}>
+                        <span className={`font-bold font-mono ${car.tokenTaxPaid ? 'text-emerald-500' : 'text-yellow-500'}`}>
                           {car.tokenTaxPaid ? 'Paid & Up to date' : 'Outstanding / Verification Needed'}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-[var(--color-text-muted)] font-mono">Biometrics:</span>
-                        <span className="font-bold font-mono text-[var(--color-accent-main)]">Ready for instant transfer</span>
+                        <span className="font-bold font-mono text-emerald-500">Ready for instant transfer</span>
                       </div>
                     </div>
                   </div>
@@ -222,7 +222,7 @@ export function VehicleVerificationModal({ car, isOpen, onClose }: VehicleVerifi
                       </div>
                       <div className="flex justify-between">
                         <span className="text-[var(--color-text-muted)] font-mono">Chassis Integrity:</span>
-                        <span className="font-bold font-mono text-[var(--color-accent-main)]">{frameStatus}</span>
+                        <span className="font-bold font-mono text-emerald-500">{frameStatus}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-[var(--color-text-muted)] font-mono">Avg Paint Thickness:</span>
@@ -230,7 +230,7 @@ export function VehicleVerificationModal({ car, isOpen, onClose }: VehicleVerifi
                       </div>
                       <div className="flex justify-between">
                         <span className="text-[var(--color-text-muted)] font-mono">Suspension / CVs:</span>
-                        <span className="font-bold font-mono text-[var(--color-accent-main)]">95% Efficiency rating</span>
+                        <span className="font-bold font-mono text-emerald-500">95% Efficiency rating</span>
                       </div>
                     </div>
                   </div>
@@ -241,7 +241,7 @@ export function VehicleVerificationModal({ car, isOpen, onClose }: VehicleVerifi
               {/* Verified Certificate Footer Stamp */}
               <div className="pt-4 border-t border-[var(--color-border-main)] flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <ShieldCheck size={26} className="text-[var(--color-accent-main)]" />
+                  <ShieldCheck size={26} className="text-emerald-500" />
                   <div>
                     <h5 className="text-xs font-black uppercase text-[var(--color-text-main)] tracking-wider">Official Inspection Stamp</h5>
                     <p className="text-[9px] text-[var(--color-text-muted)] font-mono uppercase">Bazar360 Automotive Assurance Wing • Peshawer Desk</p>

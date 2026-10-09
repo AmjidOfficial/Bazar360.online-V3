@@ -146,7 +146,7 @@ export function Lightbox({ images, initialIndex, isOpen, onClose, title }: Light
         <div className="relative z-50 flex items-center justify-between p-4 bg-gradient-to-b from-black/60 to-transparent">
           <div className="text-left">
             {title && (
-              <h4 className="text-sm font-black text-[var(--color-text-header)] uppercase tracking-wider line-clamp-1">
+              <h4 className="text-sm font-black text-white uppercase tracking-wider line-clamp-1">
                 {title}
               </h4>
             )}
@@ -159,7 +159,7 @@ export function Lightbox({ images, initialIndex, isOpen, onClose, title }: Light
           <div className="flex items-center gap-2">
             <button
               onClick={handleRotate}
-              className="p-2.5 bg-white/5 hover:bg-white/10 active:scale-95 text-[var(--color-text-header)]/80 hover:text-[var(--color-text-header)] rounded-full transition-all cursor-pointer"
+              className="p-2.5 bg-white/5 hover:bg-white/10 active:scale-95 text-white/80 hover:text-white rounded-full transition-all cursor-pointer"
               title="Rotate Image"
             >
               <RotateCw size={16} />
@@ -167,7 +167,7 @@ export function Lightbox({ images, initialIndex, isOpen, onClose, title }: Light
             <button
               onClick={handleZoomOut}
               disabled={scale <= 1}
-              className="p-2.5 bg-white/5 hover:bg-white/10 active:scale-95 disabled:opacity-30 disabled:pointer-events-none text-[var(--color-text-header)]/80 hover:text-[var(--color-text-header)] rounded-full transition-all cursor-pointer"
+              className="p-2.5 bg-white/5 hover:bg-white/10 active:scale-95 disabled:opacity-30 disabled:pointer-events-none text-white/80 hover:text-white rounded-full transition-all cursor-pointer"
               title="Zoom Out"
             >
               <ZoomOut size={16} />
@@ -175,7 +175,7 @@ export function Lightbox({ images, initialIndex, isOpen, onClose, title }: Light
             <button
               onClick={handleZoomIn}
               disabled={scale >= 4}
-              className="p-2.5 bg-white/5 hover:bg-white/10 active:scale-95 disabled:opacity-30 disabled:pointer-events-none text-[var(--color-text-header)]/80 hover:text-[var(--color-text-header)] rounded-full transition-all cursor-pointer"
+              className="p-2.5 bg-white/5 hover:bg-white/10 active:scale-95 disabled:opacity-30 disabled:pointer-events-none text-white/80 hover:text-white rounded-full transition-all cursor-pointer"
               title="Zoom In"
             >
               <ZoomIn size={16} />
@@ -195,7 +195,7 @@ export function Lightbox({ images, initialIndex, isOpen, onClose, title }: Light
           {/* Back Navigation Button */}
           <button
             onClick={handlePrev}
-            className="absolute left-4 z-50 p-3 bg-black/40 hover:bg-black/70 active:scale-95 border border-white/5 text-[var(--color-text-header)]/80 hover:text-[var(--color-text-header)] rounded-full transition-all cursor-pointer hidden sm:block"
+            className="absolute left-4 z-50 p-3 bg-black/40 hover:bg-black/70 active:scale-95 border border-white/5 text-white/80 hover:text-white rounded-full transition-all cursor-pointer hidden sm:block"
           >
             <ChevronLeft size={24} />
           </button>
@@ -228,7 +228,7 @@ export function Lightbox({ images, initialIndex, isOpen, onClose, title }: Light
           {/* Next Navigation Button */}
           <button
             onClick={handleNext}
-            className="absolute right-4 z-50 p-3 bg-black/40 hover:bg-black/70 active:scale-95 border border-white/5 text-[var(--color-text-header)]/80 hover:text-[var(--color-text-header)] rounded-full transition-all cursor-pointer hidden sm:block"
+            className="absolute right-4 z-50 p-3 bg-black/40 hover:bg-black/70 active:scale-95 border border-white/5 text-white/80 hover:text-white rounded-full transition-all cursor-pointer hidden sm:block"
           >
             <ChevronRight size={24} />
           </button>

@@ -200,7 +200,7 @@ export default function PostUploadForm({
     >
       <div className="flex items-center gap-2">
         <Sparkles size={16} className="text-[#FF6B00]" />
-        <h3 className="text-sm font-black uppercase text-[var(--color-text-header)] tracking-widest font-display text-left">
+        <h3 className="text-sm font-black uppercase text-white tracking-widest font-display text-left">
           Share a Community Update
         </h3>
       </div>
@@ -217,7 +217,7 @@ export default function PostUploadForm({
                 ? "Announce new stock arrivals, promotions, or showroom milestones..."
                 : "Ask for opinions on a vehicle, share track days, or post auto news..."
             }
-            className="w-full min-h-[90px] bg-bg-secondary/60 border border-white/5 rounded-2xl p-4 text-xs md:text-sm text-text-main placeholder-slate-500 focus:outline-none focus:border-[#FF6B00] duration-200 resize-none font-sans"
+            className="w-full min-h-[90px] bg-slate-900/60 border border-white/5 rounded-2xl p-4 text-xs md:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-[#FF6B00] duration-200 resize-none font-sans"
             disabled={submitting}
           />
         </div>
@@ -226,14 +226,14 @@ export default function PostUploadForm({
         {isShowroomOwner && showroomId && (
           <div
             id="official-announcement-toggle"
-            className="flex items-center gap-3 p-3 rounded-2xl bg-[var(--color-accent-main)]/5 border border-[var(--color-accent-main)]/15 text-[var(--color-accent-main)] select-none"
+            className="flex items-center gap-3 p-3 rounded-2xl bg-[#38BDF8]/5 border border-[#38BDF8]/15 text-[#38BDF8] select-none"
           >
             <input
               id="announcement-checkbox"
               type="checkbox"
               checked={isOfficialAnnouncement}
               onChange={(e) => setIsOfficialAnnouncement(e.target.checked)}
-              className="w-4 h-4 text-[#FF6B00] bg-bg-secondary border-white/10 rounded focus:ring-0 focus:outline-none cursor-pointer"
+              className="w-4 h-4 text-[#FF6B00] bg-slate-900 border-white/10 rounded focus:ring-0 focus:outline-none cursor-pointer"
             />
             <label htmlFor="announcement-checkbox" className="flex items-center gap-1.5 text-[10px] md:text-xs font-mono font-black uppercase cursor-pointer tracking-wider">
               <Store size={14} />
@@ -249,48 +249,26 @@ export default function PostUploadForm({
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-dashed border-white/10 bg-bg-secondary/40 text-center space-y-3"
+              className="flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-dashed border-white/10 bg-slate-900/40 text-center space-y-3"
               id="upload-progress-container"
             >
               <Loader2 size={24} className="animate-spin text-[#FF6B00]" />
               <div className="space-y-1">
-                <p className="text-xs font-black uppercase tracking-wider text-[var(--color-text-header)]">
+                <p className="text-xs font-black uppercase tracking-wider text-white">
                   Optimizing & Compressing Media...
                 </p>
-                <div className="w-48 h-1.5 bg-bg-tertiary rounded-full overflow-hidden mx-auto border border-white/5">
+                <div className="w-48 h-1.5 bg-slate-800 rounded-full overflow-hidden mx-auto border border-white/5">
                   <div
                     className="h-full bg-gradient-to-r from-orange-500 to-amber-400 rounded-full transition-all duration-300"
                     style={{ width: `${uploadProgress}%` }}
                   />
                 </div>
-                <span className="text-[10px] font-mono text-text-muted">{uploadProgress}% Complete</span>
+                <span className="text-[10px] font-mono text-slate-500">{uploadProgress}% Complete</span>
               </div>
             </motion.div>
           ) : (
             <div className="space-y-4 w-full">
-              {/* Media gallery header with Remove All Attached Files button */}
-              {mediaUrls.length > 0 && (
-                <div className="flex items-center justify-between pb-1">
-                  <span className="text-xs font-bold text-text-muted font-mono">
-                    Attached Files ({mediaUrls.length}/6)
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMediaUrls([]);
-                      setMediaTypes([]);
-                      if (fileInputRef.current) fileInputRef.current.value = '';
-                      toast.success('All attached files removed');
-                    }}
-                    className="px-2.5 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
-                    id="remove-all-attached-files-btn"
-                  >
-                    <X size={13} />
-                    <span>Remove all attached files</span>
-                  </button>
-                </div>
-              )}
-
+              {/* Media gallery grid for uploaded multiple files */}
               {mediaUrls.length > 0 && (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3" id="uploaded-media-gallery">
                   {mediaUrls.map((url, index) => {
@@ -301,7 +279,7 @@ export default function PostUploadForm({
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.9 }}
-                        className="relative rounded-xl overflow-hidden border border-white/5 bg-bg-secondary aspect-video group shadow-lg"
+                        className="relative rounded-xl overflow-hidden border border-white/5 bg-slate-900 aspect-video group shadow-lg"
                       >
                         {isVideo ? (
                           <video src={url} className="w-full h-full object-cover" muted />
@@ -316,7 +294,7 @@ export default function PostUploadForm({
                         <button
                           type="button"
                           onClick={() => handleRemoveMedia(index)}
-                          className="absolute top-2.5 right-2.5 p-1.5 rounded-lg bg-black/75 hover:bg-red-500 active:scale-90 text-[var(--color-text-header)] backdrop-blur-md transition-all cursor-pointer border border-white/10"
+                          className="absolute top-2.5 right-2.5 p-1.5 rounded-lg bg-black/75 hover:bg-red-500 active:scale-90 text-white backdrop-blur-md transition-all cursor-pointer border border-white/10"
                           title="Remove attachment"
                         >
                           <X size={12} />
@@ -338,7 +316,7 @@ export default function PostUploadForm({
                   className={`border-2 border-dashed rounded-2xl p-5 text-center cursor-pointer transition-all duration-200 select-none flex flex-col items-center justify-center space-y-1.5 ${
                     isDragging
                       ? 'border-orange-500 bg-orange-500/5 scale-[1.01]'
-                      : 'border-white/5 hover:border-white/15 bg-bg-secondary/25 hover:bg-bg-secondary/40'
+                      : 'border-white/5 hover:border-white/15 bg-slate-900/25 hover:bg-slate-900/40'
                   }`}
                   id="media-dropzone"
                 >
@@ -351,15 +329,15 @@ export default function PostUploadForm({
                     multiple
                     className="hidden"
                   />
-                  <div className="flex gap-2 text-text-muted">
+                  <div className="flex gap-2 text-slate-400">
                     <Image size={18} className="text-[#FF6B00]" />
-                    <Video size={18} className="text-[var(--color-accent-main)]" />
+                    <Video size={18} className="text-[#38BDF8]" />
                   </div>
                   <div className="text-center">
-                    <p className="text-[11px] font-black uppercase text-text-main tracking-wider">
+                    <p className="text-[11px] font-black uppercase text-slate-200 tracking-wider">
                       {mediaUrls.length > 0 ? "Add More Media" : "Drag & Drop Auto Media"}
                     </p>
-                    <p className="text-[9px] text-text-muted font-mono mt-0.5">
+                    <p className="text-[9px] text-slate-500 font-mono mt-0.5">
                       Supports up to 6 Photos or Clips (max 25MB each)
                     </p>
                   </div>
@@ -371,7 +349,7 @@ export default function PostUploadForm({
 
         {/* Action Panel Bottom */}
         <div className="flex items-center justify-between border-t border-white/5 pt-3">
-          <div className="text-[10px] text-text-muted font-mono">
+          <div className="text-[10px] text-slate-500 font-mono">
             {!idToken ? '⚠️ Log in required to publish' : '⚡ Auto-optimized via Cloudinary'}
           </div>
 
@@ -381,7 +359,7 @@ export default function PostUploadForm({
                 id="post-attachment-trigger-btn"
                 type="button"
                 onClick={triggerFileInput}
-                className="px-3.5 py-2 rounded-2xl bg-bg-secondary border border-white/5 hover:border-white/15 hover:bg-bg-tertiary text-text-muted active:scale-95 duration-100 text-[11px] font-mono font-black uppercase flex items-center gap-1.5 cursor-pointer"
+                className="px-3.5 py-2 rounded-2xl bg-slate-900 border border-white/5 hover:border-white/15 hover:bg-slate-800 text-slate-300 active:scale-95 duration-100 text-[11px] font-mono font-black uppercase flex items-center gap-1.5 cursor-pointer"
                 title="Add photo or video"
               >
                 <Image size={13} className="text-orange-500" />

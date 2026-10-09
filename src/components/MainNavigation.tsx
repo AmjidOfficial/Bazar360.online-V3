@@ -1,7 +1,7 @@
 import React from 'react';
 import { Compass, PlusCircle, Grid, Store, User, MessageCircle } from 'lucide-react';
 import { useTheme } from './ThemeContext';
-
+import { AutoChoiceLogo } from './Bazar360Logo';
 import { ThemeSwitcher } from './ThemeSwitcher';
 import MobileBottomNav from './MobileBottomNav';
 
@@ -29,29 +29,26 @@ export function MainNavigation({ currentTab, setTab, lang, currentUser, onLogout
   return (
     <>
       {/* Desktop Sticky Nav */}
-      <nav className="hidden md:flex sticky top-0 z-50 bg-[var(--color-bg-primary)]/90 backdrop-blur-md border-b border-[var(--color-border-main)] py-4 px-6 items-center justify-between">
-        <button onClick={() => setTab('home')} className="font-black text-sm uppercase tracking-wider text-[var(--color-text-header)] hover:text-[var(--color-accent-main)] transition-colors cursor-pointer flex items-center gap-1">
-          <span className="text-[var(--color-accent-main)]">BAZAR</span>
-          <span>360</span>
-        </button>
+      <nav className="hidden md:flex sticky top-0 z-50 bg-[var(--color-bg-primary)]/80 backdrop-blur-md border-b border-[var(--color-border-main)] py-4 px-6 items-center justify-between">
+        <AutoChoiceLogo showText={true} />
         
         <div className="flex items-center gap-6">
           {navItems.map(item => (
             item.url ? (
-              <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-bold uppercase text-emerald-400 hover:text-emerald-300 transition-colors">
+              <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-bold uppercase text-green-500 hover:text-green-600">
                 <item.icon size={18} />
                 {item.label}
               </a>
             ) : (
-              <button key={item.id} onClick={() => setTab(item.id)} className={`text-sm font-bold uppercase cursor-pointer transition-colors ${currentTab === item.id ? 'text-[var(--color-accent-main)] font-extrabold' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-header)]'}`}>
+              <button key={item.id} onClick={() => setTab(item.id)} className={`text-sm font-bold uppercase ${currentTab === item.id ? 'text-[#FF6B00]' : 'text-[#161D6F] hover:text-[#FF6B00]'}`}>
                 {item.label}
               </button>
             )
           ))}
           {currentUser ? (
-            <button onClick={onLogout} className="text-sm font-bold uppercase text-rose-500 hover:text-rose-400 transition-colors cursor-pointer">Logout</button>
+            <button onClick={onLogout} className="text-sm font-bold uppercase text-red-600 hover:text-red-800">Logout</button>
           ) : (
-            <button onClick={onLoginClick} className="text-sm font-bold uppercase text-[var(--color-accent-main)] hover:text-[var(--color-accent-hover)] transition-colors cursor-pointer">Login</button>
+            <button onClick={onLoginClick} className="text-sm font-bold uppercase text-[#FF6B00] hover:text-[#e05e00]">Login</button>
           )}
           <ThemeSwitcher />
         </div>

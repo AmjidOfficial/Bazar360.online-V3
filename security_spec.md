@@ -1,13 +1,13 @@
-# Bazar360 Security Specification (Hardened ABAC)
+# Bazar360 Security Specification
 
 ## Data Invariants
 1. **Showroom Ownership**: A dealer profile (`dealers/{dealerId}`) can only be created if `ownerUid` matches the authenticated user. It can only be updated by the user whose UID matches `ownerUid`.
 2. **Inventory Ownership (Master Gate)**: A vehicle listing (`listings/{listingId}`) can only be created if it is linked to a valid `dealerId`, and the user creating the listing MUST be the `ownerUid` of that dealer document.
 3. **Immutability**: Crucial fields like `ownerUid` on dealers and `dealerId` on listings are immutable.
 4. **Relational Integrity**: A listing cannot be created without a valid, pre-existing dealer.
-5. **No Open Reads**: All list queries must be bound to specific roles or states, and write endpoints must strictly enforce structure.
 
-## The "Dirty Dozen" Payloads (Red Team Constraints)
+## The "Dirty Dozen" Payloads
+
 1. **Identity Spoofing (Create Dealer)**: Attempt to create a dealer with `ownerUid` set to another user's ID.
 2. **Ghost Field Update (Patch Dealer)**: Attempt to update a dealer adding an unapproved field (e.g. `isAdmin: true`).
 3. **Ownership Bypass (Patch Dealer)**: Attempt to update another user's dealer profile.
@@ -18,5 +18,5 @@
 8. **Ownership Bypass (Patch Listing)**: Attempt to update another user's listing.
 9. **Role Injection (Create User)**: Attempt to create a user profile with `role: "Super Admin"`.
 10. **PII Leak (Read User)**: Attempt to read another user's private `profiles/{userId}`.
-11. **Cost Attack (List Listings)**: Attempt a blanket `list` query without proper bounding.
+11. **Cost Attack (List Listings)**: Attempt a blanket `list` query without proper bounding (prevented via rules requiring specific filters where applicable, though public listings are readable).
 12. **Status Shortcutting (Lead Update)**: Attempt to modify immutable fields in a lead/CRM record.

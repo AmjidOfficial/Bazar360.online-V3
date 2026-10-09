@@ -7,11 +7,13 @@ interface AdminOpButtonProps {
 
 export function AdminOpButton({ url, label }: AdminOpButtonProps) {
   return (
-    <button
-      onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}
-      className="bg-orange-500 hover:bg-orange-600 text-[var(--color-text-header)] text-xs font-bold py-2 px-4 rounded-lg transition-colors"
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold py-2 px-4 rounded-lg transition-colors inline-block text-center"
     >
       {label}
-    </button>
+    </a>
   );
 }

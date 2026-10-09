@@ -36,18 +36,18 @@ export function IdentityGreetingHeader({
 
   // Compute Stats
   const activePostingsCount = listings.filter(car => !car.approved).length;
-  const userListingsCount = currentUser ? listings.filter(car => car.createdBy === currentUser.uid || (isShowroomOwner && car.dealerId === '')).length : 0;
+  const userListingsCount = currentUser ? listings.filter(car => car.createdBy === currentUser.uid || (isShowroomOwner && car.dealerId === 'auto-choice-peshawar')).length : 0;
   const totalVehicles = listings.filter(car => car.approved).length;
 
   // Find associated showroom name
   const associatedShowroom = isShowroomOwner 
-    ? dealers.find(d => d.id === currentUser?.associatedShowroomId || d.id === '')
+    ? dealers.find(d => d.id === currentUser?.associatedShowroomId || d.id === 'auto-choice-peshawar')
     : null;
 
-  const showroomName = associatedShowroom?.name || 'Bazar360 Showroom';
+  const showroomName = associatedShowroom?.name || 'Auto Choice Showroom';
 
   return (
-    <div className="w-full bg-[var(--color-bg-primary)] border-b border-white/10 select-none relative overflow-hidden py-4 px-4 md:px-8 shadow-inner">
+    <div className="w-full bg-[#0a0d16] border-b border-white/10 select-none relative overflow-hidden py-4 px-4 md:px-8 shadow-inner">
       <div className="absolute inset-0 bg-[radial-gradient(rgba(56,189,248,0.03)_1px,transparent_1.5px)] [background-size:16px_16px] pointer-events-none opacity-80" />
       
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative z-10">
@@ -61,7 +61,7 @@ export function IdentityGreetingHeader({
               : isAdmin
                 ? 'bg-red-500/10 border-red-500/35 text-red-400'
                 : isShowroomOwner
-                  ? 'bg-[var(--color-accent-main)]/10 border-[var(--color-accent-main)]/35 text-[var(--color-accent-main)]'
+                  ? 'bg-[#38BDF8]/10 border-[#38BDF8]/35 text-[#38BDF8]'
                   : 'bg-orange-500/10 border-orange-500/35 text-orange-400'
           }`}>
             {isGuest ? (
@@ -69,7 +69,7 @@ export function IdentityGreetingHeader({
             ) : isAdmin ? (
               <Shield size={20} className="text-red-400" />
             ) : isShowroomOwner ? (
-              <Star size={20} className="text-[var(--color-accent-main)]" />
+              <Star size={20} className="text-[#38BDF8]" />
             ) : (
               <Sparkles size={20} className="text-orange-400" />
             )}
@@ -84,7 +84,7 @@ export function IdentityGreetingHeader({
                   : isAdmin
                     ? 'bg-red-500/10 text-red-400 border border-red-500/10'
                     : isShowroomOwner
-                      ? 'bg-[var(--color-accent-main)]/10 text-[var(--color-accent-main)] border border-[var(--color-accent-main)]/10'
+                      ? 'bg-[#38BDF8]/10 text-[#38BDF8] border border-[#38BDF8]/10'
                       : 'bg-orange-500/10 text-orange-400 border border-orange-500/10'
               }`}>
                 {isGuest 
@@ -96,12 +96,12 @@ export function IdentityGreetingHeader({
                       : (lang === 'ur' ? 'رجسٹرڈ صارف' : 'Registered Private Seller')
                 }
               </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-accent-main)] animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Peshawar Area Network</span>
             </div>
 
             {/* Personalized greeting copy */}
-            <h2 className="text-sm sm:text-base font-black uppercase text-[var(--color-text-header)] tracking-tight mt-1">
+            <h2 className="text-sm sm:text-base font-black uppercase text-white tracking-tight mt-1">
               {isGuest && (
                 lang === 'ur' 
                   ? 'السلام علیکم! بازار360 ڈاٹ آن لائن پر خوش آمدید' 
@@ -129,7 +129,7 @@ export function IdentityGreetingHeader({
               {isGuest && (
                 lang === 'ur'
                   ? 'پشاور اور خیبر پختونخوا کے معروف شو رومز سے جڑنے اور بہترین ڈیلز حاصل کرنے کے لیے سائن ان کریں۔'
-                  : 'Connect with elite KPK showrooms like Bazar360, access direct dealer pricing, and start listing vehicles.'
+                  : 'Connect with elite KPK showrooms like Auto Choice, access direct dealer pricing, and start listing vehicles.'
               )}
               {isAdmin && (
                 lang === 'ur'
@@ -165,7 +165,7 @@ export function IdentityGreetingHeader({
               {/* Profile Shortcut Button */}
               <button
                 onClick={() => setTab('profile')}
-                className="px-3.5 py-2 bg-bg-secondary border border-white/10 text-gray-300 hover:text-[var(--color-text-header)] hover:border-white/20 active:scale-95 text-xs font-black uppercase tracking-wider rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-3.5 py-2 bg-slate-900 border border-white/10 text-gray-300 hover:text-white hover:border-white/20 active:scale-95 text-xs font-black uppercase tracking-wider rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 <LayoutDashboard size={13} className="text-orange-400" />
                 <span>{lang === 'ur' ? 'میرا ڈیش بورڈ' : 'My Console'}</span>
@@ -175,7 +175,7 @@ export function IdentityGreetingHeader({
               {isShowroomOwner && (
                 <button
                   onClick={() => setTab('profile')}
-                  className="px-3.5 py-2 bg-[var(--color-accent-main)]/10 border border-[var(--color-accent-main)]/30 text-[var(--color-accent-main)] hover:bg-[var(--color-accent-main)]/20 active:scale-95 text-xs font-black uppercase tracking-wider rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="px-3.5 py-2 bg-[#38BDF8]/10 border border-[#38BDF8]/30 text-[#38BDF8] hover:bg-[#38BDF8]/20 active:scale-95 text-xs font-black uppercase tracking-wider rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   <Plus size={13} />
                   <span>{lang === 'ur' ? 'نیا اشتہار لگائیں' : 'List New Vehicle'}</span>
@@ -195,7 +195,7 @@ export function IdentityGreetingHeader({
               {isRegistered && (
                 <button
                   onClick={onPostAdClick}
-                  className="px-3.5 py-2 bg-[var(--color-accent-main)]/10 border border-[var(--color-accent-main)]/30 text-[var(--color-accent-main)] hover:bg-[var(--color-accent-main)]/20 active:scale-95 text-xs font-black uppercase tracking-wider rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="px-3.5 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 active:scale-95 text-xs font-black uppercase tracking-wider rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   <Plus size={13} />
                   <span>{lang === 'ur' ? 'اشتہار لگائیں' : 'Sell My Car'}</span>

@@ -2,16 +2,50 @@ export const NO_IMAGE_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 
 export type { UserProfile } from './lib/dbService';
 
+export const SUPER_ADMIN_EMAILS = [
+  'amjid.bisconni@gmail.com',
+  'amjid.psh@gmail.com'
+];
+
+export type UserRole = 
+  | 'Visitor' 
+  | 'Registered User' 
+  | 'Seller' 
+  | 'Dealer' 
+  | 'Showroom Owner' 
+  | 'Moderator' 
+  | 'Admin' 
+  | 'Super Admin';
+
+export interface SocialMedia {
+  facebook?: string;
+  instagram?: string;
+  youtube?: string;
+  tiktok?: string;
+  twitter?: string;
+  website?: string;
+  linkedin?: string;
+  [key: string]: string | undefined;
+}
+
+export interface SocialAccount {
+  id?: string;
+  platform: string;
+  url: string;
+  handle?: string;
+  username?: string;
+}
+
 export interface CarListing {
   id: string;
   title: string;
   make: string;
   model: string;
-  vehicleType?: string; // 'car' | 'motorcycle' | 'commercial'
+  vehicleType?: string;
   variant?: string;
   year: number;
-  price: number; // in PKR
-  mileage: number; // in km
+  price: number;
+  mileage: number;
   fuelType: 'Petrol' | 'Diesel' | 'Hybrid' | 'Electric';
   transmission: 'Automatic' | 'Manual';
   imageUrl: string;
@@ -40,7 +74,6 @@ export interface CarListing {
   sellerType?: 'Individual' | 'Showroom';
   sellerAvatar?: string;
 
-  // Bazar360 Exclusive strict properties
   condition: 'New' | 'Used';
   engineCC: number;
   exteriorColor: string;
@@ -52,7 +85,6 @@ export interface CarListing {
   primaryImage?: string;
   verifiedBadge?: boolean;
   
-  // Requirement matrix extensions
   assemblyType?: 'Local' | 'Imported';
   features?: string[];
   dentPaintDescription?: string;
@@ -63,7 +95,6 @@ export interface CarListing {
   isArchived?: boolean;
   status?: 'Available' | 'Reserved' | 'Sold';
 
-  // Cloudinary Integrated properties
   cloudinaryPublicId?: string;
   cloudinaryPublicIds?: string[];
   cloudinaryFolderPath?: string;
@@ -81,7 +112,6 @@ export interface CarListing {
   pdfCloudinaryPublicId?: string;
   pdfTitle?: string;
 
-  // Owner & Creator Identity Details
   ownerId?: string;
   sellerEmail?: string;
   ownerDetails?: {
@@ -94,358 +124,415 @@ export interface CarListing {
     associatedShowroomId?: string;
   };
 
-  // Premium specs for hero banner matching elite reference images
   topSpeed?: string;
   acceleration?: string;
   range?: string;
 }
 
-export interface ShowroomMember {
-  id: string;
-  name: string;
-  title: string;
-  phone: string;
-  whatsapp?: string;
-  email?: string;
-  photoUrl?: string;
-  active?: boolean;
-  role?: 'Owner' | 'Manager' | 'Sales Executive' | 'Salesperson' | 'Marketing' | 'Admin';
-  permissions?: string[];
-}
-
-export interface ShowroomThemeSettings {
-  primaryColor?: string;
-  secondaryColor?: string;
-  fontFamily?: string;
-  bgStyle?: 'dark' | 'light' | 'emerald' | 'gold';
-}
+export type Vehicle = CarListing;
 
 export interface Dealer {
   id: string;
-  slug?: string;
-  ownerUid?: string;
   name: string;
-  avatarLetter: string;
-  avatarUrl?: string;
-  profilePictureUrl?: string;
-  logoUrl?: string;
-  logo?: string;
-  subtitle: string;
+  subtitle?: string;
+  tagline?: string;
   location: string;
+  city?: string;
+  address?: string;
   rating: number;
   vehiclesCount: number;
-  followersCount: string;
-  coverImage: string;
-  description: string;
-  about?: string;
+  followersCount?: string;
+  avatarLetter?: string;
+  avatarUrl?: string;
+  logo?: string;
+  logoUrl?: string;
+  coverImage?: string;
   phone: string;
-  whatsapp: string;
+  whatsapp?: string;
   landline?: string;
   contactPerson?: string;
   email?: string;
-  flagshipVerified?: boolean;
-  verified?: boolean;
-  likes_count?: number;
-  likesCount?: number;
-  socials: SocialMedia;
+  website?: string;
+  googleMapsUrl?: string;
+  googleMapsEmbed?: string;
+  facebookUrl?: string;
+  instagramUrl?: string;
+  tiktokUrl?: string;
+  youtubeUrl?: string;
+  description?: string;
+  about?: string;
+  socials?: SocialMedia;
   socialAccounts?: SocialAccount[];
-  activityFeed: ActivityPost[];
-  teamMembers?: ShowroomMember[];
-  theme_choice?: 'Cosmic' | 'Bone' | 'Emerald' | 'Gold';
-  themeSettings?: ShowroomThemeSettings;
-  gallery?: string[];
-  media?: string[];
-  tagline?: string;
-  taglineCategory?: 'Professional' | 'Dynamic' | 'Convenience' | 'Short';
-  updatedAt?: string;
-
-  // Smart Link & Passkey Protection
-  smartSlug?: string; // e.g. "AutoChoice01"
-  passkey?: string;   // e.g. "Choice360"
-  isPrivateLocked?: boolean;
+  smartSlug?: string;
+  slug?: string;
   customSmartUrl?: string;
-  accessCount?: number;
-  featuredShowcaseCarId?: string;
+  taglineCategory?: string;
+  passkey?: string;
+  theme_choice?: string;
+  themeSettings?: Record<string, any>;
+  gallery?: string[];
+  profilePictureUrl?: string;
+  flagshipVerified?: boolean;
+  isPrivateLocked?: boolean;
+  likes_count?: number;
+  teamMembers?: ShowroomStaff[];
+  media?: Array<string | {
+    url: string;
+    type: string;
+    public_id?: string;
+    caption?: string;
+  }>;
+  activityFeed?: Array<{
+    id: string;
+    title: string;
+    timestamp: string;
+    type: string;
+    badge?: string;
+    description?: string;
+    price?: number | string;
+    carId?: string;
+    imageUrl?: string;
+  }>;
+  verified?: boolean;
+  ownerUid?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  likesCount?: number;
+  reviewsCount?: number;
+  trustScore?: number;
+  badges?: string[];
 }
 
-export interface ActivityPost {
+export interface ShowroomStaff {
   id: string;
-  timestamp: string;
-  badge: string;
-  imageUrl: string;
-  title: string;
-  description: string;
-  price: string;
-  carId?: string;
-  status?: 'pending_approval' | 'approved';
-  videoUrl?: string;
-  videoDuration?: number;
+  showroomId?: string;
+  name: string;
+  phone?: string;
+  whatsapp?: string;
+  email?: string;
+  title?: string;
+  photoUrl?: string;
+  active?: boolean;
+  role?: any;
+  status?: 'Active' | 'Inactive';
+  createdAt?: string;
 }
 
-export interface Review {
-  id: string;
-  author: string;
-  rating: number;
-  date: string;
-  comment: string;
-}
+export type ShowroomMember = ShowroomStaff;
 
-export interface ChatMessage {
-  id: string;
-  sender: 'user' | 'agent';
-  text: string;
-  timestamp: string;
-}
+export type VisitorCategory = 'First Time Visitor' | 'Second Time Visitor' | 'Third Time Visitor' | 'Regular Visitor';
+export type LeadCategory = 'Cold' | 'Warm' | 'Hot' | 'VIP';
 
-export interface GeneratedSEOListing {
-  title: string;
-  description: string;
-  tags: string[];
-  suggestedPricePKR: number;
-  highlights: string[];
-}
-
-export interface IndustryConfig {
-  activeIndustry: 'Automotive' | 'Footwear' | 'Apparel';
-  industryName: string;
-  slogan: string;
-  heroBadge: string;
+export interface VisitorProfile {
+  visitorId: string;
+  userId?: string;
+  name?: string;
+  phone?: string;
+  email?: string;
+  visitCount: number;
+  sessionCount: number;
+  ipAddress?: string;
+  deviceType: 'Mobile' | 'Tablet' | 'Desktop';
+  browser: string;
+  operatingSystem: string;
+  country: string;
+  city: string;
+  referrer: string;
+  searchHistory: string[];
+  vehicleViews: Array<{
+    vehicleId: string;
+    title: string;
+    timestamp: string;
+  }>;
+  showroomViews: Array<{
+    showroomId: string;
+    name: string;
+    timestamp: string;
+  }>;
+  favorites: string[];
+  sharesCount: number;
+  whatsAppClicks: number;
+  callClicks: number;
+  leadSubmissions: number;
+  timeOnSiteSeconds: number;
+  visitorCategory: VisitorCategory;
+  leadCategory: LeadCategory;
+  leadScore: number;
+  firstSeenAt: string;
+  lastSeenAt: string;
 }
 
 export interface VisitorLog {
   id: string;
-  timestamp: string;
   visitorId: string;
-  searchQueries: string[];
-  filterChanges: {
-    make?: string;
-    city?: string;
-    maxPrice?: number;
-    transmission?: string;
-  };
-  deviceMetrics: {
-    viewportWidth: number;
-    viewportHeight: number;
-    userAgent: string;
-  };
-}
-
-export interface RegisteredUserLog {
-  id: string;
+  path: string;
+  action: 'PAGE_VIEW' | 'SEARCH' | 'VEHICLE_VIEW' | 'WHATSAPP_CLICK' | 'CALL_CLICK' | 'LEAD_SUBMIT' | 'SHARE';
+  metadata?: Record<string, any>;
   timestamp: string;
-  userId: string;
-  userEmail: string;
-  savedAlerts: string[];
-  activityType: 'profile_view' | 'save_car' | 'message_sent' | 'comparative_eval';
-  queryDetails?: string;
-}
-
-export interface DealerSubscription {
-  id: string;
-  dealerId: string;
-  dealerName?: string;
-  subscriberId: string;
-  subscriberEmail?: string;
-  subscriberPhone?: string;
-  createdAt: string;
-  active: boolean;
-}
-
-export interface BargainOwnerLog {
-  id: string;
-  timestamp: string;
-  dealerId: string;
-  ownerEmail: string;
-  action: 'monetize_analytics' | 'inventory_health_update' | 'buyer_log_accessed' | 'uploaded_listing';
-  details: string;
-  inventoryCountSnapshot: number;
 }
 
 export interface Lead {
   id: string;
-  userName: string;
-  userPhone: string;
-  userEmail: string;
-  createdAt: string;
-
-  // New interactive CRM Lead schema properties
-  vehicleId?: string;
-  showroomOwnerId?: string;
-  customerId?: string;
-  inquiryMessage?: string;
-  inquiryDate?: string;
-  status?: 'New' | 'Contacted' | 'Converted' | 'Closed' | 'Lost' | 'Pending' | 'Approved' | 'Countered' | 'Rejected';
-  vehicleTitle?: string;
-  vehiclePrice?: number;
-  vehicleImage?: string;
-  notes?: string;
-
-  // Older legacy fields for compatibility with existing subviews
-  type?: string;
-  title?: string;
-  city?: string;
-  details?: string;
-  metadata?: Record<string, any>;
-}
-
-export interface ServiceBooking {
-  id: string;
-  serviceId: 'inspection' | 'excise' | 'detailing' | 'ceramic_ppf' | 'sell_for_u' | 'financing' | string;
-  serviceTitle: string;
+  visitorId?: string;
   userName: string;
   userPhone: string;
   userEmail?: string;
   city?: string;
-  preferredDate?: string;
-  vehicleDetails?: string;
   vehicleId?: string;
   vehicleTitle?: string;
-  uvLightAnalysisRequested?: boolean;
+  vehiclePrice?: number;
+  vehicleImage?: string;
+  showroomId?: string;
+  showroomName?: string;
+  showroomOwnerId?: string;
+  customerId?: string;
+  type?: string;
+  title?: string;
+  details?: string;
+  inquiryMessage?: string;
+  inquiryDate?: string;
+  metadata?: Record<string, any>;
+  leadScore?: number;
+  leadCategory?: LeadCategory;
+  source?: 'WhatsApp' | 'Phone Call' | 'Inquiry Form' | 'Inspection Booking' | 'Bargain Offer';
+  status: 'New' | 'Contacted' | 'In Negotiation' | 'Converted' | 'Lost' | 'Pending' | 'Closed' | 'Approved';
   notes?: string;
-  status: 'Pending' | 'Confirmed' | 'In-Progress' | 'Completed' | 'Cancelled';
   createdAt: string;
   updatedAt?: string;
-  userId?: string;
+}
 
-  // New CRM and Full-Lifecycle properties
-  priority?: 'Low' | 'Medium' | 'High' | 'Critical';
+export interface SEOPageMeta {
+  id: string;
+  urlPath: string;
+  metaTitle: string;
+  metaDescription: string;
+  canonicalUrl: string;
+  ogTitle: string;
+  ogDescription: string;
+  ogImage: string;
+  twitterCard: 'summary_large_image' | 'summary';
+  jsonLdSchemas: Array<Record<string, any>>;
+  faqItems: Array<{
+    question: string;
+    answer: string;
+  }>;
+  aiEngineSummary: string;
+  aiKeywords: string[];
+  updatedAt: string;
+}
+
+export interface EntityNode {
+  id: string;
+  entityType: 'Brand' | 'Model' | 'Vehicle' | 'Showroom' | 'Dealer' | 'City' | 'Category' | 'FuelType';
+  name: string;
+  slug: string;
+  description: string;
+  imageUrl?: string;
+  relatedEntityIds: string[];
+  entityAttributes: Record<string, any>;
+  faqQuestions: Array<{ q: string; a: string }>;
+  aiSummary: string;
+  structuredDataJson: Record<string, any>;
+}
+
+export interface KnowledgeGraphEdge {
+  id: string;
+  sourceEntityId: string;
+  targetEntityId: string;
+  relationship: 'BELONGS_TO' | 'LOCATED_IN' | 'OFFERS_VEHICLE' | 'COMPARES_WITH' | 'SUPPLIES';
+  weight: number;
+}
+
+export interface ReviewItem {
+  id: string;
+  targetType?: 'Showroom' | 'Vehicle' | 'Dealer' | 'Platform';
+  targetId?: string;
+  authorName?: string;
+  authorUid?: string;
+  author?: string;
+  rating: number;
+  comment: string;
+  verifiedPurchase?: boolean;
+  date?: string;
+  createdAt?: string;
+}
+
+export type Review = ReviewItem;
+export type DetailedReview = ReviewItem;
+
+export interface ServiceBooking {
+  id: string;
+  userId?: string;
+  userName: string;
+  userPhone: string;
+  userEmail?: string;
+  serviceType?: string;
+  serviceId?: string;
+  serviceTitle?: string;
+  city: string;
+  preferredDate: string;
+  preferredTime?: string;
+  vehicleInfo?: string;
+  vehicleId?: string;
+  vehicleTitle?: string;
+  vehicleDetails?: string;
   assignedWorkshop?: string;
   assignedTechnician?: string;
-  estimatedCompletion?: string;
-  photos?: string[];
-  timelineLogs?: Array<{ title: string; timestamp: string; note: string; user?: string }>;
-  chatMessages?: Array<{ id: string; sender: string; senderName: string; message: string; timestamp: string }>;
-  invoice?: { amount?: number; status?: 'Pending' | 'Paid'; paymentMethod?: string; paidAt?: string };
-  review?: { rating?: number; comment?: string; date?: string };
-  warrantyId?: string;
-  warrantyDuration?: string;
-}
-
-export interface SocialAccount {
-  id: string;
-  platform: string; // e.g., 'facebook', 'instagram', 'tiktok', 'whatsapp', 'website', 'youtube', 'linkedin', 'x', 'threads', 'snapchat', 'pinterest', 'telegram'
-  username: string;
-  url: string;
-  enabled: boolean;
-  sortOrder: number;
-}
-
-export interface SocialMedia {
-  facebook?: string;
-  instagram?: string;
-  linkedin?: string;
-  whatsapp?: string;
-  tiktok?: string;
-  website?: string;
-  youtube?: string;
-}
-
-export interface SocialPost {
-  id: string;
-  userId: string;
-  userName: string;
-  userAvatar?: string;
-  userRole: string;
-  showroomId?: string;
-  type: 'TEXT' | 'IMAGE' | 'VIDEO';
-  content: string;
-  mediaUrl?: string;
-  mediaUrls?: string[];
+  invoice?: any;
+  review?: any;
+  chatMessages?: any;
+  priority?: 'High' | 'Medium' | 'Low' | 'Critical';
+  uvLightAnalysisRequested?: boolean;
+  status: 'Pending' | 'Confirmed' | 'In-Progress' | 'Completed' | 'Cancelled';
+  notes?: string;
   createdAt: string;
-  likes: string[];
-  commentsCount: number;
-  approved?: boolean;
-}
-
-export interface SocialComment {
-  id: string;
-  postId: string;
-  userId: string;
-  userName: string;
-  userAvatar?: string;
-  userRole: string;
-  text: string;
-  createdAt: string;
-}
-
-// Enterprise BAZAR360 Messaging & Communication Models
-export interface Conversation {
-  id: string;
-  participants: string[]; // UIDs or Phone numbers
-  participantDetails: Record<string, {
-    name: string;
-    avatar?: string;
-    role?: string;
-    showroomTitle?: string;
-  }>;
-  relatedListingId?: string;
-  relatedListingTitle?: string;
-  relatedListingImage?: string;
-  relatedListingPrice?: number;
-  relatedShowroomId?: string;
-  relatedServiceId?: string;
-  relatedLeadId?: string;
-  lastMessage: string;
-  lastMessageTime: string;
-  lastMessageSenderId: string;
-  unreadCount: Record<string, number>; // UID -> unread count
-  status: 'Active' | 'Archived' | 'Closed' | 'Flagged';
-  priority?: 'Normal' | 'High' | 'Urgent';
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface DirectMessage {
   id: string;
-  conversationId: string;
   senderId: string;
   senderName: string;
   senderAvatar?: string;
-  recipientId: string;
-  message: string;
-  attachments?: Array<{ url: string; name: string; type: 'image' | 'document' | 'pdf' }>;
-  type: 'text' | 'image' | 'document' | 'system_event' | 'service_update' | 'listing_inquiry' | 'appointment_update';
-  metadata?: {
-    listingId?: string;
-    listingTitle?: string;
-    listingPrice?: number;
-    listingImage?: string;
-    serviceId?: string;
-    serviceTitle?: string;
-    appointmentDate?: string;
-    referenceCode?: string;
-  };
-  read: boolean;
-  delivered: boolean;
-  createdAt: string;
+  text?: string;
+  timestamp?: string;
+  createdAt?: string;
+  type?: string;
+  metadata?: Record<string, any>;
+  conversationId?: string;
+  recipientId?: string;
+  message?: string;
+  attachments?: any[];
+  read?: boolean;
+  delivered?: boolean;
+}
+
+export interface Conversation {
+  id: string;
+  participants: string[];
+  participantDetails?: Record<string, any>;
+  participantNames?: Record<string, string>;
+  lastMessage?: string;
+  lastMessageTimestamp?: string;
+  lastMessageTime?: string;
+  lastMessageSenderId?: string;
+  relatedListingTitle?: string;
+  relatedListingImage?: string;
+  relatedListingPrice?: number;
+  relatedListingId?: string;
+  relatedShowroomId?: string;
+  relatedServiceId?: string;
+  relatedLeadId?: string;
+  unreadCount?: number | Record<string, number>;
+  status?: string;
+  createdAt?: string;
+  updatedAt: string;
 }
 
 export interface UserNotification {
   id: string;
   userId: string;
   title: string;
-  body: string;
-  type: 'messages' | 'leads' | 'services' | 'appointments' | 'payments' | 'reviews' | 'system';
-  read: boolean;
-  createdAt: string;
+  message?: string;
+  body?: string;
   link?: string;
   metadata?: Record<string, any>;
+  type: 'INFO' | 'LEAD' | 'BARGAIN' | 'ALERT' | 'SYSTEM' | 'system' | 'messages' | 'leads' | 'services' | 'appointments' | 'reviews';
+  read: boolean;
+  linkUrl?: string;
+  createdAt: string;
 }
 
-export interface DetailedReview {
+export interface DealerSubscription {
   id: string;
-  author: string;
-  authorAvatar?: string;
-  authorUid?: string;
-  rating: number;
-  date: string;
-  comment: string;
-  verifiedTransaction?: boolean;
-  transactionType?: 'Vehicle Purchase' | 'Service Completed' | 'Inspection';
-  photos?: string[];
-  reply?: {
-    text: string;
-    date: string;
-    author: string;
-  };
+  dealerId: string;
+  planName: 'Basic' | 'Pro' | 'Enterprise';
+  status: 'Active' | 'Expired' | 'Pending';
+  monthlyFee: number;
+  startDate: string;
+  endDate: string;
 }
+
+export interface IndustryConfig {
+  industryName?: string;
+  activeIndustry?: string;
+  slogan?: string;
+  heroBadge?: string;
+  domain?: string;
+  heroHeadline?: string;
+  heroSubtitle?: string;
+  primaryCategoryLabel?: string;
+  secondaryCategoryLabel?: string;
+  accentColor?: string;
+  theme?: Record<string, string>;
+}
+
+export interface AuditLogItem {
+  id: string;
+  userId: string;
+  userName: string;
+  userRole: string;
+  action: string;
+  details: string;
+  status: 'SUCCESS' | 'FAILED' | 'WARNING';
+  timestamp: string;
+}
+
+export interface Bargain {
+  id: string;
+  carId: string;
+  carTitle?: string;
+  carPrice?: number;
+  buyerUid: string;
+  buyerName: string;
+  buyerPhone: string;
+  offeredPrice: number;
+  dealerOwnerUid?: string;
+  status: 'Pending' | 'Accepted' | 'Rejected' | 'Countered';
+  createdAt: string;
+}
+
+export interface SocialComment {
+  id: string;
+  postId?: string;
+  userId?: string;
+  authorName?: string;
+  userName?: string;
+  authorAvatar?: string;
+  userAvatar?: string;
+  userRole?: string;
+  content?: string;
+  text?: string;
+  createdAt: string;
+}
+
+export interface SocialPost {
+  id: string;
+  title?: string;
+  description?: string;
+  badge?: string;
+  price?: number | string;
+  carId?: string;
+  timestamp?: string;
+  status?: string;
+  authorName?: string;
+  authorAvatar?: string;
+  userName?: string;
+  userAvatar?: string;
+  userId?: string;
+  userRole?: string;
+  authorRole?: string;
+  content?: string;
+  imageUrl?: string;
+  mediaUrl?: string;
+  mediaUrls?: string[];
+  type?: string;
+  showroomId?: string;
+  approved?: boolean;
+  likesCount?: number;
+  commentsCount?: number;
+  likes?: string[];
+  comments?: SocialComment[];
+  createdAt?: string;
+}
+
+export type ActivityPost = SocialPost;

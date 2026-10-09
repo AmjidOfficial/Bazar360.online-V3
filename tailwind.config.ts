@@ -1,4 +1,4 @@
-// Bazar360 Enterprise Theme Engine - Refined Luxury Tailwind Configuration
+// Bazar360 Enterprise Theme Engine - Single Unified Luxury Dark Design System
 export default {
   content: [
     "./index.html",
@@ -9,35 +9,40 @@ export default {
     extend: {
       colors: {
         bg: {
-          primary: "var(--color-bg-primary)",
-          secondary: "var(--color-bg-deep)",
-          tertiary: "var(--color-surface-highest)",
-          surface: "var(--color-surface)",
-          elevated: "var(--color-surface-elevated)",
+          primary: "#0F172A",
+          secondary: "#111827",
+          tertiary: "#1E293B",
+          surface: "#1E293B",
+          elevated: "#334155",
         },
         text: {
-          main: "var(--color-text-main)",
-          header: "var(--color-text-main)",
-          secondary: "var(--color-text-secondary)",
-          muted: "var(--color-text-muted)",
+          main: "#FFFFFF",
+          header: "#FFFFFF",
+          secondary: "#CBD5E1",
+          muted: "#94A3B8",
         },
         border: {
-          main: "var(--color-outline)",
-          subtle: "var(--color-outline)",
-          accent: "var(--color-amber-accent)",
+          main: "#334155",
+          subtle: "#1E293B",
+          accent: "#2563EB",
         },
         accent: {
-          main: "var(--color-amber-accent)",
-          hover: "var(--color-secondary-orange)",
-          gold: "#C5A880",
-          bronze: "#A47E53",
-          obsidian: "#0B0F19",
+          main: "#2563EB",
+          hover: "#3B82F6",
+          blue: "#2563EB",
+          lightBlue: "#3B82F6",
+          gold: "#F59E0B",
+          emerald: "#10B981",
         },
         brand: {
-          blue: '#1E3A8A',
-          gold: '#C5A880',
-          darkBg: '#040812',
-          lightBg: '#FAF9F6',
+          primary: "#0F172A",
+          secondary: "#111827",
+          card: "#1E293B",
+          accent: "#2563EB",
+          hover: "#3B82F6",
+          success: "#10B981",
+          warning: "#F59E0B",
+          danger: "#EF4444",
         },
       },
       borderRadius: {
@@ -47,9 +52,9 @@ export default {
         'luxury-xl': '32px',
       },
       fontFamily: {
-        sans: ["Plus Jakarta Sans", "ui-sans-serif", "system-ui", "-apple-system", "sans-serif"],
-        heading: ["Plus Jakarta Sans", "ui-sans-serif", "system-ui", "sans-serif"],
-        display: ["Plus Jakarta Sans", "ui-sans-serif", "system-ui", "sans-serif"],
+        sans: ["Inter", "ui-sans-serif", "system-ui", "-apple-system", "sans-serif"],
+        heading: ["Outfit", "Inter", "sans-serif"],
+        display: ["Outfit", "Inter", "sans-serif"],
         mono: ["JetBrains Mono", "monospace"],
       },
       letterSpacing: {
@@ -68,10 +73,10 @@ export default {
         '30': '7.5rem',
       },
       boxShadow: {
-        'luxury-subtle': '0 2px 10px -2px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02)',
-        'luxury-card': '0 8px 30px -4px rgba(0, 0, 0, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02)',
-        'luxury-hover': '0 16px 40px -6px rgba(197, 168, 128, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.04)',
-        'luxury-glow': '0 0 35px rgba(197, 168, 128, 0.15)',
+        'luxury-subtle': '0 2px 10px -2px rgba(0, 0, 0, 0.2)',
+        'luxury-card': '0 8px 30px -4px rgba(0, 0, 0, 0.4)',
+        'luxury-hover': '0 16px 40px -6px rgba(37, 99, 235, 0.25)',
+        'luxury-glow': '0 0 35px rgba(37, 99, 235, 0.3)',
       },
       transitionTimingFunction: {
         'luxury': 'cubic-bezier(0.16, 1, 0.3, 1)',

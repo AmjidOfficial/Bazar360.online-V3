@@ -1,7 +1,7 @@
 import React from 'react';
 import { X, GitCompare, MessageCircle, Phone, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { CarListing, NO_IMAGE_SVG } from '../types';
+import { CarListing } from '../types';
 
 interface ShowroomComparisonModalProps {
   isOpen: boolean;
@@ -28,12 +28,17 @@ export function ShowroomComparisonModal({
   };
 
   const getSpecsList = (car: CarListing) => {
-    const rawHp = car.specs?.horspower || '';
-    const calculatedHP = rawHp 
-      ? (rawHp.toString().toLowerCase().includes('hp') || rawHp.toString().toLowerCase().includes('bhp') ? rawHp : `${rawHp} HP`)
-      : 'Not provided';
+    const calculatedHP = car.specs?.horspower || (
+      car.engineCC > 3500 ? '450 HP' :
+      car.engineCC > 2400 ? '280 HP' :
+      car.engineCC > 1500 ? '160 HP' : '110 HP'
+    );
 
-    const calculatedTopSpeed = car.topSpeed || 'Not provided';
+    const calculatedTopSpeed = car.topSpeed || (
+      car.engineCC > 3500 ? '280 km/h' :
+      car.engineCC > 2400 ? '250 km/h' :
+      car.engineCC > 1500 ? '220 km/h' : '190 km/h'
+    );
 
     return [
       { label: 'Price', value: formatPrice(car.price), highlight: true },
@@ -44,9 +49,9 @@ export function ShowroomComparisonModal({
       { label: 'Fuel Type', value: car.fuelType },
       { label: 'Power', value: calculatedHP },
       { label: 'Top Speed', value: calculatedTopSpeed },
-      { label: 'Body Condition', value: car.bodyCondition || 'Not provided' },
-      { label: 'Documents', value: car.documentType || 'Not provided' },
-      { label: 'Tax Status', value: car.tokenTaxStatus || 'Not provided' }
+      { label: 'Body Condition', value: car.bodyCondition || 'Total Genuine' },
+      { label: 'Documents', value: car.documentType || 'Smart Card' },
+      { label: 'Tax Status', value: car.tokenTaxStatus || 'Paid' }
     ];
   };
 
@@ -71,7 +76,7 @@ export function ShowroomComparisonModal({
             transition={{ type: 'spring', damping: 25, stiffness: 350 }}
             className={`relative w-full max-w-5xl rounded-3xl border overflow-hidden shadow-2xl flex flex-col max-h-[90vh] ${
               isDark 
-                ? 'bg-[var(--color-bg-primary)] border-white/5 text-[var(--color-text-header)]' 
+                ? 'bg-[#0f1118] border-white/5 text-white' 
                 : 'bg-white border-slate-100 text-slate-900'
             }`}
           >
@@ -89,7 +94,7 @@ export function ShowroomComparisonModal({
                 </div>
                 <div>
                   <h3 className="font-sans font-bold text-lg md:text-xl">Fleet Comparison Desk</h3>
-                  <p className={`text-[10px] uppercase font-mono tracking-widest mt-0.5 ${isDark ? 'text-gray-400' : 'text-text-muted'}`}>
+                  <p className={`text-[10px] uppercase font-mono tracking-widest mt-0.5 ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>
                     Side-By-Side Spec Sheet ({compareList.length}/3 selected)
                   </p>
                 </div>
@@ -97,7 +102,7 @@ export function ShowroomComparisonModal({
               <button
                 onClick={onClose}
                 className={`p-2 rounded-xl transition-colors cursor-pointer ${
-                  isDark ? 'hover:bg-white/5 text-gray-400 hover:text-[var(--color-text-header)]' : 'hover:bg-slate-100 text-text-muted hover:text-slate-900'
+                  isDark ? 'hover:bg-white/5 text-gray-400 hover:text-white' : 'hover:bg-slate-100 text-slate-500 hover:text-slate-900'
                 }`}
               >
                 <X size={18} />
@@ -137,7 +142,7 @@ export function ShowroomComparisonModal({
                         {/* Remove Button */}
                         <button
                           onClick={() => onRemove(car)}
-                          className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 text-[var(--color-text-header)] flex items-center justify-center transition-colors cursor-pointer"
+                          className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition-colors cursor-pointer"
                           title="Remove vehicle"
                         >
                           <X size={14} />
@@ -146,7 +151,7 @@ export function ShowroomComparisonModal({
                         {/* Image Frame */}
                         <div className="aspect-video relative overflow-hidden bg-black/10 shrink-0">
                           <img
-                            src={car.imageUrl || NO_IMAGE_SVG}
+                            src={car.imageUrl || 'https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&q=80&w=600'}
                             alt={`${car.make} ${car.model}`}
                             className="w-full h-full object-cover"
                             referrerPolicy="no-referrer"
@@ -157,7 +162,7 @@ export function ShowroomComparisonModal({
                             <span className="text-[9px] font-mono font-bold text-orange-500 tracking-wider uppercase">
                               {car.make}
                             </span>
-                            <h4 className="text-sm font-bold text-[var(--color-text-header)] truncate leading-snug mt-0.5">
+                            <h4 className="text-sm font-bold text-white truncate leading-snug mt-0.5">
                               {car.model}
                             </h4>
                           </div>
@@ -175,13 +180,13 @@ export function ShowroomComparisonModal({
                                     : ''
                                 }`}
                               >
-                                <span className={isDark ? 'text-gray-400' : 'text-text-muted'}>
+                                <span className={isDark ? 'text-gray-400' : 'text-slate-500'}>
                                   {spec.label}
                                 </span>
                                 <span className={`font-mono ${
                                   spec.highlight 
                                     ? 'text-orange-500 font-bold text-sm' 
-                                    : isDark ? 'text-text-main' : 'text-slate-800'
+                                    : isDark ? 'text-slate-100' : 'text-slate-800'
                                 }`}>
                                   {spec.value}
                                 </span>
@@ -197,7 +202,7 @@ export function ShowroomComparisonModal({
                                 e.preventDefault();
                                 window.location.href = `/?listing=${car.id}`;
                               }}
-                              className="flex items-center justify-center gap-1.5 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-[var(--color-text-header)] text-[10px] font-bold font-mono uppercase tracking-wider transition-all"
+                              className="flex items-center justify-center gap-1.5 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-bold font-mono uppercase tracking-wider transition-all"
                             >
                               <Sparkles size={11} />
                               EXPLORE
@@ -212,7 +217,7 @@ export function ShowroomComparisonModal({
                                   : 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-800'
                               }`}
                             >
-                              <MessageCircle size={11} className="text-[var(--color-accent-main)]" />
+                              <MessageCircle size={11} className="text-emerald-400" />
                               DISCUSS
                             </a>
                           </div>

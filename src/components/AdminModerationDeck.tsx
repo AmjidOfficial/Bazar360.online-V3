@@ -30,51 +30,7 @@ export default function AdminModerationDeck({
   const [price, setPrice] = useState('');
   const [mileage, setMileage] = useState('');
 
-  const [selectedListingIds, setSelectedListingIds] = useState<string[]>([]);
-  const [isBulkApproving, setIsBulkApproving] = useState(false);
-
   const pendingListings = listings.filter((l) => l.approved === false);
-
-  const toggleSelectAll = () => {
-    if (selectedListingIds.length === pendingListings.length) {
-      setSelectedListingIds([]);
-    } else {
-      setSelectedListingIds(pendingListings.map(l => l.id));
-    }
-  };
-
-  const toggleSelectOne = (id: string) => {
-    setSelectedListingIds(prev =>
-      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
-    );
-  };
-
-  const handleBulkApprove = async () => {
-    if (selectedListingIds.length === 0) return;
-    setIsBulkApproving(true);
-    try {
-      const { doc, writeBatch } = await import('firebase/firestore');
-      const { db } = await import('../firebase');
-
-      const batch = writeBatch(db);
-      for (const id of selectedListingIds) {
-        const ref = doc(db, 'listings', id);
-        batch.update(ref, { approved: true, updatedAt: new Date().toISOString() });
-      }
-      await batch.commit();
-
-      selectedListingIds.forEach(id => {
-        onApproveListing(id);
-      });
-
-      toast.success(`Successfully approved ${selectedListingIds.length} listings!`);
-      setSelectedListingIds([]);
-    } catch (error: any) {
-      toast.error(`Bulk approval error: ${error.message}`);
-    } finally {
-      setIsBulkApproving(false);
-    }
-  };
 
   const handleAdminPost = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,7 +48,7 @@ export default function AdminModerationDeck({
         mileage: Number(mileage),
         fuelType: 'Petrol',
         transmission: 'Automatic',
-        imageUrl: '',
+        imageUrl: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80',
         verified: true,
         featured: true,
         dealerId: postMode === 'showroom' ? selectedDealerId : 'admin-private',
@@ -145,63 +101,26 @@ export default function AdminModerationDeck({
 
       {activeTab === 'pending' && (
         <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] rounded-3xl p-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-            <h3 className="text-lg font-black text-[var(--color-text-header)] uppercase">Pending Approvals ({pendingListings.length})</h3>
-            
-            {pendingListings.length > 0 && (
-              <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-                <label className="flex items-center gap-2 cursor-pointer text-xs font-mono text-[var(--color-text-muted)]">
-                  <input
-                    type="checkbox"
-                    checked={selectedListingIds.length === pendingListings.length && pendingListings.length > 0}
-                    onChange={toggleSelectAll}
-                    className="accent-orange-500 w-4 h-4 rounded"
-                  />
-                  <span>Select All ({selectedListingIds.length}/{pendingListings.length})</span>
-                </label>
-
-                {selectedListingIds.length > 0 && (
-                  <button
-                    onClick={handleBulkApprove}
-                    disabled={isBulkApproving}
-                    className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-[var(--color-accent-main)] hover:to-teal-500 text-slate-950 font-black uppercase text-xs rounded-xl shadow-lg transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                  >
-                    <Check size={14} className="stroke-[3]" />
-                    <span>{isBulkApproving ? 'Approving...' : `Bulk Approve (${selectedListingIds.length})`}</span>
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-
+          <h3 className="text-lg font-black text-[var(--color-text-header)] uppercase mb-4">Pending Approvals</h3>
           {pendingListings.length === 0 ? (
             <p className="text-[var(--color-text-muted)] text-xs">No pending listings.</p>
           ) : (
             <div className="space-y-4">
-              {pendingListings.map(car => {
-                const isSelected = selectedListingIds.includes(car.id);
-                return (
-                  <div key={car.id} className={`flex justify-between items-center bg-[var(--color-bg-primary)] p-4 rounded-xl border transition-all ${isSelected ? 'border-orange-500 bg-orange-500/5' : 'border-[var(--color-border-main)]'}`}>
-                    <div className="flex items-center gap-4">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => toggleSelectOne(car.id)}
-                        className="accent-orange-500 w-4 h-4 rounded cursor-pointer"
-                      />
-                      <img src={car.imageUrl} alt={car.title} className="w-16 h-12 object-cover rounded-lg" />
-                      <div>
-                        <p className="text-[var(--color-text-header)] font-bold text-sm uppercase">{car.title}</p>
-                        <p className="text-[var(--color-text-muted)] text-[10px] uppercase font-mono">ID: {car.id} | Dealer: {car.dealerId}</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <button onClick={() => onApproveListing(car.id)} className="p-2 bg-[var(--color-accent-main)]/10 text-[var(--color-accent-main)] rounded-lg hover:bg-[var(--color-accent-main)]/20 cursor-pointer" title="Approve single"><Check size={16} /></button>
-                      <button onClick={() => onRejectListing(car.id)} className="p-2 bg-rose-500/10 text-rose-400 rounded-lg hover:bg-rose-500/20 cursor-pointer" title="Reject"><X size={16} /></button>
+              {pendingListings.map(car => (
+                <div key={car.id} className="flex justify-between items-center bg-[var(--color-bg-primary)] p-4 rounded-xl border border-[var(--color-border-main)]">
+                  <div className="flex items-center gap-4">
+                    <img src={car.imageUrl} alt={car.title} className="w-16 h-12 object-cover rounded-lg" />
+                    <div>
+                      <p className="text-[var(--color-text-header)] font-bold text-sm uppercase">{car.title}</p>
+                      <p className="text-[var(--color-text-muted)] text-[10px] uppercase font-mono">ID: {car.id} | Dealer: {car.dealerId}</p>
                     </div>
                   </div>
-                );
-              })}
+                  <div className="flex gap-2">
+                    <button onClick={() => onApproveListing(car.id)} className="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg hover:bg-emerald-500/20"><Check size={16} /></button>
+                    <button onClick={() => onRejectListing(car.id)} className="p-2 bg-rose-500/10 text-rose-400 rounded-lg hover:bg-rose-500/20"><X size={16} /></button>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>

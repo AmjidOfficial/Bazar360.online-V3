@@ -48,7 +48,7 @@ export default function NotificationsView({ lang }: { lang: 'en' | 'ur' }) {
         {/* Placeholder Notification 3 */}
         <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] p-4 rounded-2xl flex gap-4 transition-all hover:shadow-lg">
           <div className="w-10 h-10 rounded-full bg-[var(--color-bg-primary)] flex items-center justify-center shrink-0 border border-[var(--color-border-main)]">
-            <Info className="w-4 h-4 text-[var(--color-accent-main)]" />
+            <Info className="w-4 h-4 text-[#38bdf8]" />
           </div>
           <div>
             <h4 className="text-sm font-bold text-[var(--color-text-main)]">

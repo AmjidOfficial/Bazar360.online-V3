@@ -5,7 +5,7 @@ import { AnimatePresence } from 'motion/react';
 import { Dealer, CarListing, Review } from '../types';
 import { 
   dbFetchDealers, 
-  dbFetchListingsByDealerId,
+  dbFetchListings,
   dbFetchReviews,
   dbAddReview
 } from '../lib/dbService';
@@ -35,34 +35,29 @@ export function ShowroomView() {
     const loadShowroomData = async () => {
       setLoading(true);
       try {
-        const targetSlug = (showroomSlug || '').toLowerCase();
-        
-        // Fetch dealers list
         const allDealers = await dbFetchDealers();
-        let foundDealer = allDealers.find(d => {
+        const allListings = await dbFetchListings();
+        
+        const targetSlug = (showroomSlug || '').toLowerCase();
+        const foundDealer = allDealers.find(d => {
           const generatedSlug = d.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
           return (
             generatedSlug === targetSlug || 
-            d.id?.toLowerCase() === targetSlug
+            d.id?.toLowerCase() === targetSlug || 
+            (d.id === 'auto-choice-peshawar' && (targetSlug === 'auto-choice' || targetSlug === 'auto-choice-peshawar'))
           );
         });
 
         if (foundDealer) {
           setDealer(foundDealer);
-          
-          // Load listings progressively in background
-          dbFetchListingsByDealerId(foundDealer.id).then(filtered => {
-            setListings(filtered);
-          }).catch(lErr => {
-            console.error('[Progressive Loading] Error fetching listings:', lErr);
-          });
-
-          // Load reviews progressively in background
-          dbFetchReviews(foundDealer.id).then(revs => {
+          const filtered = allListings.filter(l => l.dealerId === foundDealer.id && l.approved);
+          setListings(filtered);
+          try {
+            const revs = await dbFetchReviews(foundDealer.id);
             setReviews(revs || []);
-          }).catch(rErr => {
-            console.warn('[Progressive Loading] Error fetching reviews:', rErr);
-          });
+          } catch (rErr) {
+            console.warn('Error fetching reviews:', rErr);
+          }
         }
       } catch (err) {
         console.error('[ShowroomView] Error loading data:', err);
@@ -140,7 +135,7 @@ export function ShowroomView() {
           <div className="relative w-full max-w-4xl bg-[var(--color-bg-primary)] border border-[var(--color-border-main)] rounded-3xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto shadow-2xl">
             <button 
               onClick={() => setShowPostingModal(false)}
-              className="absolute top-4 right-4 z-50 p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-header)] bg-white/10 rounded-full transition-all cursor-pointer"
+              className="absolute top-4 right-4 z-50 p-2 text-[var(--color-text-muted)] hover:text-white bg-white/10 rounded-full transition-all cursor-pointer"
               title="Close Posting Studio"
             >
               <X size={18} />
@@ -163,7 +158,7 @@ function NotFoundView({ onBack }: { onBack: () => void }) {
   return (
     <div className="min-h-screen bg-[var(--color-bg-primary)] flex items-center justify-center px-6">
       <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] rounded-3xl p-12 max-w-md w-full text-center shadow-2xl space-y-6">
-        <div className="w-20 h-20 bg-[var(--color-accent-main)]/10 rounded-full flex items-center justify-center mx-auto text-[var(--color-accent-main)]">
+        <div className="w-20 h-20 bg-orange-500/10 rounded-full flex items-center justify-center mx-auto text-orange-500">
           <ShieldCheck size={40} className="animate-pulse" />
         </div>
         <div className="space-y-2">
@@ -174,7 +169,7 @@ function NotFoundView({ onBack }: { onBack: () => void }) {
         </div>
         <button 
           onClick={onBack}
-          className="w-full bg-[var(--color-accent-main)] hover:bg-[var(--color-accent-hover)] text-[#030712] font-black font-sans py-3.5 px-6 rounded-xl uppercase tracking-widest text-xs transition-all flex items-center justify-center gap-2 shadow-lg shadow-[var(--color-accent-main)]/20 cursor-pointer"
+          className="w-full bg-orange-600 hover:bg-orange-700 text-white font-black font-sans py-3.5 px-6 rounded-xl uppercase tracking-widest text-xs transition-all flex items-center justify-center gap-2 shadow-lg shadow-orange-600/20 cursor-pointer"
         >
           <ArrowLeft size={16} />
           Return to Marketplace

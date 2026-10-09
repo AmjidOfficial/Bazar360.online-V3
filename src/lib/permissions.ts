@@ -16,11 +16,12 @@ export const ADMIN_NAMES = [
 
 export function isAdminUser(user?: UserProfile | null): boolean {
   if (!user) return false;
-  const roleStr = String(user.role || '').toLowerCase();
-  if (roleStr === 'admin' || roleStr === 'super admin' || (user as any).isAdmin === true) return true;
   const email = (user.email || '').toLowerCase();
+  const name = user.displayName || '';
   
   if (ADMIN_EMAILS.includes(email)) return true;
+  if (ADMIN_NAMES.some(adminName => name.toLowerCase().includes(adminName.toLowerCase()))) return true;
+  
   return false;
 }
 
@@ -53,28 +54,4 @@ export function canDeleteAllInventory(user?: UserProfile | null): boolean {
 
 export function canDeleteAllPosts(user?: UserProfile | null): boolean {
   return isAdminUser(user);
-}
-
-export function canManageShowroom(user?: UserProfile | null, dealerId?: string): boolean {
-  if (!user) return false;
-  if (isAdminUser(user)) return true;
-  const userRole = (user.role as string);
-  if (userRole === 'Showroom Owner' || userRole === 'Dealer' || userRole === 'Verified Seller') {
-    if (!dealerId) return true;
-    return user.uid === dealerId || 
-           (user as any).dealerId === dealerId || 
-           (user as any).associatedShowroomId === dealerId || 
-           user.salesPodId === dealerId;
-  }
-  return false;
-}
-
-export function isAuthorized(user?: UserProfile | null, action: string = 'manage'): boolean {
-  if (!user) return false;
-  if (isAdminUser(user)) return true;
-  const userRole = (user.role as string);
-  if (['Showroom Owner', 'Verified Seller', 'Sales Rep', 'Dealer'].includes(userRole)) {
-    return true;
-  }
-  return false;
 }

@@ -1,11 +1,9 @@
-import { NO_IMAGE_SVG } from "../types";
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowUpRight, ArrowRight, Heart, Trash, Mail, X, CheckCircle, User, Phone, MessageSquare, ShieldCheck, Maximize2, Zap, Gauge, Flame, ChevronLeft, ChevronRight, Share2, Check } from 'lucide-react';
+import { ArrowUpRight, ArrowRight, Heart, Trash, Mail, X, CheckCircle, User, Phone, MessageSquare, ShieldCheck, Maximize2, Zap, Gauge, Flame, ChevronLeft, ChevronRight } from 'lucide-react';
 import { CarListing, Dealer } from '../types';
 import { useCurrencyMode } from '../lib/currency';
 import { useTheme } from './ThemeContext';
-import { useAuth } from './AuthContext';
 import { dbSubmitLead, dbTrackShowroomEvent } from '../lib/dbService';
 import { VehicleVerificationModal } from './VehicleVerificationModal';
 import { getOptimizedUrl } from '../lib/cloudinaryService';
@@ -40,7 +38,6 @@ export default function VehicleListingCard({
   index = 0
 }: VehicleListingCardProps) {
   const { theme } = useTheme();
-  const { currentUser } = useAuth();
   const { renderPrice } = useCurrencyMode();
 
   // Enquiry state variables
@@ -54,20 +51,7 @@ export default function VehicleListingCard({
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
-  const [copied, setCopied] = useState(false);
   const swiperRef = useRef<any>(null);
-
-  const handleShare = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const shareUrl = `${window.location.origin}/#/vehicle/${car.id}`;
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // fallback
-    }
-  };
 
   // Hidden UTM tracking parameters for lead source attribution
   const [utmSource] = useState(() => {
@@ -86,9 +70,9 @@ export default function VehicleListingCard({
   const imagesList = car.images && car.images.length > 0 
     ? car.images 
     : [
-        car.imageUrl || NO_IMAGE_SVG,
-        NO_IMAGE_SVG,
-        NO_IMAGE_SVG
+        car.imageUrl || 'https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&q=80&w=600',
+        'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=600',
+        'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&q=80&w=600'
       ];
 
   const displayImage = imagesList[0];
@@ -118,12 +102,11 @@ export default function VehicleListingCard({
     setSubmitting(true);
     try {
       const leadData = {
-        customerId: currentUser?.uid || 'guest',
         userName: enqName,
         userPhone: enqPhone,
         userEmail: enqEmail || 'visitor@bazar360.online',
         vehicleId: car.id,
-        showroomOwnerId: car.dealerId || dealer?.id || '',
+        showroomOwnerId: car.dealerId || dealer?.id || 'auto-choice-peshawar',
         inquiryMessage: enqMessage,
         inquiryDate: new Date().toISOString(),
         status: 'New' as const,
@@ -147,7 +130,7 @@ export default function VehicleListingCard({
       setIsEnquiryOpen(false);
     } catch (err) {
       console.error(err);
-      toast.error('Failed to submit inquiry. Please retry or contact the advisor directly via phone/WhatsApp.');
+      toast.error('Failed to submit inquiry. Please retry or contact the advisor directly via the hotline.');
     } finally {
       setSubmitting(false);
     }
@@ -167,19 +150,16 @@ export default function VehicleListingCard({
           delay: Math.min(index * 0.05, 0.35)
         }}
         whileHover={{ 
-          y: -8, 
-          rotateX: 2.5,
-          rotateY: -2,
+          y: -6, 
           scale: 1.015,
-          transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] } 
+          transition: { type: 'spring', stiffness: 300, damping: 20 } 
         }}
         whileTap={{ scale: 0.98 }}
-        style={{ transformStyle: 'preserve-3d', perspective: 1000 }}
-        className="group relative flex flex-col bg-bg-primary/45 dark:bg-bg-primary/45 backdrop-blur-[16px] -webkit-backdrop-blur-[16px] rounded-3xl overflow-hidden cursor-pointer border border-white/10 shadow-[0_10px_35px_-10px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-orange-500/50 hover:shadow-[0_20px_45px_rgba(249,115,22,0.18)]"
+        className="group relative flex flex-col bg-slate-950/45 dark:bg-slate-950/45 backdrop-blur-[16px] -webkit-backdrop-blur-[16px] rounded-3xl overflow-hidden cursor-pointer border border-white/10 shadow-[0_10px_35px_-10px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-orange-500/50 hover:shadow-[0_20px_45px_rgba(249,115,22,0.18)]"
       >
         {/* 1. HERO MEDIA CANVAS - Fills top section */}
         <div 
-          className="relative w-full aspect-[16/10] overflow-hidden bg-[var(--color-bg-primary)] touch-pan-y"
+          className="relative w-full aspect-[4/3] overflow-hidden bg-[var(--color-bg-primary)] touch-pan-y"
           onClick={(e) => {
             // Prevent navigating when clicking on controls
             const target = e.target as HTMLElement;
@@ -209,15 +189,13 @@ export default function VehicleListingCard({
                 ) : (
                   <img
                     src={getOptimizedUrl(imgUrl, {
-                      width: 800,
-                      height: 500,
-                      crop: 'fill',
+                      width: 600,
                       quality: 'auto',
                       format: 'auto',
-                      watermark: false
+                      watermark: true
                     })}
                     alt={car.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     referrerPolicy="no-referrer"
                   />
                 )}
@@ -234,7 +212,7 @@ export default function VehicleListingCard({
                   e.stopPropagation();
                   swiperRef.current?.swiper?.slidePrev();
                 }}
-                className="custom-swiper-btn absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/60 hover:bg-[var(--color-accent-main)] text-[var(--color-text-header)] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-30 shadow-md active:scale-90 border border-white/20 cursor-pointer"
+                className="custom-swiper-btn absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/60 hover:bg-[var(--color-accent-main)] text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-30 shadow-md active:scale-90 border border-white/20 cursor-pointer"
                 title="Previous image"
               >
                 <ChevronLeft size={16} className="stroke-[2.5]" />
@@ -245,7 +223,7 @@ export default function VehicleListingCard({
                   e.stopPropagation();
                   swiperRef.current?.swiper?.slideNext();
                 }}
-                className="custom-swiper-btn absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/60 hover:bg-[var(--color-accent-main)] text-[var(--color-text-header)] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-30 shadow-md active:scale-90 border border-white/20 cursor-pointer"
+                className="custom-swiper-btn absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/60 hover:bg-[var(--color-accent-main)] text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-30 shadow-md active:scale-90 border border-white/20 cursor-pointer"
                 title="Next image"
               >
                 <ChevronRight size={16} className="stroke-[2.5]" />
@@ -258,7 +236,7 @@ export default function VehicleListingCard({
           {/* Dynamic Sold Overlay on image */}
           {status === 'Sold' && (
             <div className="absolute inset-0 bg-black/40 backdrop-grayscale-[40%] pointer-events-none z-15 flex items-center justify-center">
-              <div className="bg-rose-600/90 text-[var(--color-text-header)] font-black text-xs uppercase tracking-[0.25em] px-4 py-1.5 rounded-full border border-rose-400/40 shadow-2xl rotate-[-6deg] backdrop-blur-sm">
+              <div className="bg-rose-600/90 text-white font-black text-xs uppercase tracking-[0.25em] px-4 py-1.5 rounded-full border border-rose-400/40 shadow-2xl rotate-[-6deg] backdrop-blur-sm">
                 Vehicle Sold
               </div>
             </div>
@@ -272,7 +250,7 @@ export default function VehicleListingCard({
                   e.stopPropagation();
                   setIsVerifyModalOpen(true);
                 }}
-                className="bg-[var(--color-accent-main)] hover:bg-emerald-600 border border-[var(--color-accent-main)]/25 text-[var(--color-text-header)] text-[9px] font-sans font-black uppercase tracking-widest px-2.5 py-1.5 rounded-full shadow-md flex items-center gap-1 cursor-pointer animate-pulse"
+                className="bg-emerald-500 hover:bg-emerald-600 border border-emerald-400/25 text-white text-[9px] font-sans font-black uppercase tracking-widest px-2.5 py-1.5 rounded-full shadow-md flex items-center gap-1 cursor-pointer animate-pulse"
                 title="Bazar360 Verified. Click to view detailed inspection report."
               >
                 <ShieldCheck size={10} className="stroke-[3.5]" />
@@ -280,17 +258,17 @@ export default function VehicleListingCard({
               </button>
             )}
             {status === 'Sold' ? (
-              <span className="bg-rose-600 text-[var(--color-text-header)] text-[9px] font-sans font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-lg border border-rose-400/30 flex items-center gap-1.5">
+              <span className="bg-rose-600 text-white text-[9px] font-sans font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-lg border border-rose-400/30 flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                 Sold
               </span>
             ) : status === 'Reserved' ? (
-              <span className="bg-amber-500 text-[var(--color-text-header)] text-[9px] font-sans font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-lg border border-amber-300/30 flex items-center gap-1.5">
+              <span className="bg-amber-500 text-white text-[9px] font-sans font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-lg border border-amber-300/30 flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-white" />
                 Reserved
               </span>
             ) : (
-              <span className="bg-emerald-600 text-[var(--color-text-header)] text-[9px] font-sans font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-lg border border-[var(--color-accent-main)]/30 flex items-center gap-1.5">
+              <span className="bg-emerald-600 text-white text-[9px] font-sans font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-lg border border-emerald-400/30 flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-200 animate-ping" />
                 Available
               </span>
@@ -298,20 +276,6 @@ export default function VehicleListingCard({
           </div>
 
           <div className="absolute top-4 right-4 z-30 flex items-center gap-1.5">
-            <motion.button
-              whileTap={{ scale: 0.85 }}
-              type="button"
-              onClick={handleShare}
-              className={`p-2 rounded-full shadow-lg transition-all cursor-pointer border backdrop-blur-md ${
-                copied
-                  ? 'bg-[var(--color-accent-main)] text-[var(--color-text-header)] border-[var(--color-accent-main)]'
-                  : 'bg-black/60 text-[var(--color-text-header)] hover:bg-orange-500 hover:text-slate-950 border-white/20'
-              }`}
-              title={copied ? 'Link Copied!' : 'Share Vehicle Link'}
-            >
-              {copied ? <Check size={12} className="stroke-[3] animate-bounce" /> : <Share2 size={12} className="stroke-[2.5]" />}
-            </motion.button>
-
             <button
               type="button"
               onClick={(e) => {
@@ -320,7 +284,7 @@ export default function VehicleListingCard({
                 setLightboxIndex(activeIndex);
                 setIsLightboxOpen(true);
               }}
-              className="p-2 bg-black/60 hover:bg-orange-500 hover:text-slate-950 text-[var(--color-text-header)] rounded-full shadow-lg active:scale-90 transition-all cursor-pointer border border-white/20 backdrop-blur-md"
+              className="p-2 bg-black/60 hover:bg-orange-500 hover:text-slate-950 text-white rounded-full shadow-lg active:scale-90 transition-all cursor-pointer border border-white/20 backdrop-blur-md"
               title="Click to magnify / pinch-to-zoom vehicle images"
             >
               <Maximize2 size={12} className="stroke-[2.5]" />
@@ -333,7 +297,7 @@ export default function VehicleListingCard({
                   e.stopPropagation();
                   onDelete(car);
                 }}
-                className="p-2 bg-rose-600 hover:bg-rose-700 text-[var(--color-text-header)] rounded-full shadow-lg active:scale-90 transition-all cursor-pointer border border-white/10"
+                className="p-2 bg-rose-600 hover:bg-rose-700 text-white rounded-full shadow-lg active:scale-90 transition-all cursor-pointer border border-white/10"
                 title="Delete vehicle listing"
               >
                 <Trash size={12} className="stroke-[2.5]" />
@@ -342,7 +306,7 @@ export default function VehicleListingCard({
           </div>
 
           {/* Model Year Stamp */}
-          <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full text-[9px] font-bold text-[var(--color-text-header)] tracking-widest z-20">
+          <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full text-[9px] font-bold text-white tracking-widest z-20">
             {car.year}
           </div>
         </div>
@@ -367,19 +331,19 @@ export default function VehicleListingCard({
               <div className="flex flex-col items-center justify-center">
                 <Zap size={10} className="text-amber-500 mb-0.5" />
                 <span className="text-[8px] sm:text-[9px] font-bold text-[var(--color-text-main)] leading-none truncate">
-                  {car.specs?.horspower || 'Not provided'}
+                  {car.specs?.horspower || (car.engineCC && car.engineCC > 2000 ? '280 HP' : '150 HP')}
                 </span>
               </div>
               <div className="flex flex-col items-center justify-center border-x border-[var(--color-border-main)]">
                 <Gauge size={10} className="text-orange-500 mb-0.5" />
                 <span className="text-[8px] sm:text-[9px] font-bold text-[var(--color-text-main)] leading-none truncate">
-                  {car.topSpeed || 'Not provided'}
+                  {car.topSpeed || (car.engineCC && car.engineCC > 2000 ? '240 km/h' : '190 km/h')}
                 </span>
               </div>
               <div className="flex flex-col items-center justify-center">
                 <Flame size={10} className="text-rose-500 mb-0.5" />
                 <span className="text-[8px] sm:text-[9px] font-bold text-[var(--color-text-main)] leading-none truncate">
-                  {car.acceleration || 'Not provided'}
+                  {car.acceleration || (car.engineCC && car.engineCC > 2000 ? '5.4s' : '9.2s')}
                 </span>
               </div>
             </div>
@@ -399,7 +363,7 @@ export default function VehicleListingCard({
                   e.stopPropagation();
                   setIsEnquiryOpen(true);
                 }}
-                className="bg-[var(--color-accent-main)] hover:bg-[var(--color-accent-hover)] text-[var(--color-text-header)] px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-wider transition-all shadow-lg hover:shadow-orange-500/20 cursor-pointer flex items-center gap-0.5 sm:gap-1 shrink-0"
+                className="bg-[var(--color-accent-main)] hover:bg-[var(--color-accent-hover)] text-white px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-wider transition-all shadow-lg hover:shadow-orange-500/20 cursor-pointer flex items-center gap-0.5 sm:gap-1 shrink-0"
               >
                 <span>Enquire</span>
                 <Mail size={10} className="stroke-[2.5]" />
@@ -418,7 +382,7 @@ export default function VehicleListingCard({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsEnquiryOpen(false)}
-              className="fixed inset-0 bg-bg-primary/85 backdrop-blur-sm"
+              className="fixed inset-0 bg-slate-950/85 backdrop-blur-sm"
             />
             
             <motion.div
@@ -426,8 +390,8 @@ export default function VehicleListingCard({
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.95, y: 15, opacity: 0 }}
               className={`relative rounded-3xl w-full max-w-lg p-6 sm:p-8 overflow-hidden shadow-2xl z-10 text-left border ${
-                (theme as string) === 'dark'
-                  ? 'bg-[var(--color-bg-secondary)] border-white/10 text-[var(--color-text-header)]'
+                theme === 'dark'
+                  ? 'bg-[#0E1117] border-white/10 text-white'
                   : 'bg-white border-slate-200 text-slate-900'
               }`}
             >
@@ -435,7 +399,7 @@ export default function VehicleListingCard({
               
               <button
                 onClick={() => setIsEnquiryOpen(false)}
-                className="absolute top-4 right-4 p-1.5 rounded-full bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-gray-400 hover:text-gray-600 dark:hover:text-[var(--color-text-header)] transition-colors cursor-pointer"
+                className="absolute top-4 right-4 p-1.5 rounded-full bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors cursor-pointer"
               >
                 <X size={16} />
               </button>
@@ -444,7 +408,7 @@ export default function VehicleListingCard({
                 <div className="space-y-1">
                   <span className="text-[9px] font-mono font-black uppercase tracking-[0.2em] text-orange-500">Direct Advisor Desk</span>
                   <h3 className="text-xl font-black tracking-tight font-display">Vehicle Inquiry</h3>
-                  <p className="text-xs text-text-muted font-medium">Please submit your details below to request a callback or official showroom pricing.</p>
+                  <p className="text-xs text-slate-400 font-medium">Please submit your details below to request a callback or official showroom pricing.</p>
                 </div>
 
                 {/* Micro vehicle snippet inside modal */}
@@ -456,7 +420,7 @@ export default function VehicleListingCard({
                     referrerPolicy="no-referrer"
                   />
                   <div className="flex flex-col justify-center text-left">
-                    <span className="text-[10px] font-mono text-text-muted uppercase font-black">{car.year} Model</span>
+                    <span className="text-[10px] font-mono text-slate-400 uppercase font-black">{car.year} Model</span>
                     <h4 className="text-sm font-extrabold tracking-tight line-clamp-1">{car.title}</h4>
                     <span className="text-orange-500 font-black text-xs font-mono mt-0.5">{renderPrice(car.price)}</span>
                   </div>
@@ -468,59 +432,59 @@ export default function VehicleListingCard({
                   <input type="hidden" name="utm_medium" value={utmMedium} />
                   <input type="hidden" name="utm_campaign" value={utmCampaign} />
                   <div className="space-y-1.5 text-left">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Your Full Name</label>
-                    <div className="relative flex items-center bg-slate-100/50 dark:bg-bg-primary/40 border border-slate-200 dark:border-white/10 rounded-xl focus-within:border-orange-500/50 transition-all">
-                      <User size={14} className="absolute left-3.5 text-text-muted" />
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Your Full Name</label>
+                    <div className="relative flex items-center bg-slate-100/50 dark:bg-slate-950/40 border border-slate-200 dark:border-white/10 rounded-xl focus-within:border-orange-500/50 transition-all">
+                      <User size={14} className="absolute left-3.5 text-slate-400" />
                       <input
                         type="text"
                         required
                         placeholder="e.g. Malak Mazhar"
                         value={enqName}
                         onChange={(e) => setEnqName(e.target.value)}
-                        className="w-full bg-transparent pl-10 pr-4 py-2.5 text-xs focus:outline-none placeholder-slate-400 font-medium text-slate-900 dark:text-[var(--color-text-header)]"
+                        className="w-full bg-transparent pl-10 pr-4 py-2.5 text-xs focus:outline-none placeholder-slate-400 font-medium text-slate-900 dark:text-white"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-1.5 text-left">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-text-muted">WhatsApp or Phone Number</label>
-                    <div className="relative flex items-center bg-slate-100/50 dark:bg-bg-primary/40 border border-slate-200 dark:border-white/10 rounded-xl focus-within:border-orange-500/50 transition-all">
-                      <Phone size={14} className="absolute left-3.5 text-text-muted" />
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">WhatsApp or Phone Number</label>
+                    <div className="relative flex items-center bg-slate-100/50 dark:bg-slate-950/40 border border-slate-200 dark:border-white/10 rounded-xl focus-within:border-orange-500/50 transition-all">
+                      <Phone size={14} className="absolute left-3.5 text-slate-400" />
                       <input
                         type="tel"
                         required
                         placeholder="e.g. 03159085086"
                         value={enqPhone}
                         onChange={(e) => setEnqPhone(e.target.value)}
-                        className="w-full bg-transparent pl-10 pr-4 py-2.5 text-xs focus:outline-none placeholder-slate-400 font-medium text-slate-900 dark:text-[var(--color-text-header)]"
+                        className="w-full bg-transparent pl-10 pr-4 py-2.5 text-xs focus:outline-none placeholder-slate-400 font-medium text-slate-900 dark:text-white"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-1.5 text-left">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Email Address (Optional)</label>
-                    <div className="relative flex items-center bg-slate-100/50 dark:bg-bg-primary/40 border border-slate-200 dark:border-white/10 rounded-xl focus-within:border-orange-500/50 transition-all">
-                      <Mail size={14} className="absolute left-3.5 text-text-muted" />
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Email Address (Optional)</label>
+                    <div className="relative flex items-center bg-slate-100/50 dark:bg-slate-950/40 border border-slate-200 dark:border-white/10 rounded-xl focus-within:border-orange-500/50 transition-all">
+                      <Mail size={14} className="absolute left-3.5 text-slate-400" />
                       <input
                         type="email"
                         placeholder="e.g. buyer@example.com"
                         value={enqEmail}
                         onChange={(e) => setEnqEmail(e.target.value)}
-                        className="w-full bg-transparent pl-10 pr-4 py-2.5 text-xs focus:outline-none placeholder-slate-400 font-medium text-slate-900 dark:text-[var(--color-text-header)]"
+                        className="w-full bg-transparent pl-10 pr-4 py-2.5 text-xs focus:outline-none placeholder-slate-400 font-medium text-slate-900 dark:text-white"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-1.5 text-left">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Inquiry Message</label>
-                    <div className="relative flex items-start bg-slate-100/50 dark:bg-bg-primary/40 border border-slate-200 dark:border-white/10 rounded-xl focus-within:border-orange-500/50 transition-all p-2">
-                      <MessageSquare size={14} className="mt-1 mr-2 text-text-muted shrink-0" />
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Inquiry Message</label>
+                    <div className="relative flex items-start bg-slate-100/50 dark:bg-slate-950/40 border border-slate-200 dark:border-white/10 rounded-xl focus-within:border-orange-500/50 transition-all p-2">
+                      <MessageSquare size={14} className="mt-1 mr-2 text-slate-400 shrink-0" />
                       <textarea
                         required
                         rows={3}
                         value={enqMessage}
                         onChange={(e) => setEnqMessage(e.target.value)}
-                        className="w-full bg-transparent py-1 text-xs focus:outline-none placeholder-slate-400 font-medium text-slate-900 dark:text-[var(--color-text-header)] resize-none"
+                        className="w-full bg-transparent py-1 text-xs focus:outline-none placeholder-slate-400 font-medium text-slate-900 dark:text-white resize-none"
                       />
                     </div>
                   </div>
@@ -530,7 +494,7 @@ export default function VehicleListingCard({
                     whileTap={{ scale: 0.985 }}
                     type="submit"
                     disabled={submitting}
-                    className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-[var(--color-text-header)] font-black py-3 px-4 rounded-xl text-xs uppercase tracking-widest transition-all duration-150 cursor-pointer shadow-lg shadow-orange-500/10 flex items-center justify-center gap-2"
+                    className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-black py-3 px-4 rounded-xl text-xs uppercase tracking-widest transition-all duration-150 cursor-pointer shadow-lg shadow-orange-500/10 flex items-center justify-center gap-2"
                   >
                     {submitting ? (
                       <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin" />

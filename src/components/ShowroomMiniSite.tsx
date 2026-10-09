@@ -26,28 +26,17 @@ import {
   PlusCircle,
   Plus,
   PhoneCall,
-  Building2,
-  Megaphone,
-  MapPin,
-  BarChart3,
-  Bell
+  Building2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ShowroomHero } from './ShowroomHero';
-import { dbUpdateDealer, dbSaveShowroomMedia, dbRemoveShowroomMedia } from '../lib/dbService';
-
+import { dbUpdateDealer } from '../lib/dbService';
+import { AutoChoiceLogo } from './Bazar360Logo';
+import { ThemeSwitcher } from './ThemeSwitcher';
 import ShowroomFABMenu from './ShowroomFABMenu';
 import { QRCodeCanvas } from 'qrcode.react';
 import { ShowroomInventorySkeleton } from './layout/SkeletonLoader';
-import { DigitalBusinessCard } from './DigitalBusinessCard/DigitalBusinessCard';
-import { ShowroomAnnouncementsFeed } from './ShowroomAnnouncementsFeed';
-import { ShowroomMediaManager } from './ShowroomMediaManager';
-import { ShowroomShareQR } from './ShowroomShareQR';
-import { ShowroomTeamManager } from './ShowroomTeamManager';
-import { ShowroomFacilityGallery } from './ShowroomFacilityGallery';
-import { ShowroomAnalyticsDashboard } from './ShowroomAnalyticsDashboard';
-import { ShowroomSubscriptionToggle } from './ShowroomSubscriptionToggle';
-import { cinematicAudio } from '../lib/cinematicAudio';
+import { BusinessCardGenerator } from './BusinessCardGenerator';
 
 // Performance optimization: Lazy load non-critical sections to reduce initial bundle evaluation
 const InventoryGrid = React.lazy(() => import('./InventoryGrid').then(module => ({ default: module.InventoryGrid })));
@@ -74,7 +63,6 @@ export default function ShowroomMiniSite({
   listings,
   onSelectListing,
   currentUser,
-  onPublishActivity,
   onNavigateToSell,
   onOpenSupportDrawer,
   onBack
@@ -83,7 +71,6 @@ export default function ShowroomMiniSite({
   const [activeTab, setActiveTab] = useState('home');
   const [isLiked, setIsLiked] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isQrModalOpen, setIsQrModalOpen] = useState(false);
 
   // QR Customizer States
   const [qrColor, setQrColor] = useState('#F97316');
@@ -105,20 +92,13 @@ export default function ShowroomMiniSite({
 
   useEffect(() => {
     if (dealer) {
-      try {
-        const likedShowrooms = JSON.parse(localStorage.getItem('bazar360_liked_showrooms') || '[]');
-        setIsLiked(likedShowrooms.includes(dealer.id));
-      } catch {
-        setIsLiked(false);
-      }
+      const likedShowrooms = JSON.parse(localStorage.getItem('bazar360_liked_showrooms') || '[]');
+      setIsLiked(likedShowrooms.includes(dealer.id));
     }
   }, [dealer.id]);
 
   const handleLike = async () => {
-    let likedShowrooms: string[] = [];
-    try {
-      likedShowrooms = JSON.parse(localStorage.getItem('bazar360_liked_showrooms') || '[]');
-    } catch {}
+    const likedShowrooms = JSON.parse(localStorage.getItem('bazar360_liked_showrooms') || '[]');
     const newIsLiked = !isLiked;
     
     let updatedLiked;
@@ -131,18 +111,11 @@ export default function ShowroomMiniSite({
     }
     
     setIsLiked(newIsLiked);
-    try {
-      localStorage.setItem('bazar360_liked_showrooms', JSON.stringify(updatedLiked));
-    } catch {}
+    localStorage.setItem('bazar360_liked_showrooms', JSON.stringify(updatedLiked));
     
     try {
       const currentCount = dealer.likes_count || dealer.likesCount || 0;
       const newCount = newIsLiked ? currentCount + 1 : Math.max(0, currentCount - 1);
-      if (newIsLiked) {
-        cinematicAudio.playLuxuryChime();
-      } else {
-        cinematicAudio.playClick();
-      }
       await dbUpdateDealer(dealer.id, { likesCount: newCount, likes_count: newCount });
       setDealer(prev => ({ ...prev, likesCount: newCount, likes_count: newCount }));
     } catch (err) {
@@ -151,28 +124,33 @@ export default function ShowroomMiniSite({
   };
 
   const handleTabClick = (tabId: string) => {
-    cinematicAudio.playClick();
     setActiveTab(tabId);
     setIsMobileMenuOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleInquireFleet = () => {
+    const fleetCount = listings.length;
+    const msg = `Hello! I am inquiring about the available vehicle fleet (${fleetCount} active stock units) at ${dealer.name} (${dealer.location || 'Peshawar'}). Please share more details and current stock deals.`;
+    if (onOpenSupportDrawer) {
+      onOpenSupportDrawer(msg);
+    } else {
+      console.log('Inquire Fleet message:', msg);
+    }
+  };
+
   const isOwner = useMemo(() => {
     if (!currentUser) return false;
-    return currentUser.uid === dealer.ownerUid || 
-           currentUser.associatedShowroomId === dealer.id ||
-           currentUser.dealerId === dealer.id ||
-           currentUser.salesPodId === dealer.id ||
-           currentUser.role === 'Admin' || 
-           currentUser.role === 'Super Admin';
+    return currentUser.uid === dealer.ownerUid || currentUser.role === 'Admin' || currentUser.role === 'Super Admin';
   }, [currentUser, dealer]);
 
   const handleShareShowroom = async () => {
-    cinematicAudio.playClick();
     const shareUrl = `${window.location.origin}/dealers/${dealer.id}`;
-    const mapLink = `https://maps.google.com/?q=${encodeURIComponent(dealer.location || dealer.name)}`;
+    const mapLink = dealer.id === 'auto-choice-peshawar' 
+      ? "https://maps.google.com/?q=Auto+choice+Alamas+Car+Village+Ring+Road+Peshawar"
+      : `https://maps.google.com/?q=${encodeURIComponent(dealer.location || 'Peshawar')}`;
       
-    const shareText = `🚗 ${dealer.name.toUpperCase()} 🚗\n✨ "${dealer.subtitle || 'Elite Automotive Dealership'}"\n📍 Location: ${dealer.location}\n🗺️ Google Maps: ${mapLink}\n📞 Contact/WhatsApp: ${dealer.whatsapp || dealer.phone || 'Not Provided'}\n🌐 Browse Real-Time Inventory: ${shareUrl}`;
+    const shareText = `🚗 ${dealer.name.toUpperCase()} 🚗\n✨ "${dealer.subtitle || 'Elite Automotive Dealership'}"\n📍 Location: ${dealer.location}\n🗺️ Google Maps: ${mapLink}\n📞 Contact/WhatsApp: ${dealer.whatsapp || '0315-9085086'}\n👥 Showroom Lead: Malak Mazhar\n🌐 Browse Real-Time Inventory: ${shareUrl}`;
 
     if (navigator.share) {
       try {
@@ -204,41 +182,35 @@ export default function ShowroomMiniSite({
 
   const tabs = [
     { id: 'home', label: 'Home', icon: <Info size={16} /> },
+    { id: 'about', label: 'About & Contacts', icon: <Newspaper size={16} /> },
     { id: 'inventory', label: 'Inventory', icon: <LayoutGrid size={16} /> },
-    { id: 'team', label: 'Staff & Team', icon: <Users size={16} /> },
-    { id: 'media', label: 'Premises & Gallery', icon: <Building2 size={16} /> },
-    { id: 'community', label: 'Posts/Community', icon: <Megaphone size={16} /> },
-    { id: 'about', label: 'About', icon: <Newspaper size={16} /> },
-    { id: 'businesscard', label: 'Digital Business Card', icon: <QrCode size={16} /> },
-    ...(isOwner ? [
-      { id: 'analytics', label: 'Visitor Insights', icon: <BarChart3 size={16} /> },
-      { id: 'mediamanager', label: 'Logo & Cover Manager', icon: <ImageIcon size={16} /> }
-    ] : [])
+    { id: 'media', label: 'Media', icon: <ImageIcon size={16} /> },
+    { id: 'qrcode', label: 'QR Code', icon: <QrCode size={16} /> },
   ];
 
   return (
     <div className="bg-[var(--color-bg-primary)] min-h-screen text-[var(--color-text-main)] transition-colors duration-200">
       
       {/* 1. MOBILE RESPONSIVE TOP HEADER BAR */}
-      <header className="md:hidden sticky top-0 z-40 h-14 border-b border-white/10 bg-bg-primary/80 backdrop-blur-xl px-3 flex items-center justify-between shadow-lg overflow-hidden">
+      <header className="md:hidden sticky top-0 z-40 h-14 border-b border-white/10 bg-slate-950/80 backdrop-blur-xl px-3 flex items-center justify-between shadow-lg overflow-hidden">
         <div className="flex items-center gap-2">
           <button 
             onClick={onBack || (() => window.history.back())}
-            className="w-9 h-9 flex items-center justify-center bg-white/5 border border-white/10 text-gray-300 hover:text-[var(--color-accent-secondary)] rounded-xl text-xs cursor-pointer active:scale-95 transition-all"
+            className="w-9 h-9 flex items-center justify-center bg-white/5 border border-white/10 text-gray-300 hover:text-orange-500 rounded-xl text-xs cursor-pointer active:scale-95 transition-all"
             title="Back"
           >
             <ArrowLeft size={16} />
           </button>
           
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[var(--color-accent-main)]/10 border border-[var(--color-accent-main)]/30 flex items-center justify-center font-black text-[10px] text-[var(--color-accent-main)]">
-              {(dealer.logoUrl || dealer.logo) ? <img src={dealer.logoUrl || dealer.logo} alt="Logo" className="w-6 h-6 object-contain" /> : dealer.avatarLetter}
+            <div className="w-8 h-8 rounded-lg bg-orange-500/10 border border-orange-500/30 flex items-center justify-center font-black text-[10px] text-orange-500">
+              {dealer.logo ? <img src={dealer.logo} alt="Logo" className="w-6 h-6 object-contain" /> : dealer.avatarLetter}
             </div>
             <div className="flex flex-col text-left">
-              <span className="font-sans font-black text-[11px] uppercase tracking-wide text-[var(--color-text-header)] leading-tight truncate max-w-[120px]">
+              <span className="font-sans font-black text-[11px] uppercase tracking-wide text-white leading-tight truncate max-w-[120px]">
                 {dealer.name}
               </span>
-              <span className="text-[7.5px] font-mono text-[var(--color-accent-main)] font-bold uppercase tracking-wider leading-none">
+              <span className="text-[7.5px] font-mono text-emerald-400 font-bold uppercase tracking-wider leading-none">
                 Verified Dealer
               </span>
             </div>
@@ -251,7 +223,7 @@ export default function ShowroomMiniSite({
             href={`https://wa.me/${(dealer.whatsapp || '923159085086').replace(/[^\d]/g, '')}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-9 h-9 rounded-xl text-[var(--color-accent-main)] bg-[var(--color-accent-main)]/10 border border-[var(--color-accent-main)]/20 hover:bg-[var(--color-accent-main)]/20 active:scale-90 transition-all flex items-center justify-center relative"
+            className="w-9 h-9 rounded-xl text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 active:scale-90 transition-all flex items-center justify-center relative"
             title="Contact on WhatsApp"
           >
             <MessageCircle size={15} className="stroke-[2.5]" />
@@ -260,7 +232,7 @@ export default function ShowroomMiniSite({
           {/* Quick Call */}
           <a
             href={`tel:${dealer.whatsapp || '03159085086'}`}
-            className="w-9 h-9 rounded-xl text-[var(--color-accent-secondary)] bg-[var(--color-accent-secondary)]/10 border border-[var(--color-accent-secondary)]/20 hover:bg-[var(--color-accent-secondary)]/20 active:scale-90 transition-all flex items-center justify-center"
+            className="w-9 h-9 rounded-xl text-orange-400 bg-orange-500/10 border border-orange-500/20 hover:bg-orange-500/20 active:scale-90 transition-all flex items-center justify-center"
             title="Call Showroom"
           >
             <Phone size={14} />
@@ -268,7 +240,7 @@ export default function ShowroomMiniSite({
 
           <button 
             onClick={() => setIsMobileMenuOpen(true)}
-            className="w-9 h-9 flex items-center justify-center text-[var(--color-text-header)] bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 cursor-pointer active:scale-95 transition-all"
+            className="w-9 h-9 flex items-center justify-center text-white bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 cursor-pointer active:scale-95 transition-all"
             title="Open Menu"
           >
             <Menu size={15} />
@@ -296,7 +268,7 @@ export default function ShowroomMiniSite({
             >
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono font-black uppercase tracking-widest text-[var(--color-accent-main)]">Showroom Desk</span>
+                  <span className="text-[10px] font-mono font-black uppercase tracking-widest text-orange-500">Showroom Desk</span>
                   <button 
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] border border-[var(--color-border-main)] rounded-lg cursor-pointer"
@@ -306,12 +278,12 @@ export default function ShowroomMiniSite({
                 </div>
 
                 <div className="flex items-center gap-3 border-b border-[var(--color-border-main)] pb-4">
-                  <div className="w-10 h-10 rounded-xl bg-[var(--color-accent-main)]/10 border border-[var(--color-accent-main)]/20 flex items-center justify-center font-black text-[var(--color-accent-main)] shrink-0">
-                    {(dealer.logoUrl || dealer.logo) ? <img src={dealer.logoUrl || dealer.logo} alt="Logo" className="w-8 h-8 object-contain" /> : dealer.avatarLetter}
+                  <div className="w-10 h-10 rounded-xl bg-orange-600/10 border border-orange-500/20 flex items-center justify-center font-black text-orange-500 shrink-0">
+                    {dealer.logo ? <img src={dealer.logo} alt="Logo" className="w-8 h-8 object-contain" /> : dealer.avatarLetter}
                   </div>
                   <div className="min-w-0">
                     <h3 className="text-xs font-black uppercase text-[var(--color-text-main)] truncate">{dealer.name}</h3>
-                    <p className="text-[8px] font-mono uppercase text-[var(--color-accent-main)]">Elite Certified</p>
+                    <p className="text-[8px] font-mono uppercase text-emerald-500">Elite Certified</p>
                   </div>
                 </div>
 
@@ -324,7 +296,7 @@ export default function ShowroomMiniSite({
                         onClick={() => handleTabClick(tab.id)}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-100 cursor-pointer ${
                           isActive 
-                            ? 'bg-[var(--color-accent-main)] text-[#030712] shadow-lg shadow-[var(--color-accent-main)]/20' 
+                            ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' 
                             : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-bg-secondary)]'
                         }`}
                       >
@@ -348,6 +320,7 @@ export default function ShowroomMiniSite({
                 </button>
                 <div className="flex items-center justify-between text-[9px] font-mono text-[var(--color-text-muted)] uppercase">
                   <span>{listings.length} Active Fleet</span>
+                  <ThemeSwitcher />
                 </div>
               </div>
             </motion.aside>
@@ -364,21 +337,21 @@ export default function ShowroomMiniSite({
             {/* Back to Hub button */}
             <button 
               onClick={onBack || (() => window.history.back())}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--color-bg-primary)] border border-[var(--color-border-main)] text-xs font-mono font-black uppercase tracking-wider text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:border-[var(--color-accent-main)]/50 hover:shadow transition-all duration-150 cursor-pointer"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--color-bg-primary)] border border-[var(--color-border-main)] text-xs font-mono font-black uppercase tracking-wider text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:border-orange-500/50 hover:shadow transition-all duration-150 cursor-pointer"
             >
               <ArrowLeft size={14} /> Back to Hub
             </button>
 
             {/* Brand Header */}
             <div className="flex items-center gap-3 border-b border-[var(--color-border-main)] pb-5">
-              <div className="w-12 h-12 rounded-xl bg-[var(--color-accent-main)]/10 border border-[var(--color-accent-main)]/20 flex items-center justify-center font-black text-lg text-[var(--color-accent-main)] shrink-0">
-                {(dealer.logoUrl || dealer.logo) ? <img src={dealer.logoUrl || dealer.logo} alt="Logo" className="w-9 h-9 object-contain" /> : dealer.avatarLetter}
+              <div className="w-12 h-12 rounded-xl bg-orange-600/10 border border-orange-500/20 flex items-center justify-center font-black text-lg text-orange-500 shrink-0">
+                {dealer.logo ? <img src={dealer.logo} alt="Logo" className="w-9 h-9 object-contain" /> : dealer.avatarLetter}
               </div>
               <div className="min-w-0">
                 <h2 className="text-sm font-black tracking-wide text-[var(--color-text-main)] uppercase truncate">
                   {dealer.name}
                 </h2>
-                <span className="inline-flex items-center gap-1 text-[8px] font-mono font-bold tracking-widest text-[var(--color-accent-main)] uppercase bg-[var(--color-accent-main)]/10 px-1.5 py-0.5 rounded mt-0.5 border border-[var(--color-accent-main)]/10">
+                <span className="inline-flex items-center gap-1 text-[8px] font-mono font-bold tracking-widest text-emerald-500 uppercase bg-emerald-500/10 px-1.5 py-0.5 rounded mt-0.5 border border-emerald-500/10">
                   <ShieldCheck size={8} /> Verified Store
                 </span>
               </div>
@@ -394,7 +367,7 @@ export default function ShowroomMiniSite({
                     onClick={() => handleTabClick(tab.id)}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-100 relative cursor-pointer ${
                       isActive 
-                        ? 'bg-[var(--color-accent-main)] text-[#030712] shadow-lg shadow-[var(--color-accent-main)]/15' 
+                        ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/15' 
                         : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-bg-secondary)]'
                     }`}
                   >
@@ -431,6 +404,8 @@ export default function ShowroomMiniSite({
 
             <div className="flex items-center justify-between text-[9px] font-mono text-[var(--color-text-muted)] uppercase px-1">
               <span>{listings.length} Active Fleet</span>
+              <span>•</span>
+              <ThemeSwitcher />
             </div>
           </div>
         </aside>
@@ -457,95 +432,25 @@ export default function ShowroomMiniSite({
                   
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
                     <div className="lg:col-span-8 space-y-8">
-                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] p-6 sm:p-8 rounded-3xl shadow-xl">
-                        
-                        {/* LEFT/CENTER: Logo & Information Grid */}
-                        <div className="flex flex-col md:flex-row md:items-center gap-5 md:gap-6 flex-1 min-w-0">
-                          {/* Logo */}
-                          <div className="w-20 h-20 rounded-2xl bg-bg-primary border border-[var(--color-accent-main)]/20 flex items-center justify-center font-extrabold text-2xl text-[var(--color-accent-main)] shadow-lg shrink-0 overflow-hidden mx-auto md:mx-0">
-                            {(dealer.logoUrl || dealer.logo) ? (
-                              <img src={dealer.logoUrl || dealer.logo} alt="Logo" className="w-full h-full object-contain p-1" />
-                            ) : (
-                              dealer.avatarLetter || 'AC'
-                            )}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] p-6 rounded-3xl shadow-sm">
+                        <div className="flex items-center gap-4">
+                          <div className="w-16 h-16 rounded-2xl bg-orange-600/10 border border-orange-500/20 flex items-center justify-center font-black text-2xl text-orange-500 shadow-lg shrink-0">
+                            {dealer.logo ? <img src={dealer.logo} alt="Logo" className="w-11 h-11 object-contain" /> : dealer.avatarLetter}
                           </div>
-                          
-                          {/* Information */}
-                          <div className="space-y-2 text-center md:text-left flex-1 min-w-0">
-                            <div className="flex items-center justify-center md:justify-start gap-2 flex-wrap">
-                              <h2 className="text-2xl sm:text-3xl font-black text-[var(--color-text-main)] font-display tracking-tight uppercase truncate">
-                                {dealer.name}
-                              </h2>
-                              <span className="px-2.5 py-0.5 rounded-full bg-[var(--color-accent-main)]/10 border border-[var(--color-accent-main)]/20 text-[var(--color-accent-main)] text-[10px] font-mono font-bold uppercase tracking-wider flex items-center gap-1 shrink-0">
-                                <ShieldCheck size={12} />
-                                Verified Partner
-                              </span>
-                            </div>
-                            
-                            <p className="text-[var(--color-text-muted)] text-xs font-sans flex items-start justify-center md:justify-start gap-1.5 leading-snug">
-                              <MapPin size={14} className="text-[var(--color-accent-main)] shrink-0 mt-0.5" />
-                              <span className="line-clamp-2">{dealer.location || 'Alamas Car Village, Ring Road, Peshawar'}</span>
+                          <div>
+                            <h2 className="text-2xl font-black text-[var(--color-text-main)] font-display tracking-tight uppercase">
+                              {dealer.name}
+                            </h2>
+                            <p className="text-[var(--color-text-muted)] text-xs font-sans flex items-center gap-1.5 mt-0.5">
+                              <ShieldCheck size={14} className="text-orange-500" />
+                              Elite Verified Dealership Floor
                             </p>
-                            
-                            <p className="text-[var(--color-text-muted)] text-xs italic font-medium">
-                              "{dealer.subtitle || 'To buy and Sell New and Used Cars, Jeeps and SUVs'}"
-                            </p>
-
-                            {/* Quick Action Bar (Facebook-Style Profile Actions) */}
-                            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-2">
-                              <a
-                                href={`tel:${dealer.whatsapp || dealer.phone || '03159085086'}`}
-                                className="px-4 py-2 bg-[var(--color-accent-main)] hover:bg-[var(--color-accent-hover)] text-[#030712] font-mono font-bold text-xs uppercase rounded-xl transition-all cursor-pointer shadow flex items-center gap-2"
-                              >
-                                <Phone size={14} />
-                                <span>Call</span>
-                              </a>
-
-                              <a
-                                href={`https://wa.me/${(dealer.whatsapp || '923159085086').replace(/[^\d]/g, '')}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-[var(--color-text-header)] font-mono font-bold text-xs uppercase rounded-xl transition-all cursor-pointer shadow flex items-center gap-2"
-                              >
-                                <MessageCircle size={14} />
-                                <span>WhatsApp</span>
-                              </a>
-
-                              <a
-                                href={dealer.id === '' 
-                                  ? "https://maps.google.com/?q=Auto+choice+Alamas+Car+Village+Ring+Road+Peshawar"
-                                  : `https://maps.google.com/?q=${encodeURIComponent(dealer.location || dealer.name)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="px-4 py-2 bg-[var(--color-bg-primary)] hover:bg-[var(--color-bg-hover)] text-[var(--color-text-main)] border border-[var(--color-border-main)] font-mono font-bold text-xs uppercase rounded-xl transition-all cursor-pointer shadow flex items-center gap-2"
-                              >
-                                <MapPin size={14} />
-                                <span>Directions</span>
-                              </a>
-                            </div>
                           </div>
-                        </div>
-
-                        {/* RIGHT: QR Code (Grid Aligned) */}
-                        <div className="flex flex-col items-center justify-center shrink-0 border-t md:border-t-0 md:border-l border-[var(--color-border-main)] pt-6 md:pt-0 md:pl-6 mx-auto md:mx-0">
-                          <div className="bg-white p-2 rounded-xl shadow-md border border-slate-200">
-                            <QRCodeCanvas
-                              value={`${window.location.origin}/dealers/${dealer.id}`}
-                              size={80}
-                              bgColor="#ffffff"
-                              fgColor="#000000"
-                              level="H"
-                              includeMargin={false}
-                            />
-                          </div>
-                          <span className="text-[9px] font-mono font-black uppercase text-[var(--color-accent-main)] tracking-widest mt-2 block">
-                            Scan to Share
-                          </span>
                         </div>
                       </div>
 
                       <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] p-6 md:p-8 rounded-3xl space-y-4 shadow-sm text-left">
-                        <h3 className="text-[var(--color-accent-main)] font-mono font-bold text-xs uppercase tracking-widest flex items-center gap-2">
+                        <h3 className="text-orange-500 font-mono font-bold text-xs uppercase tracking-widest flex items-center gap-2">
                           <Sparkles size={14} className="animate-spin" /> Executive Showroom Bio
                         </h3>
                         <div className="text-[var(--color-text-muted)] text-sm leading-relaxed font-sans prose prose-invert">
@@ -561,40 +466,27 @@ export default function ShowroomMiniSite({
                             <span className="text-[9px] text-[var(--color-text-muted)] uppercase font-black">Store Fans</span>
                           </div>
                           <div className="bg-[var(--color-bg-primary)] p-4 rounded-2xl border border-[var(--color-border-main)] col-span-2 md:col-span-1">
-                            <span className="text-[var(--color-accent-main)] font-extrabold text-xl block">100%</span>
+                            <span className="text-emerald-500 font-extrabold text-xl block">100%</span>
                             <span className="text-[9px] text-[var(--color-text-muted)] uppercase font-black">Reliability</span>
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    {/* SHARE DIGITAL SHOWROOM COGNITIVE CARD & SUBSCRIPTION TOGGLE */}
-                    <div className="lg:col-span-4 space-y-6">
-                      
-                      {/* Subscription Toggle Card */}
-                      <div className="bg-[var(--color-bg-secondary)] p-6 rounded-3xl border border-[var(--color-border-main)] shadow-xl text-left space-y-4">
-                        <div className="flex items-center gap-2 text-orange-500 font-extrabold text-sm font-display">
-                          <Bell size={18} />
-                          <span>Inventory Notifications</span>
-                        </div>
-                        <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
-                          Subscribe to receive instant push and email alerts whenever {dealer.name} posts a new vehicle listing or reduces prices.
-                        </p>
-                        <ShowroomSubscriptionToggle dealer={dealer} currentUser={currentUser} className="w-full" />
-                      </div>
-
-                      <div className="bg-[var(--color-bg-secondary)] p-8 rounded-3xl border border-[var(--color-border-main)] shadow-2xl relative overflow-hidden group text-left">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--color-accent-main)]/10 rounded-full blur-3xl group-hover:bg-[var(--color-accent-main)]/20 transition-all pointer-events-none" />
-                        <h3 className="text-lg font-black text-[var(--color-text-header)] font-display mb-4 flex items-center gap-2">
-                          <Share2 size={18} className="text-[var(--color-accent-main)]" />
+                    {/* SHARE DIGITAL SHOWROOM COGNITIVE CARD */}
+                    <div className="lg:col-span-4">
+                      <div className="bg-gradient-to-br from-slate-900 to-slate-950 p-8 rounded-3xl border border-white/5 shadow-2xl relative overflow-hidden group text-left">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl group-hover:bg-orange-500/20 transition-all pointer-events-none" />
+                        <h3 className="text-lg font-black text-white font-display mb-4 flex items-center gap-2">
+                          <Share2 size={18} className="text-orange-500" />
                           Share Showroom
                         </h3>
-                        <p className="text-xs text-[var(--color-text-muted)] font-sans leading-relaxed mb-6">
+                        <p className="text-xs text-gray-400 font-sans leading-relaxed mb-6">
                           Utilize the Web Share integration to distribute this showroom profile directly with name, location, map link, and contact details!
                         </p>
                         <button 
                           onClick={handleShareShowroom}
-                          className="w-full py-3.5 bg-[var(--color-accent-main)] hover:bg-[var(--color-accent-hover)] border border-[var(--color-accent-main)]/20 rounded-xl text-xs font-black uppercase tracking-widest text-[#030712] transition-all active:scale-95 cursor-pointer shadow-lg flex items-center justify-center gap-2"
+                          className="w-full py-3.5 bg-orange-500 hover:bg-orange-600 border border-orange-400/20 rounded-xl text-xs font-black uppercase tracking-widest text-white transition-all active:scale-95 cursor-pointer shadow-lg flex items-center justify-center gap-2"
                         >
                           <Share2 size={14} />
                           Share Digital Profile
@@ -603,63 +495,13 @@ export default function ShowroomMiniSite({
                     </div>
                   </div>
 
-                  {/* SHOWROOM LIVE ANNOUNCEMENTS PREVIEW BANNER */}
-                  {dealer.activityFeed && dealer.activityFeed.length > 0 && (
-                    <div className="bg-gradient-to-r from-[var(--color-accent-main)]/10 via-[var(--color-accent-secondary-subtle)] to-transparent border border-[var(--color-accent-main)]/30 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl relative overflow-hidden text-left">
-                      <div className="flex items-center justify-between gap-4 border-b border-[var(--color-accent-main)]/20 pb-4">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-xl bg-[var(--color-accent-main)]/20 text-[var(--color-accent-main)] flex items-center justify-center font-black">
-                            <Megaphone size={18} className="animate-pulse" />
-                          </div>
-                          <div>
-                            <span className="text-[10px] font-mono font-bold text-[var(--color-accent-main)] uppercase tracking-widest block">Broadcast</span>
-                            <h3 className="text-base font-black text-[var(--color-text-header)] uppercase font-display">Live Showroom Updates & Offers</h3>
-                          </div>
-                        </div>
-
-                        <button
-                          onClick={() => handleTabClick('announcements')}
-                          className="px-4 py-2 rounded-xl bg-[var(--color-accent-main)] hover:bg-[var(--color-accent-hover)] text-[#030712] font-mono font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md shrink-0"
-                        >
-                          View Feed ({dealer.activityFeed.length}) &rarr;
-                        </button>
-                      </div>
-
-                      {/* Latest Post Highlight */}
-                      {(() => {
-                        const latest = dealer.activityFeed[0];
-                        return (
-                          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-bg-primary/60 border border-white/10 rounded-2xl p-4">
-                            <div className="space-y-1 max-w-2xl">
-                              <div className="flex items-center gap-2">
-                                <span className="px-2.5 py-0.5 rounded-full bg-[var(--color-accent-main)]/20 text-[var(--color-accent-main)] font-mono text-[9px] font-bold uppercase tracking-wider">
-                                  {latest.badge}
-                                </span>
-                                <span className="text-[10px] text-gray-400 font-mono">{latest.timestamp}</span>
-                              </div>
-                              <h4 className="text-sm font-black text-[var(--color-text-header)] font-display uppercase">{latest.title}</h4>
-                              <p className="text-xs text-gray-300 font-sans line-clamp-2">{latest.description}</p>
-                            </div>
-
-                            {latest.price && (
-                              <div className="shrink-0 font-mono text-right">
-                                <span className="text-[9px] text-[var(--color-accent-main)] uppercase font-bold block">Offer Price</span>
-                                <span className="text-sm font-black text-[var(--color-accent-main)]">{latest.price}</span>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })()}
-                    </div>
-                  )}
-
                   {/* SHOWROOM HIGHLIGHTS */}
                   <div className="space-y-8">
                     <div className="flex items-center justify-between border-b border-[var(--color-border-main)] pb-4">
                       <h3 className="text-xl font-black text-[var(--color-text-main)] font-display uppercase tracking-widest">Showroom Highlights</h3>
                       <button 
                         onClick={() => handleTabClick('inventory')}
-                        className="text-xs font-mono font-black uppercase tracking-widest text-[var(--color-accent-main)] hover:text-[var(--color-accent-hover)] transition-colors cursor-pointer"
+                        className="text-xs font-mono font-black uppercase tracking-widest text-orange-500 hover:text-orange-400 transition-colors cursor-pointer"
                       >
                         Explore Fleet &rarr;
                       </button>
@@ -667,7 +509,7 @@ export default function ShowroomMiniSite({
                     <React.Suspense fallback={
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5 animate-pulse">
                         {[1, 2, 3, 4].map(n => (
-                          <div key={n} className="bg-bg-secondary/50 rounded-3xl h-80 border border-white/5" />
+                          <div key={n} className="bg-slate-900/50 rounded-3xl h-80 border border-white/5" />
                         ))}
                       </div>
                     }>
@@ -679,19 +521,6 @@ export default function ShowroomMiniSite({
                     </React.Suspense>
                   </div>
                 </div>
-              )}
-
-              {/* ======================================================== */}
-              {/* TAB: ANNOUNCEMENTS & COMMUNITY FEED TAB */}
-              {/* ======================================================== */}
-              {(activeTab === 'announcements' || activeTab === 'community') && (
-                <ShowroomAnnouncementsFeed 
-                  dealer={dealer}
-                  listings={listings}
-                  isOwner={isOwner}
-                  onPublishActivity={onPublishActivity}
-                  onSelectListing={(car) => onSelectListing(car)}
-                />
               )}
 
               {/* ======================================================== */}
@@ -726,13 +555,27 @@ export default function ShowroomMiniSite({
                         </div>
                       </div>
 
-                      <div className="bg-bg-primary rounded-2xl h-48 border border-[var(--color-border-main)] relative overflow-hidden flex items-center justify-center font-mono text-[var(--color-text-muted)]">
-                        <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.03)_1.2px,transparent_1.2px)] [background-size:12px_12px] opacity-60"></div>
-                        <div className="z-10 text-center space-y-1">
-                          <span className="text-[10px] uppercase font-black text-[var(--color-accent-main)] block">GPS Pin Verified</span>
-                          <span className="text-xs text-[var(--color-text-main)] block">{dealer.location || 'Peshawar'}</span>
+                      {dealer.id === 'auto-choice-peshawar' ? (
+                        <div className="w-full h-48 rounded-2xl border border-[var(--color-border-main)] overflow-hidden bg-slate-950 relative">
+                          <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3308.9780193666907!2d71.48557838117156!3d33.967404453093664!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38d917f3bfdc9deb%3A0xfc1d94addfbea0d5!2sAuto%20choice!5e0!3m2!1sen!2s!4v1781725478050!5m2!1sen!2s"
+                            width="100%"
+                            height="100%"
+                            style={{ border: 0 }}
+                            allowFullScreen={true}
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                          />
                         </div>
-                      </div>
+                      ) : (
+                        <div className="bg-slate-950 rounded-2xl h-48 border border-[var(--color-border-main)] relative overflow-hidden flex items-center justify-center font-mono text-[var(--color-text-muted)]">
+                          <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.03)_1.2px,transparent_1.2px)] [background-size:12px_12px] opacity-60"></div>
+                          <div className="z-10 text-center space-y-1">
+                            <span className="text-[10px] uppercase font-black text-orange-500 block">GPS Pin Verified</span>
+                            <span className="text-xs text-[var(--color-text-main)] block">{dealer.location || 'Peshawar'}</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Operational Hour Card */}
@@ -749,42 +592,202 @@ export default function ShowroomMiniSite({
                       <div className="space-y-2 pt-2 border-t border-[var(--color-border-main)] text-xs font-mono">
                         <div className="flex justify-between py-1 border-b border-[var(--color-border-main)]/5">
                           <span className="text-[var(--color-text-muted)]">Mon - Sat:</span>
-                          <span className="text-[var(--color-accent-main)] font-bold">9:00 AM - 9:00 PM</span>
+                          <span className="text-emerald-400 font-bold">9:00 AM - 9:00 PM</span>
                         </div>
                         <div className="flex justify-between py-1">
                           <span className="text-[var(--color-text-muted)]">Sunday:</span>
-                          <span className="text-[var(--color-accent-main)] font-bold">Appointment Only</span>
+                          <span className="text-orange-400 font-bold">Appointment Only</span>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                    {/* Direct Contact Form Section */}
+                    {/* Team Directory & Contact Form */}
                     <div className="pt-6 border-t border-[var(--color-border-main)] space-y-8">
                       <div className="text-center max-w-2xl mx-auto space-y-2">
-                        <h2 className="text-3xl font-black text-[var(--color-text-main)] font-display uppercase tracking-tight">Get In Touch</h2>
-                        <p className="text-[var(--color-text-muted)] text-sm font-sans">Send a message directly to {dealer.name} or visit our showroom location.</p>
+                        <h2 className="text-3xl font-black text-[var(--color-text-main)] font-display uppercase tracking-tight">Direct Contact & Team Directory</h2>
+                        <p className="text-[var(--color-text-muted)] text-sm font-sans">Reach out to our executive directors or send a direct inquiry message.</p>
                       </div>
 
-                      <div className="max-w-3xl mx-auto w-full">
+                      {/* Visitor Live Greeting Board for Malak Mazhar & Amjid */}
+                      <div className="bg-gradient-to-r from-orange-500/10 via-amber-500/5 to-transparent border border-orange-500/20 rounded-3xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-lg text-left relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-48 h-48 bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
+                        <div className="space-y-2">
+                          <span className="px-2.5 py-1 rounded-full bg-orange-500/10 border border-orange-500/30 text-[9px] font-mono font-black uppercase text-orange-400 tracking-wider">
+                            Visitor Special Channel
+                          </span>
+                          <h3 className="text-lg font-black uppercase tracking-tight text-white font-sans">
+                            Leave a Message for Malak Mazhar & Amjid
+                          </h3>
+                          <p className="text-xs text-gray-300 leading-relaxed font-sans max-w-xl">
+                            You are currently browsing as a <strong className="text-orange-400 font-black uppercase">Visitor</strong>. Reach out directly to our principal partners and directors with a quick pre-formatted greeting message.
+                          </p>
+                        </div>
+                        
+                        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto shrink-0 font-mono text-[10px]">
+                          <a
+                            href={`https://wa.me/923159085086?text=${encodeURIComponent("Hello Malak Mazhar, I am a visitor at your Auto Choice showroom page on Bazar360. I would like to inquire about your premium vehicles.")}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 sm:flex-initial px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-lg active:scale-95 flex items-center justify-center gap-2"
+                          >
+                            <MessageCircle size={14} /> Greeting to Malak Mazhar
+                          </a>
+                          
+                          <a
+                            href={`https://wa.me/923469085033?text=${encodeURIComponent("Hello Amjid, I am browsing your premium Auto Choice showroom on Bazar360.online. Great layout!")}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 sm:flex-initial px-5 py-3 bg-white/5 border border-white/10 hover:bg-white/10 text-gray-300 font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-2"
+                          >
+                            <MessageCircle size={14} /> Greeting to Amjid
+                          </a>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                      {/* Contact Form */}
+                      <div className="lg:col-span-6 space-y-8">
                         <React.Suspense fallback={
-                          <div className="bg-bg-secondary/50 rounded-3xl h-96 border border-white/5 animate-pulse w-full" />
+                          <div className="bg-slate-900/50 rounded-3xl h-96 border border-white/5 animate-pulse w-full" />
                         }>
-                          <ContactSection 
-                            dealer={dealer} 
-                            isOwner={isOwner} 
-                            onUpdateDealer={(updatedDealer) => setDealer(updatedDealer)} 
-                          />
+                          <ContactSection dealer={dealer} />
                         </React.Suspense>
+                      </div>
+
+                      {/* Team Directory */}
+                      <div className="lg:col-span-6 space-y-6">
+                        <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] rounded-3xl p-6 md:p-8 space-y-6 shadow-xl relative overflow-hidden">
+                          <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
+                          
+                          <div className="space-y-1">
+                            <h3 className="text-lg font-black uppercase text-[var(--color-text-main)] font-display tracking-wide flex items-center gap-2">
+                              <Users size={20} className="text-orange-500" />
+                              Showroom Team Directory
+                            </h3>
+                            <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
+                              Connect with verified representatives of <span className="text-orange-500 font-bold">{dealer.name}</span> for swift purchase closures and professional on-desk support.
+                            </p>
+                          </div>
+
+                          <div className="space-y-4">
+                            {((dealer as any).businessCards && (dealer as any).businessCards.length > 0
+                              ? (dealer as any).businessCards
+                              : [
+                                  {
+                                    id: 'card-1',
+                                    name: 'Malak Mazhar',
+                                    role: 'Chief Sales Lead & Director',
+                                    phone1: '+92 315 9085086',
+                                    phone2: '+92 346 9085033',
+                                    email: 'Mazharsouls@gmail.com',
+                                    location: 'Alamas Car Village, Ring Road, Peshawar, Pakistan',
+                                    colorAccent: 'orange'
+                                  },
+                                  {
+                                    id: 'card-2',
+                                    name: 'M. Nasir Mirza',
+                                    role: 'Senior Sales Consultant',
+                                    phone1: '+92 346 9085032',
+                                    phone2: '+92 315 9085086',
+                                    email: 'Mirzashowroom@gmail.com',
+                                    location: 'Alamas Car Village, Ring Road, Peshawar, Pakistan',
+                                    colorAccent: 'gold'
+                                  },
+                                  {
+                                    id: 'card-3',
+                                    name: 'Malak Waseem',
+                                    role: 'Managing Partner & Coordinator',
+                                    phone1: '+92 346 9085033',
+                                    phone2: '+92 315 9085086',
+                                    email: 'Waseempartners@gmail.com',
+                                    location: 'Alamas Car Village, Ring Road, Peshawar, Pakistan',
+                                    colorAccent: 'cyan'
+                                  },
+                                  {
+                                    id: 'card-4',
+                                    name: 'Asfandyar Zafar',
+                                    role: 'Sales Executive',
+                                    phone1: '+92 315 9085086',
+                                    phone2: '+92 346 9085032',
+                                    email: 'Asfandyarpartners@gmail.com',
+                                    location: 'Alamas Car Village, Ring Road, Peshawar, Pakistan',
+                                    colorAccent: 'emerald'
+                                  }
+                                ]
+                            ).map((member: any, index: number) => {
+                              const isLead = index === 0;
+                              const nameInitials = member.name.split(' ').map((n: string) => n[0]).join('');
+                              const waPhone = member.phone1.replace(/[^\d]/g, '');
+                              const displayPhone = member.phone1;
+                              
+                              const accentColorClass = 
+                                member.colorAccent === 'gold' ? 'text-amber-400' :
+                                member.colorAccent === 'cyan' ? 'text-cyan-400' :
+                                member.colorAccent === 'emerald' ? 'text-emerald-400' :
+                                member.colorAccent === 'rose' ? 'text-rose-400' :
+                                member.colorAccent === 'navy' ? 'text-blue-400' : 'text-orange-400';
+
+                              const bgGradientClass = isLead 
+                                ? 'bg-gradient-to-br from-orange-500/10 to-transparent border border-orange-500/30 shadow-lg'
+                                : 'bg-[var(--color-bg-primary)] border border-[var(--color-border-main)] shadow-md';
+
+                              return (
+                                <div key={member.id || index} className={`p-4 rounded-xl relative overflow-hidden transition-all duration-300 hover:scale-[1.01] ${bgGradientClass}`}>
+                                  {isLead && (
+                                    <span className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md bg-orange-500 text-white font-mono font-black text-[7.5px] uppercase tracking-widest shadow-sm">
+                                      Showroom Head
+                                    </span>
+                                  )}
+                                  <div className="flex items-start gap-4">
+                                    <div className={`w-10 h-10 rounded-full text-white flex items-center justify-center font-sans font-black text-xs select-none ${
+                                      isLead ? 'bg-orange-500 shadow-md' : 'bg-slate-800'
+                                    }`}>
+                                      {nameInitials}
+                                    </div>
+                                    <div className="min-w-0 flex-1 space-y-1">
+                                      <h4 className="text-xs font-black text-[var(--color-text-main)] uppercase flex items-center gap-1.5">
+                                        {member.name}
+                                      </h4>
+                                      <p className={`text-[9px] font-mono font-bold uppercase tracking-wider ${accentColorClass}`}>
+                                        {member.role}
+                                      </p>
+                                      <p className="text-[10px] text-[var(--color-text-muted)] font-mono leading-relaxed max-w-md truncate">
+                                        📍 {member.location}
+                                      </p>
+                                      <div className="flex gap-2 pt-2.5">
+                                        <a 
+                                          href={`https://wa.me/${waPhone}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="flex-1 py-1.5 bg-emerald-600/15 text-emerald-500 hover:bg-emerald-600/25 rounded-lg text-[8px] font-mono font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer"
+                                        >
+                                          <MessageCircle size={10} /> WhatsApp
+                                        </a>
+                                        <a 
+                                          href={`tel:${displayPhone}`}
+                                          className="flex-1 py-1.5 bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] rounded-lg text-[8px] font-mono font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer"
+                                        >
+                                          <Phone size={10} /> Call
+                                        </a>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
+                </div>
               )}
 
               {/* ======================================================== */}
               {/* TAB 6: MODERN QR CODE & BUSINESS CARD GENERATOR TAB */}
               {/* ======================================================== */}
-              {(activeTab === 'qrcode' || activeTab === 'businesscard') && (
+              {activeTab === 'qrcode' && (
                 <div className="max-w-5xl mx-auto space-y-8 text-left">
                   
                   <div className="border-b border-[var(--color-border-main)] pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -803,7 +806,7 @@ export default function ShowroomMiniSite({
                         onClick={() => setIsCardBack(false)}
                         className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${
                           !isCardBack 
-                            ? 'bg-[var(--color-accent-main)] text-[#030712] shadow-md' 
+                            ? 'bg-orange-500 text-white shadow-md' 
                             : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'
                         }`}
                       >
@@ -813,7 +816,7 @@ export default function ShowroomMiniSite({
                         onClick={() => setIsCardBack(true)}
                         className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${
                           isCardBack 
-                            ? 'bg-[var(--color-accent-main)] text-[#030712] shadow-md' 
+                            ? 'bg-orange-500 text-white shadow-md' 
                             : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'
                         }`}
                       >
@@ -827,17 +830,17 @@ export default function ShowroomMiniSite({
                       
                       {/* Visual QR presentation frame */}
                       <div className="md:col-span-5 bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] p-8 rounded-3xl text-center space-y-6 shadow-2xl relative overflow-hidden">
-                        <div className="absolute inset-0 bg-[radial-gradient(rgba(212,175,55,0.03)_1.2px,transparent_1.2px)] [background-size:16px_16px] pointer-events-none"></div>
+                        <div className="absolute inset-0 bg-[radial-gradient(rgba(249,115,22,0.03)_1.2px,transparent_1.2px)] [background-size:16px_16px] pointer-events-none"></div>
                         
-                        <div className="relative mx-auto w-56 h-56 flex items-center justify-center bg-bg-primary rounded-2xl border border-white/10 p-3 shadow-inner">
+                        <div className="relative mx-auto w-56 h-56 flex items-center justify-center bg-slate-950 rounded-2xl border border-white/10 p-3 shadow-inner">
                           {/* Neon horizontal scanning indicator line */}
-                          <div className="absolute left-3 right-3 h-0.5 bg-gradient-to-r from-transparent via-[var(--color-accent-main)] to-transparent animate-bounce top-1/2 z-10 pointer-events-none"></div>
+                          <div className="absolute left-3 right-3 h-0.5 bg-gradient-to-r from-transparent via-orange-500 to-transparent animate-bounce top-1/2 z-10 pointer-events-none"></div>
                           
                           {/* Corner scanner alignment target paths */}
-                          <div className="absolute top-2 left-2 w-6 h-6 border-t-2 border-l-2 border-[var(--color-accent-main)] rounded-tl-md"></div>
-                          <div className="absolute top-2 right-2 w-6 h-6 border-t-2 border-r-2 border-[var(--color-accent-main)] rounded-tr-md"></div>
-                          <div className="absolute bottom-2 left-2 w-6 h-6 border-b-2 border-l-2 border-[var(--color-accent-main)] rounded-bl-md"></div>
-                          <div className="absolute bottom-2 right-2 w-6 h-6 border-b-2 border-r-2 border-[var(--color-accent-main)] rounded-br-md"></div>
+                          <div className="absolute top-2 left-2 w-6 h-6 border-t-2 border-l-2 border-orange-500 rounded-tl-md"></div>
+                          <div className="absolute top-2 right-2 w-6 h-6 border-t-2 border-r-2 border-orange-500 rounded-tr-md"></div>
+                          <div className="absolute bottom-2 left-2 w-6 h-6 border-b-2 border-l-2 border-orange-500 rounded-bl-md"></div>
+                          <div className="absolute bottom-2 right-2 w-6 h-6 border-b-2 border-r-2 border-orange-500 rounded-br-md"></div>
 
                           {/* Live high-fidelity local QR Canvas with center brand icon logo */}
                           <QRCodeCanvas
@@ -849,21 +852,19 @@ export default function ShowroomMiniSite({
                             level="H"
                             includeMargin={true}
                             className="w-44 h-44 rounded-lg object-contain bg-white p-2.5 border border-white/5 shadow-2xl transition-transform duration-300 hover:scale-105"
-                            {...((dealer.logoUrl || dealer.logo) ? {
-                              imageSettings: {
-                                src: dealer.logoUrl || dealer.logo || "",
-                                x: undefined,
-                                y: undefined,
-                                height: 36,
-                                width: 36,
-                                excavate: true,
-                              }
-                            } : {})}
+                            imageSettings={{
+                              src: dealer.logo || "/auto_choice_logo_dark.jpg",
+                              x: undefined,
+                              y: undefined,
+                              height: 36,
+                              width: 36,
+                              excavate: true,
+                            }}
                           />
                         </div>
 
                         <div className="space-y-1">
-                          <span className="text-[10px] font-mono font-black text-[var(--color-accent-main)] uppercase tracking-widest block">Scan to Browse Inventory</span>
+                          <span className="text-[10px] font-mono font-black text-orange-500 uppercase tracking-widest block">Scan to Browse Inventory</span>
                           <span className="text-[9px] text-[var(--color-text-muted)] font-mono uppercase block">{dealer.name} Official Portal</span>
                         </div>
                       </div>
@@ -882,17 +883,17 @@ export default function ShowroomMiniSite({
                               <span className="text-[10px] text-[var(--color-text-muted)] uppercase font-bold">QR Ink Contrast Theme</span>
                               <div className="flex flex-wrap gap-2">
                                 <button 
-                                  onClick={() => setQrColor('#D4AF37')}
+                                  onClick={() => setQrColor('#F97316')}
                                   className={`px-3 py-1.5 rounded-lg border text-[10px] uppercase font-black cursor-pointer transition-colors ${
-                                    qrColor === '#D4AF37' ? 'bg-[var(--color-accent-main)] text-[#030712] border-[var(--color-accent-main)]' : 'bg-[var(--color-bg-primary)] text-[var(--color-text-muted)] border-[var(--color-border-main)] hover:text-[var(--color-text-main)]'
+                                    qrColor === '#F97316' ? 'bg-orange-500 text-white border-orange-500' : 'bg-[var(--color-bg-primary)] text-[var(--color-text-muted)] border-[var(--color-border-main)] hover:text-[var(--color-text-main)]'
                                   }`}
                                 >
-                                  Luxury Gold
+                                  Electric Orange
                                 </button>
                                 <button 
                                   onClick={() => setQrColor('#38BDF8')}
                                   className={`px-3 py-1.5 rounded-lg border text-[10px] uppercase font-black cursor-pointer transition-colors ${
-                                    qrColor === '#38BDF8' ? 'bg-sky-500 text-[#030712] border-sky-500' : 'bg-[var(--color-bg-primary)] text-[var(--color-text-muted)] border-[var(--color-border-main)] hover:text-[var(--color-text-main)]'
+                                    qrColor === '#38BDF8' ? 'bg-sky-500 text-white border-sky-500' : 'bg-[var(--color-bg-primary)] text-[var(--color-text-muted)] border-[var(--color-border-main)] hover:text-[var(--color-text-main)]'
                                   }`}
                                 >
                                   Cobalt Blue
@@ -900,7 +901,7 @@ export default function ShowroomMiniSite({
                                 <button 
                                   onClick={() => setQrColor('#000000')}
                                   className={`px-3 py-1.5 rounded-lg border text-[10px] uppercase font-black cursor-pointer transition-colors ${
-                                    qrColor === '#000000' ? 'bg-black text-[var(--color-text-header)] border-black' : 'bg-[var(--color-bg-primary)] text-[var(--color-text-muted)] border-[var(--color-border-main)] hover:text-[var(--color-text-main)]'
+                                    qrColor === '#000000' ? 'bg-black text-white border-black' : 'bg-[var(--color-bg-primary)] text-[var(--color-text-muted)] border-[var(--color-border-main)] hover:text-[var(--color-text-main)]'
                                   }`}
                                 >
                                   Jet Charcoal
@@ -921,12 +922,12 @@ export default function ShowroomMiniSite({
                                   Polar White (Recommended for Prints)
                                 </button>
                                 <button 
-                                  onClick={() => setQrBg('#FDFBF7')}
+                                  onClick={() => setQrBg('#FFF5EB')}
                                   className={`px-3 py-1.5 rounded-lg border text-[10px] uppercase font-black cursor-pointer transition-colors ${
-                                    qrBg === '#FDFBF7' ? 'bg-[#FDFBF7] text-slate-900 border-white' : 'bg-[var(--color-bg-primary)] text-[var(--color-text-muted)] border-[var(--color-border-main)]'
+                                    qrBg === '#FFF5EB' ? 'bg-orange-50 text-slate-900 border-orange-100' : 'bg-[var(--color-bg-primary)] text-[var(--color-text-muted)] border-[var(--color-border-main)]'
                                   }`}
                                 >
-                                  Warm Ivory
+                                  Antique Cream
                                 </button>
                               </div>
                             </div>
@@ -935,7 +936,7 @@ export default function ShowroomMiniSite({
                             <div className="space-y-2">
                               <div className="flex justify-between items-center text-[10px] text-[var(--color-text-muted)] uppercase font-bold">
                                 <span>Output Image Size</span>
-                                <span>{qrSize}x{qrSize} px</span>
+                                <span className="text-[var(--color-text-main)]">{qrSize}x{qrSize} px</span>
                               </div>
                               <input 
                                 type="range" 
@@ -944,7 +945,7 @@ export default function ShowroomMiniSite({
                                 step="50"
                                 value={qrSize} 
                                 onChange={(e) => setQrSize(parseInt(e.target.value))}
-                                className="w-full accent-[var(--color-accent-main)] h-1 bg-[var(--color-bg-primary)] rounded-lg appearance-none cursor-pointer border border-[var(--color-border-main)]"
+                                className="w-full accent-orange-500 h-1 bg-[var(--color-bg-primary)] rounded-lg appearance-none cursor-pointer border border-[var(--color-border-main)]"
                               />
                             </div>
 
@@ -958,9 +959,17 @@ export default function ShowroomMiniSite({
                               onClick={() => {
                                 const canvas = document.getElementById('showroom-qr-canvas') as HTMLCanvasElement;
                                 const qrDataUrl = canvas ? canvas.toDataURL('image/png') : encodedQrData;
-                                const printWindow = window.open('', '_blank');
-                                if (printWindow) {
-                                  printWindow.document.write(`
+                                const iframe = document.createElement('iframe');
+                                iframe.style.position = 'fixed';
+                                iframe.style.right = '0';
+                                iframe.style.bottom = '0';
+                                iframe.style.width = '0';
+                                iframe.style.height = '0';
+                                iframe.style.border = '0';
+                                document.body.appendChild(iframe);
+                                const doc = iframe.contentWindow?.document;
+                                if (doc) {
+                                  doc.write(`
                                     <html>
                                       <head>
                                         <title>${dealer.name} - QR Floor Sign</title>
@@ -981,14 +990,20 @@ export default function ShowroomMiniSite({
                                           <p style="margin: 30px 0 0 0; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">SCAN TO VIEW DIGITAL INVENTORY</p>
                                           <div class="footer">BAZAR360.ONLINE VERIFIED STORE</div>
                                         </div>
-                                        <script>window.onload = function() { window.print(); }</script>
                                       </body>
                                     </html>
                                   `);
-                                  printWindow.document.close();
+                                  doc.close();
+                                  setTimeout(() => {
+                                    iframe.contentWindow?.focus();
+                                    iframe.contentWindow?.print();
+                                    setTimeout(() => {
+                                      if (document.body.contains(iframe)) document.body.removeChild(iframe);
+                                    }, 2000);
+                                  }, 300);
                                 }
                               }}
-                              className="flex-1 py-3 bg-[var(--color-bg-primary)] border border-[var(--color-border-main)] hover:text-[var(--color-accent-main)] rounded-xl text-xs font-mono font-black uppercase tracking-widest transition-all cursor-pointer shadow flex items-center justify-center gap-2"
+                              className="flex-1 py-3 bg-[var(--color-bg-primary)] border border-[var(--color-border-main)] hover:text-orange-500 rounded-xl text-xs font-mono font-black uppercase tracking-widest transition-all cursor-pointer shadow flex items-center justify-center gap-2"
                             >
                               <Printer size={14} /> Print Floor Sign
                             </button>
@@ -1010,7 +1025,7 @@ export default function ShowroomMiniSite({
                                   toast.error('Could not locate canvas element');
                                 }
                               }}
-                              className="flex-1 py-3 bg-[var(--color-accent-main)] hover:bg-[var(--color-accent-hover)] text-[#030712] rounded-xl text-xs font-mono font-black uppercase tracking-widest transition-all cursor-pointer shadow-lg flex items-center justify-center gap-2"
+                              className="flex-1 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-mono font-black uppercase tracking-widest transition-all cursor-pointer shadow-lg flex items-center justify-center gap-2"
                             >
                               <Download size={14} /> Download QR Code
                             </button>
@@ -1021,7 +1036,7 @@ export default function ShowroomMiniSite({
 
                     </div>
                   ) : (
-                    <DigitalBusinessCard dealer={dealer} onUpdateDealer={(updated) => setDealer(updated)} />
+                    <BusinessCardGenerator dealer={dealer} onUpdateDealer={(updated) => setDealer(updated)} />
                   )}
 
                 </div>
@@ -1051,53 +1066,38 @@ export default function ShowroomMiniSite({
               )}
 
               {/* ======================================================== */}
-              {/* TAB 8: STAFF & TEAM MANAGEMENT TAB */}
-              {/* ======================================================== */}
-              {activeTab === 'team' && (
-                <div className="space-y-8 text-left">
-                  <ShowroomTeamManager
-                    dealer={dealer}
-                    isOwner={isOwner}
-                    onUpdateDealer={(updated) => setDealer(updated)}
-                  />
-                </div>
-              )}
-
-              {/* ======================================================== */}
-              {/* TAB 9: VISITOR INSIGHTS ANALYTICS DASHBOARD */}
-              {/* ======================================================== */}
-              {activeTab === 'analytics' && isOwner && (
-                <div className="space-y-8 text-left">
-                  <ShowroomAnalyticsDashboard
-                    showroom={dealer}
-                    inventory={listings}
-                  />
-                </div>
-              )}
-
-              {/* ======================================================== */}
-              {/* TAB 4: SHOWROOM MEDIA & FACILITY GALLERY TAB */}
+              {/* TAB 4: SHOWROOM MEDIA GALLERY TAB */}
               {/* ======================================================== */}
               {activeTab === 'media' && (
                 <div className="space-y-8 text-left">
-                  <ShowroomFacilityGallery
-                    dealer={dealer}
-                    isOwner={isOwner}
-                    onUpdateDealer={(updated) => setDealer(updated)}
-                  />
-                </div>
-              )}
-
-              {/* ======================================================== */}
-              {/* TAB 7: SHOWROOM LOGO & COVER PICTURE UPLOAD MANAGER */}
-              {/* ======================================================== */}
-              {activeTab === 'mediamanager' && (
-                <div className="space-y-8 text-left">
-                  <ShowroomMediaManager
-                    dealer={dealer}
-                    onUpdateDealer={(updated) => setDealer(updated)}
-                    onClose={() => setActiveTab('home')}
-                  />
+                  <div className="border-b border-[var(--color-border-main)] pb-4">
+                    <h2 className="text-2xl font-black text-[var(--color-text-main)] font-display uppercase tracking-tight">
+                      Showroom Media Gallery
+                    </h2>
+                    <p className="text-xs text-[var(--color-text-muted)] mt-1">
+                      Explore virtual walkthrough videos, 360° interactive tours, and high-fidelity photos of {dealer.name}'s luxury floor.
+                    </p>
+                  </div>
+                  <React.Suspense fallback={
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 animate-pulse">
+                      {[1, 2, 3, 4, 5, 6].map(n => (
+                        <div key={n} className="bg-slate-900/50 rounded-2xl h-44 border border-white/5" />
+                      ))}
+                    </div>
+                  }>
+                    <MediaGallery 
+                      media={dealer.gallery || []} 
+                      isOwner={false} 
+                      onAddMedia={(url) => {
+                        const updated = { ...dealer, gallery: [...(dealer.gallery || []), url] };
+                        setDealer(updated);
+                      }} 
+                      onRemoveMedia={(idx) => {
+                        const updated = { ...dealer, gallery: (dealer.gallery || []).filter((_, i) => i !== idx) };
+                        setDealer(updated);
+                      }} 
+                    />
+                  </React.Suspense>
                 </div>
               )}
 
@@ -1107,12 +1107,26 @@ export default function ShowroomMiniSite({
         </main>
       </div>
 
-      {/* Showroom QR Modal */}
-      <ShowroomShareQR
-        isOpen={isQrModalOpen}
-        onClose={() => setIsQrModalOpen(false)}
-        dealer={dealer}
-      />
+      {/* Sticky "Inquire About Fleet" Button */}
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={handleInquireFleet}
+        className="fixed bottom-24 sm:bottom-24 md:bottom-8 left-4 sm:left-6 z-40 bg-gradient-to-r from-slate-900/90 to-black/90 backdrop-blur-xl border border-orange-500/40 text-white font-sans font-black text-xs uppercase tracking-wider px-4 py-3 rounded-2xl shadow-[0_10px_30px_rgba(249,115,22,0.25)] hover:border-orange-500 transition-all cursor-pointer flex items-center gap-2.5 group"
+        title="Inquire about this showroom's vehicle fleet"
+      >
+        <div className="w-8 h-8 rounded-xl bg-orange-500/20 text-orange-400 border border-orange-500/30 flex items-center justify-center group-hover:bg-orange-500 group-hover:text-black transition-all shrink-0">
+          <Building2 size={15} />
+        </div>
+        <div className="text-left leading-tight">
+          <span className="block text-[11px] font-black tracking-wide text-white group-hover:text-orange-400 transition-colors">
+            Inquire About Fleet
+          </span>
+          <span className="block text-[9px] text-gray-400 font-mono font-normal">
+            {listings.length} Stock Units
+          </span>
+        </div>
+      </motion.button>
 
       {/* Showroom FAB Action Contacts menu */}
       <ShowroomFABMenu 

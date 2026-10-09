@@ -190,19 +190,6 @@ export default function TopAppBar({
             {isMuted ? <VolumeX size={17} /> : <Volume2 size={17} className="text-[var(--color-accent-main)]" />}
           </button>
 
-          {/* Theme Toggle (Light / Dark) */}
-          <button
-            type="button"
-            onClick={() => {
-              cinematicAudio.playClick();
-              toggleTheme();
-            }}
-            className="p-2 rounded-xl bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-primary)] text-[var(--color-text-muted)] hover:text-[var(--color-accent-main)] border border-[var(--color-border-subtle)] transition-all cursor-pointer w-10 h-10 flex items-center justify-center shrink-0 shadow-2xs"
-            title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-          >
-            {isDark ? <Sun size={17} /> : <Moon size={17} />}
-          </button>
-
           {/* Live Messaging Quick Action Button */}
           <button
             type="button"

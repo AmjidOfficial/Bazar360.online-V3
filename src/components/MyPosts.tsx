@@ -1,4 +1,3 @@
-import { NO_IMAGE_SVG } from "../types";
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   Car, Clock, CheckCircle2, XCircle, Tag, Trash2, Edit2, 
@@ -186,11 +185,11 @@ export function MyPosts({
           <div>
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-amber-400" />
-              <h2 className="text-xl font-black text-[var(--color-text-header)] uppercase tracking-wider">
+              <h2 className="text-xl font-black text-white uppercase tracking-wider">
                 {lang === 'ur' ? 'میرے اشتہارات اور میڈیا' : 'My Posts & Media Library'}
               </h2>
             </div>
-            <p className="text-xs text-text-muted mt-1 max-w-xl">
+            <p className="text-xs text-slate-300 mt-1 max-w-xl">
               {lang === 'ur'
                 ? 'اپنے پوسٹ کردہ تمام وسائل اور گاڑیوں کی حیثیت کو ریئل ٹائم میں ٹریک اور اپ ڈیٹ کریں۔'
                 : 'Track, edit, mark as sold, or update pricing and media for all your uploaded vehicles in real time.'}
@@ -198,7 +197,7 @@ export function MyPosts({
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="px-3 py-1.5 bg-bg-primary/80 border border-border-main/60 rounded-xl text-xs font-mono text-amber-400 font-bold">
+            <span className="px-3 py-1.5 bg-slate-950/80 border border-slate-700/60 rounded-xl text-xs font-mono text-amber-400 font-bold">
               Total Assets: {userListings.length}
             </span>
           </div>
@@ -210,8 +209,8 @@ export function MyPosts({
         {/* Status Filter Chips */}
         <div className="flex flex-wrap items-center gap-1.5">
           {[
-            { id: 'all', label: 'All Posts', count: counts.all, color: 'text-text-muted' },
-            { id: 'active', label: 'Active', count: counts.active, color: 'text-[var(--color-accent-main)]' },
+            { id: 'all', label: 'All Posts', count: counts.all, color: 'text-slate-300' },
+            { id: 'active', label: 'Active', count: counts.active, color: 'text-emerald-400' },
             { id: 'pending', label: 'Pending Review', count: counts.pending, color: 'text-amber-400' },
             { id: 'sold', label: 'Sold', count: counts.sold, color: 'text-blue-400' },
             { id: 'rejected', label: 'Rejected', count: counts.rejected, color: 'text-rose-400' },
@@ -222,11 +221,11 @@ export function MyPosts({
               className={`px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer ${
                 filterStatus === tab.id
                   ? 'bg-amber-500 text-slate-950 shadow-md font-bold scale-105'
-                  : 'bg-bg-secondary/40 text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-bg-tertiary/60 border border-[var(--color-border-main)]'
+                  : 'bg-slate-900/40 text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-slate-800/60 border border-[var(--color-border-main)]'
               }`}
             >
               <span>{tab.label}</span>
-              <span className={`px-1.5 py-0.2 rounded-full text-[10px] bg-bg-primary/40 font-mono ${tab.color}`}>
+              <span className={`px-1.5 py-0.2 rounded-full text-[10px] bg-slate-950/40 font-mono ${tab.color}`}>
                 {tab.count}
               </span>
             </button>
@@ -240,7 +239,7 @@ export function MyPosts({
             placeholder="Search my posts..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-bg-primary/60 border border-[var(--color-border-main)] rounded-xl px-3 py-1.5 text-xs text-[var(--color-text-main)] placeholder-slate-500 focus:outline-none focus:border-amber-500"
+            className="w-full bg-slate-950/60 border border-[var(--color-border-main)] rounded-xl px-3 py-1.5 text-xs text-[var(--color-text-main)] placeholder-slate-500 focus:outline-none focus:border-amber-500"
           />
         </div>
       </div>
@@ -265,7 +264,7 @@ export function MyPosts({
               // Determine status badge
               let statusBadge = {
                 label: 'Active',
-                bg: 'bg-[var(--color-accent-main)]/15 border-[var(--color-accent-main)]/30 text-[var(--color-accent-main)]',
+                bg: 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400',
                 icon: <CheckCircle2 size={12} />
               };
 
@@ -301,9 +300,9 @@ export function MyPosts({
                   className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] hover:border-amber-500/40 rounded-2xl overflow-hidden shadow text-left flex flex-col transition-all group"
                 >
                   {/* Image & Status Overlay */}
-                  <div className="relative h-44 bg-bg-primary overflow-hidden">
+                  <div className="relative h-44 bg-slate-950 overflow-hidden">
                     <LazyImage
-                      src={car.images?.[0] || car.imageUrl || NO_IMAGE_SVG}
+                      src={car.images?.[0] || car.imageUrl || 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=800&q=80'}
                       alt={`${car.year} ${car.make} ${car.model}`}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
@@ -315,7 +314,7 @@ export function MyPosts({
                       </span>
                     </div>
 
-                    <div className="absolute bottom-2 right-2 bg-bg-primary/80 backdrop-blur-md px-2.5 py-1 rounded-lg border border-border-main/60 text-xs font-mono font-black text-amber-400">
+                    <div className="absolute bottom-2 right-2 bg-slate-950/80 backdrop-blur-md px-2.5 py-1 rounded-lg border border-slate-700/60 text-xs font-mono font-black text-amber-400">
                       {renderPrice(car.price)}
                     </div>
                   </div>
@@ -337,7 +336,7 @@ export function MyPosts({
                         onClick={() => handleToggleSold(car)}
                         className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
                           car.isSold || car.status === 'Sold'
-                            ? 'bg-[var(--color-accent-main)]/15 text-[var(--color-accent-main)] border border-[var(--color-accent-main)]/30'
+                            ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
                             : 'bg-amber-500/15 text-amber-400 border border-amber-500/30 hover:bg-amber-500/25'
                         }`}
                         title={car.isSold ? 'Mark as Available' : 'Mark as Sold'}
@@ -351,7 +350,7 @@ export function MyPosts({
                           setEditPrice(car.price);
                           setEditMileage(car.mileage || 0);
                         }}
-                        className="flex-1 py-1.5 bg-bg-tertiary hover:bg-slate-700 text-orange-400 rounded-lg font-bold uppercase text-[10px] tracking-wider transition-all cursor-pointer text-center flex items-center justify-center gap-1"
+                        className="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-orange-400 rounded-lg font-bold uppercase text-[10px] tracking-wider transition-all cursor-pointer text-center flex items-center justify-center gap-1"
                       >
                         <Edit2 size={12} />
                         <span>Edit</span>
@@ -360,7 +359,7 @@ export function MyPosts({
                       {onSelectListing && (
                         <button
                           onClick={() => onSelectListing(car)}
-                          className="p-1.5 bg-bg-tertiary hover:bg-slate-700 text-text-muted rounded-lg transition-all cursor-pointer"
+                          className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-all cursor-pointer"
                           title="View Details"
                         >
                           <Eye size={13} />
@@ -385,7 +384,7 @@ export function MyPosts({
 
       {/* Edit Modal */}
       {editingCar && (
-        <div className="fixed inset-0 z-50 bg-bg-primary/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-main)] p-6 rounded-3xl max-w-md w-full shadow-2xl space-y-4 text-left">
             <div className="flex items-center justify-between gap-2 border-b border-[var(--color-border-main)] pb-3">
               <h3 className="text-sm font-black uppercase text-[var(--color-text-main)] tracking-wider">
@@ -400,7 +399,7 @@ export function MyPosts({
                     </span>
                   )}
                   {listingAutoSaveStatus === 'saved' && (
-                    <span className="inline-flex items-center gap-1 text-[9px] font-black font-mono uppercase tracking-wider text-[var(--color-accent-main)]">
+                    <span className="inline-flex items-center gap-1 text-[9px] font-black font-mono uppercase tracking-wider text-emerald-500">
                       Auto-Saved
                     </span>
                   )}
@@ -422,7 +421,7 @@ export function MyPosts({
                   type="number"
                   value={editPrice}
                   onChange={(e) => setEditPrice(Number(e.target.value))}
-                  className="w-full bg-bg-primary border border-[var(--color-border-main)] rounded-xl px-3 py-2 text-sm font-mono text-[var(--color-text-main)]"
+                  className="w-full bg-slate-950 border border-[var(--color-border-main)] rounded-xl px-3 py-2 text-sm font-mono text-[var(--color-text-main)]"
                 />
               </div>
 
@@ -434,7 +433,7 @@ export function MyPosts({
                   type="number"
                   value={editMileage}
                   onChange={(e) => setEditMileage(Number(e.target.value))}
-                  className="w-full bg-bg-primary border border-[var(--color-border-main)] rounded-xl px-3 py-2 text-sm font-mono text-[var(--color-text-main)]"
+                  className="w-full bg-slate-950 border border-[var(--color-border-main)] rounded-xl px-3 py-2 text-sm font-mono text-[var(--color-text-main)]"
                 />
               </div>
             </div>
@@ -442,7 +441,7 @@ export function MyPosts({
             <div className="flex items-center justify-end gap-2 pt-3 border-t border-[var(--color-border-main)]">
               <button
                 onClick={() => setEditingCar(null)}
-                className="px-4 py-2 bg-bg-tertiary hover:bg-slate-700 text-text-muted text-xs font-bold uppercase rounded-xl cursor-pointer"
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold uppercase rounded-xl cursor-pointer"
               >
                 Cancel
               </button>

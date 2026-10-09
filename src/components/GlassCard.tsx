@@ -36,8 +36,8 @@ export function GlassCard({
   // Map theme overrides, or fallback to CSS class-dependent styles
   const themeStyles = {
     light: 'bg-white/90 border-slate-200/80 shadow-[0_10px_30px_-10px_rgba(15,23,42,0.08)] text-slate-900',
-    dark: 'bg-bg-primary/30 border-white/5 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] text-[var(--color-text-header)]',
-    auto: 'bg-white/90 dark:bg-bg-primary/30 border-slate-200/80 dark:border-white/5 shadow-[0_10px_30px_-10px_rgba(15,23,42,0.08)] dark:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] text-slate-900 dark:text-[var(--color-text-header)]',
+    dark: 'bg-slate-950/30 border-white/5 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] text-white',
+    auto: 'bg-white/90 dark:bg-slate-950/30 border-slate-200/80 dark:border-white/5 shadow-[0_10px_30px_-10px_rgba(15,23,42,0.08)] dark:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] text-slate-900 dark:text-white',
   }[theme];
 
   // Glass performance attributes

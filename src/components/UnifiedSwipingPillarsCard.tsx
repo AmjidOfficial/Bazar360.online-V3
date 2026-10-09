@@ -36,11 +36,11 @@ export default function UnifiedSwipingPillarsCard({ setTab, className = '' }: Un
       subtitle: 'New & Used Car Marketplace',
       tag: '1000+ Verified Listings',
       icon: Car,
-      bgGradient: 'from-[#7C3AED]/20 via-[#3B82F6]/10 to-transparent',
-      borderColor: 'border-[#7C3AED]/30',
-      glowColor: 'shadow-[0_15px_35px_rgba(124,58,237,0.25)]',
-      accentBadge: 'bg-[#7C3AED] text-white',
-      buttonBg: 'bg-gradient-to-r from-[#7C3AED] to-[#3B82F6] hover:from-[#8B5CF6] hover:to-[#2563EB] text-white font-bold',
+      bgGradient: 'from-orange-500/20 via-amber-500/10 to-transparent',
+      borderColor: 'border-orange-500/30',
+      glowColor: 'shadow-[0_15px_35px_rgba(249,115,22,0.25)]',
+      accentBadge: 'bg-orange-500 text-slate-950',
+      buttonBg: 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-slate-950 font-black',
       description: 'Explore verified new & certified pre-owned vehicles with instant price estimation, 360° health reports, and multi-currency PKR/USD view.',
       features: [
         'Certified 100+ Point Inspection',
@@ -52,15 +52,15 @@ export default function UnifiedSwipingPillarsCard({ setTab, className = '' }: Un
     },
     {
       id: 'auto-choice-hub',
-      title: 'Bazar360 Hub',
+      title: 'Auto Choice Hub',
       subtitle: 'Flagship Showrooms Network',
       tag: 'Verified Showrooms',
       icon: Store,
-      bgGradient: 'from-[#3B82F6]/20 via-[#7C3AED]/10 to-transparent',
-      borderColor: 'border-[#3B82F6]/30',
-      glowColor: 'shadow-[0_15px_35px_rgba(59,130,246,0.25)]',
-      accentBadge: 'bg-[#3B82F6] text-white',
-      buttonBg: 'bg-gradient-to-r from-[#3B82F6] to-[#7C3AED] hover:from-[#2563EB] hover:to-[#8B5CF6] text-white font-bold',
+      bgGradient: 'from-sky-500/20 via-cyan-500/10 to-transparent',
+      borderColor: 'border-sky-500/30',
+      glowColor: 'shadow-[0_15px_35px_rgba(56,189,248,0.25)]',
+      accentBadge: 'bg-sky-400 text-slate-950',
+      buttonBg: 'bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 text-slate-950 font-black',
       description: 'Connect directly with top-tier flagship auto showrooms across Pakistan. View digital storefronts, active inventory, and dealership credentials.',
       features: [
         'Exclusive Dealer Showroom Pages',
@@ -76,11 +76,11 @@ export default function UnifiedSwipingPillarsCard({ setTab, className = '' }: Un
       subtitle: 'Direct WhatsApp Deals & Offers',
       tag: 'Live Bargain Engine',
       icon: MessageCircle,
-      bgGradient: 'from-[#22C55E]/20 via-[#7C3AED]/10 to-transparent',
-      borderColor: 'border-[#22C55E]/30',
-      glowColor: 'shadow-[0_15px_35px_rgba(34,197,94,0.25)]',
-      accentBadge: 'bg-[#22C55E] text-slate-950 font-bold',
-      buttonBg: 'bg-gradient-to-r from-[#22C55E] to-[#10B981] hover:from-[#16A34A] hover:to-[#059669] text-white font-bold',
+      bgGradient: 'from-emerald-500/20 via-teal-500/10 to-transparent',
+      borderColor: 'border-emerald-500/30',
+      glowColor: 'shadow-[0_15px_35px_rgba(16,185,129,0.25)]',
+      accentBadge: 'bg-emerald-400 text-slate-950',
+      buttonBg: 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-black',
       description: 'Submit instant offer proposals and counter-offers directly via WhatsApp. Lock in exclusive prices with zero middleman markup.',
       features: [
         'Real-time WhatsApp Negotiation',
@@ -132,7 +132,7 @@ export default function UnifiedSwipingPillarsCard({ setTab, className = '' }: Un
 
   return (
     <div 
-      className={`relative w-full bg-bg-primary/90 backdrop-blur-2xl border ${currentPillar.borderColor} rounded-[28px] p-5 sm:p-6 text-[var(--color-text-header)] overflow-hidden transition-all duration-500 ${currentPillar.glowColor} ${className}`}
+      className={`relative w-full bg-slate-950/90 backdrop-blur-2xl border ${currentPillar.borderColor} rounded-[28px] p-5 sm:p-6 text-white overflow-hidden transition-all duration-500 ${currentPillar.glowColor} ${className}`}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={handleTouchStart}
@@ -153,7 +153,7 @@ export default function UnifiedSwipingPillarsCard({ setTab, className = '' }: Un
               className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-black transition-all cursor-pointer shrink-0 ${
                 isActive 
                   ? `${pillar.accentBadge} shadow-md scale-[1.02]` 
-                  : 'text-gray-400 hover:text-[var(--color-text-header)] hover:bg-white/5'
+                  : 'text-gray-400 hover:text-white hover:bg-white/5'
               }`}
             >
               <PIcon size={14} className={isActive ? 'stroke-[2.5]' : ''} />
@@ -177,14 +177,14 @@ export default function UnifiedSwipingPillarsCard({ setTab, className = '' }: Un
             {/* Pillar Header */}
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-center gap-3">
-                <div className={`p-3 rounded-2xl bg-white/10 border ${currentPillar.borderColor} text-[var(--color-text-header)] shadow-inner`}>
+                <div className={`p-3 rounded-2xl bg-white/10 border ${currentPillar.borderColor} text-white shadow-inner`}>
                   <IconComponent size={24} className="stroke-[2.2]" />
                 </div>
                 <div>
                   <span className="text-[10px] font-mono font-black uppercase tracking-widest text-orange-400 block">
                     Pillar 0{activeIndex + 1} / 03
                   </span>
-                  <h3 className="text-lg sm:text-xl font-black text-[var(--color-text-header)] leading-snug">
+                  <h3 className="text-lg sm:text-xl font-black text-white leading-snug">
                     {currentPillar.title}
                   </h3>
                   <p className="text-xs text-gray-300 font-medium">
@@ -207,7 +207,7 @@ export default function UnifiedSwipingPillarsCard({ setTab, className = '' }: Un
             <div className="space-y-1.5 pt-1">
               {currentPillar.features.map((feat, fIdx) => (
                 <div key={fIdx} className="flex items-center gap-2 text-xs text-gray-200">
-                  <CheckCircle2 size={13} className="text-[var(--color-accent-main)] shrink-0" />
+                  <CheckCircle2 size={13} className="text-emerald-400 shrink-0" />
                   <span>{feat}</span>
                 </div>
               ))}
@@ -229,14 +229,14 @@ export default function UnifiedSwipingPillarsCard({ setTab, className = '' }: Un
           <div className="flex items-center gap-1 shrink-0">
             <button
               onClick={handlePrev}
-              className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-[var(--color-text-header)] border border-white/10 transition-colors cursor-pointer active:scale-90"
+              className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/10 transition-colors cursor-pointer active:scale-90"
               title="Previous Pillar"
             >
               <ChevronLeft size={16} />
             </button>
             <button
               onClick={handleNext}
-              className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-[var(--color-text-header)] border border-white/10 transition-colors cursor-pointer active:scale-90"
+              className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/10 transition-colors cursor-pointer active:scale-90"
               title="Next Pillar"
             >
               <ChevronRight size={16} />
@@ -252,7 +252,7 @@ export default function UnifiedSwipingPillarsCard({ setTab, className = '' }: Un
           initial={{ width: '0%' }}
           animate={{ width: isPaused ? '100%' : '100%' }}
           transition={{ duration: isPaused ? 0 : 4.5, ease: 'linear' }}
-          className="h-full bg-gradient-to-r from-[#7C3AED] via-[#8B5CF6] to-[#3B82F6]"
+          className="h-full bg-gradient-to-r from-orange-500 via-amber-400 to-sky-400"
         />
       </div>
     </div>

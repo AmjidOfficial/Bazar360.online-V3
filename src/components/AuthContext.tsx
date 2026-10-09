@@ -3,6 +3,8 @@ import {
   onAuthStateChanged, 
   signInWithPopup, 
   signOut, 
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   User as FirebaseUser,
   GoogleAuthProvider
 } from 'firebase/auth';
@@ -21,6 +23,8 @@ interface AuthContextType {
   isShowroomOwner: boolean;
   isAdmin: boolean;
   loginWithGoogle: () => Promise<void>;
+  loginWithEmail: (email: string, pass: string) => Promise<void>;
+  registerWithEmail: (email: string, pass: string, name?: string, role?: string) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (data: Partial<UserProfile>) => Promise<void>;
   toggleFavorite: (car: CarListing) => Promise<void>;
@@ -89,10 +93,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           let profile = await dbFetchUserProfile(fUser.uid);
           
-          // Elevate known developer roles for high-level administration testing
-          const isDeveloper = fUser.email === 'amjid.bisconni@gmail.com' || 
-                              fUser.email === 'amjid.psh@gmail.com' || 
-                              fUser.email === 'khattakghani94@gmail.com';
+          // Elevate Super Admin accounts
+          const isSuperAdmin = fUser.email === 'amjid.bisconni@gmail.com' || 
+                               fUser.email === 'amjid.psh@gmail.com';
+          const isDeveloper = isSuperAdmin || fUser.email === 'khattakghani94@gmail.com';
           const isMalak = fUser.email === 'mazharsouls@gmail.com';
 
           if (!profile) {
@@ -100,12 +104,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             profile = {
               uid: fUser.uid,
               email: fUser.email || 'user@bazar360.online',
-              displayName: isMalak ? 'Malak Mazhar' : (fUser.displayName || 'Guest User'),
+              displayName: isSuperAdmin ? 'Super Admin' : (isMalak ? 'Malak Mazhar' : (fUser.displayName || 'Guest User')),
               phoneNumber: isMalak ? '+923159085086' : (fUser.phoneNumber || ''),
               photoURL: fUser.photoURL || '',
               profilePhoto: fUser.photoURL || '',
               phoneVerified: isMalak || !!fUser.phoneNumber,
-              role: isMalak ? 'Dealer' : (isDeveloper ? 'Admin' : 'Individual User'),
+              role: isSuperAdmin ? 'Super Admin' : (isMalak ? 'Dealer' : (isDeveloper ? 'Admin' : 'Individual User')),
               status: 'Active',
               createdAt: fUser.metadata?.creationTime ? new Date(fUser.metadata.creationTime).toISOString() : new Date().toISOString(),
               lastLogin: new Date().toISOString(),
@@ -119,7 +123,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const updates: Partial<UserProfile> = {
               lastLogin: new Date().toISOString()
             };
-            if (isDeveloper && profile.role !== 'Admin') {
+            if (isSuperAdmin && profile.role !== 'Super Admin') {
+              updates.role = 'Super Admin';
+              profile.role = 'Super Admin';
+            } else if (isDeveloper && profile.role !== 'Admin' && profile.role !== 'Super Admin') {
               updates.role = 'Admin';
               profile.role = 'Admin';
             }
@@ -181,6 +188,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await signInWithPopup(auth, googleProvider);
     } catch (err) {
       console.error('[AuthContext] Google sign-in failed:', err);
+      throw err;
+    }
+  };
+
+  const loginWithEmail = async (email: string, pass: string) => {
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+    } catch (err) {
+      console.error('[AuthContext] Email sign-in failed:', err);
+      throw err;
+    }
+  };
+
+  const registerWithEmail = async (email: string, pass: string, name?: string, userRole?: string) => {
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+      if (cred.user) {
+        const newProf: UserProfile = {
+          uid: cred.user.uid,
+          email,
+          displayName: name || 'Showroom User',
+          phoneNumber: '',
+          photoURL: '',
+          profilePhoto: '',
+          phoneVerified: false,
+          role: (userRole as any) || 'Registered User',
+          status: 'Active',
+          createdAt: new Date().toISOString(),
+          lastLogin: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          city: 'Peshawar',
+          state: 'Khyber Pakhtunkhwa'
+        };
+        await dbSaveUserProfile(newProf);
+        setCurrentUser(newProf);
+      }
+    } catch (err) {
+      console.error('[AuthContext] Email registration failed:', err);
       throw err;
     }
   };
@@ -422,6 +467,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isShowroomOwner,
       isAdmin,
       loginWithGoogle,
+      loginWithEmail,
+      registerWithEmail,
       logout,
       updateProfile,
       toggleFavorite,

@@ -1,4 +1,3 @@
-import { NO_IMAGE_SVG } from "../types";
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -44,7 +43,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
     {
       id: '1',
       name: 'Tesla Certified Peshawar',
-      avatar: NO_IMAGE_SVG,
+      avatar: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?auto=format&fit=crop&w=120&q=80',
       message: 'Hi! Is the Model 3 Long Range still available for test drive?',
       time: '2m ago',
       online: true,
@@ -53,8 +52,8 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
     },
     {
       id: '2',
-      name: 'Bazar360 Flagship',
-      avatar: NO_IMAGE_SVG,
+      name: 'Auto Choice Flagship',
+      avatar: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=120&q=80',
       message: 'The Porsche 911 GT3 RS is prepped and available on Ring Road.',
       time: '1h ago',
       online: true,
@@ -64,7 +63,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
     {
       id: '3',
       name: 'BMW of Islamabad',
-      avatar: NO_IMAGE_SVG,
+      avatar: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=120&q=80',
       message: 'Thanks for your interest in X5 M Competition! Token accepted.',
       time: '3h ago',
       online: false,
@@ -74,8 +73,8 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
     {
       id: '4',
       name: 'Muhammad Amjid (Founder)',
-      avatar: NO_IMAGE_SVG,
-      message: 'Welcome to Bazar360 Bazar360 ecosystem! Let us know if you need assistance.',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80',
+      message: 'Welcome to Bazar360 Auto Choice ecosystem! Let us know if you need assistance.',
       time: 'Yesterday',
       online: true,
       category: 'support',
@@ -84,7 +83,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
     {
       id: '5',
       name: 'John Smith (Verified Buyer)',
-      avatar: NO_IMAGE_SVG,
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80',
       message: 'More interior pics sent via WhatsApp!',
       time: '2 days ago',
       online: false,
@@ -101,14 +100,14 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
   });
 
   return (
-    <div className="w-full min-h-screen bg-slate-100 dark:bg-[var(--color-bg-secondary)] py-8 px-2 sm:px-6 transition-colors duration-300 font-sans">
+    <div className="w-full min-h-screen bg-slate-100 dark:bg-[#0d0f17] py-8 px-2 sm:px-6 transition-colors duration-300 font-sans">
       
       {/* Top Banner Control */}
       <div className="max-w-6xl mx-auto mb-8 text-center space-y-3">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 text-orange-500 border border-orange-500/20 text-xs font-mono font-bold uppercase tracking-wider">
           <Sparkles size={14} /> Mobile App Experience
         </div>
-        <h1 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-[var(--color-text-header)] uppercase tracking-tight">
+        <h1 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
           Bazar360 <span className="text-orange-500">AutoMarket</span> Smartphone Interface
         </h1>
         <p className="text-xs sm:text-sm text-slate-600 dark:text-gray-400 max-w-2xl mx-auto">
@@ -122,7 +121,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
             className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
               activeScreen === 'welcome'
                 ? 'bg-orange-500 text-slate-950 shadow-lg shadow-orange-500/25 scale-105'
-                : 'bg-white dark:bg-bg-secondary text-slate-700 dark:text-gray-300 border border-slate-200 dark:border-border-main hover:border-orange-500/50'
+                : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-gray-300 border border-slate-200 dark:border-slate-800 hover:border-orange-500/50'
             }`}
           >
             1. Welcome Onboarding
@@ -132,7 +131,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
             className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
               activeScreen === 'messages'
                 ? 'bg-orange-500 text-slate-950 shadow-lg shadow-orange-500/25 scale-105'
-                : 'bg-white dark:bg-bg-secondary text-slate-700 dark:text-gray-300 border border-slate-200 dark:border-border-main hover:border-orange-500/50'
+                : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-gray-300 border border-slate-200 dark:border-slate-800 hover:border-orange-500/50'
             }`}
           >
             2. Messages Hub
@@ -142,7 +141,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
             className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
               activeScreen === 'profile'
                 ? 'bg-orange-500 text-slate-950 shadow-lg shadow-orange-500/25 scale-105'
-                : 'bg-white dark:bg-bg-secondary text-slate-700 dark:text-gray-300 border border-slate-200 dark:border-border-main hover:border-orange-500/50'
+                : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-gray-300 border border-slate-200 dark:border-slate-800 hover:border-orange-500/50'
             }`}
           >
             3. User Profile
@@ -156,7 +155,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
         {/* ======================================================= */}
         {/* PHONE 1: WELCOME ONBOARDING SCREEN */}
         {/* ======================================================= */}
-        <div className={`w-full max-w-[360px] bg-white text-slate-900 rounded-[44px] shadow-[0_25px_60px_rgba(0,0,0,0.18)] border-8 border-slate-900 dark:border-border-main overflow-hidden relative flex flex-col justify-between min-h-[720px] transition-all duration-300 ${
+        <div className={`w-full max-w-[360px] bg-white text-slate-900 rounded-[44px] shadow-[0_25px_60px_rgba(0,0,0,0.18)] border-8 border-slate-900 dark:border-slate-800 overflow-hidden relative flex flex-col justify-between min-h-[720px] transition-all duration-300 ${
           activeScreen === 'welcome' ? 'ring-4 ring-orange-500 scale-[1.02]' : 'hidden md:flex opacity-90'
         }`}>
           {/* Status Bar */}
@@ -172,7 +171,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
           {/* Hero Porsche Vehicle Image */}
           <div className="relative w-full h-[250px] bg-gradient-to-b from-purple-100 via-purple-50 to-white flex items-center justify-center p-4">
             <img 
-              src={NO_IMAGE_SVG} 
+              src="https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=800&q=80" 
               alt="Porsche GT3 RS"
               className="w-full h-full object-cover rounded-3xl shadow-md"
             />
@@ -189,7 +188,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
                 Welcome to <br />
                 <span className="text-orange-500">AutoMarket!</span>
               </h2>
-              <p className="text-xs text-text-muted leading-relaxed">
+              <p className="text-xs text-slate-500 leading-relaxed">
                 Buy and sell cars with confidence. Join thousands of happy customers.
               </p>
             </div>
@@ -197,7 +196,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
             {/* Feature Value Pills */}
             <div className="space-y-2.5">
               <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100 shadow-sm">
-                <div className="w-6 h-6 rounded-full bg-bg-secondary text-[var(--color-text-header)] flex items-center justify-center shrink-0">
+                <div className="w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center shrink-0">
                   <Check size={12} strokeWidth={3} />
                 </div>
                 <span className="text-xs font-bold text-slate-800">
@@ -206,7 +205,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
               </div>
 
               <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100 shadow-sm">
-                <div className="w-6 h-6 rounded-full bg-bg-secondary text-[var(--color-text-header)] flex items-center justify-center shrink-0">
+                <div className="w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center shrink-0">
                   <Check size={12} strokeWidth={3} />
                 </div>
                 <span className="text-xs font-bold text-slate-800">
@@ -215,7 +214,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
               </div>
 
               <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100 shadow-sm">
-                <div className="w-6 h-6 rounded-full bg-bg-secondary text-[var(--color-text-header)] flex items-center justify-center shrink-0">
+                <div className="w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center shrink-0">
                   <Check size={12} strokeWidth={3} />
                 </div>
                 <span className="text-xs font-bold text-slate-800">
@@ -229,7 +228,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
               onClick={() => {
                 if (setTab) setTab('sell');
               }}
-              className="w-full py-4 rounded-full bg-bg-secondary hover:bg-black text-[var(--color-text-header)] font-black text-xs uppercase tracking-wider shadow-xl flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95"
+              className="w-full py-4 rounded-full bg-slate-900 hover:bg-black text-white font-black text-xs uppercase tracking-wider shadow-xl flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95"
             >
               <span>Sell Your Car</span>
               <Rocket size={15} className="text-orange-400" />
@@ -243,7 +242,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
         {/* ======================================================= */}
         {/* PHONE 2: MESSAGES HUB SCREEN */}
         {/* ======================================================= */}
-        <div className={`w-full max-w-[360px] bg-slate-50 text-slate-900 rounded-[44px] shadow-[0_25px_60px_rgba(0,0,0,0.18)] border-8 border-slate-900 dark:border-border-main overflow-hidden relative flex flex-col justify-between min-h-[720px] transition-all duration-300 ${
+        <div className={`w-full max-w-[360px] bg-slate-50 text-slate-900 rounded-[44px] shadow-[0_25px_60px_rgba(0,0,0,0.18)] border-8 border-slate-900 dark:border-slate-800 overflow-hidden relative flex flex-col justify-between min-h-[720px] transition-all duration-300 ${
           activeScreen === 'messages' ? 'ring-4 ring-orange-500 scale-[1.02]' : 'hidden md:flex opacity-90'
         }`}>
           {/* Status Bar */}
@@ -274,7 +273,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
           {/* Search & Filter Bar */}
           <div className="px-5 py-3 space-y-3 bg-slate-50">
             <div className="relative">
-              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
+              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input 
                 type="text"
                 value={searchQuery}
@@ -282,7 +281,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
                 placeholder="Search..."
                 className="w-full bg-white border border-slate-200 rounded-2xl pl-10 pr-10 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 shadow-sm"
               />
-              <SlidersHorizontal size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-text-muted cursor-pointer" />
+              <SlidersHorizontal size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 cursor-pointer" />
             </div>
 
             {/* Category Filter Pills */}
@@ -291,7 +290,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
                 onClick={() => setMessagesCategory('all')}
                 className={`px-5 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
                   messagesCategory === 'all'
-                    ? 'bg-bg-secondary text-[var(--color-text-header)] shadow-md'
+                    ? 'bg-slate-900 text-white shadow-md'
                     : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
                 }`}
               >
@@ -301,7 +300,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
                 onClick={() => setMessagesCategory('general')}
                 className={`px-5 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
                   messagesCategory === 'general'
-                    ? 'bg-bg-secondary text-[var(--color-text-header)] shadow-md'
+                    ? 'bg-slate-900 text-white shadow-md'
                     : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
                 }`}
               >
@@ -311,7 +310,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
                 onClick={() => setMessagesCategory('support')}
                 className={`px-5 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
                   messagesCategory === 'support'
-                    ? 'bg-bg-secondary text-[var(--color-text-header)] shadow-md'
+                    ? 'bg-slate-900 text-white shadow-md'
                     : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
                 }`}
               >
@@ -334,7 +333,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
                     className="w-11 h-11 rounded-full object-cover border border-slate-200"
                   />
                   {chat.online && (
-                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-[var(--color-accent-main)] rounded-full border-2 border-white shadow-sm" />
+                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white shadow-sm" />
                   )}
                 </div>
 
@@ -343,11 +342,11 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
                     <h4 className="text-xs font-bold text-slate-900 truncate">
                       {chat.name}
                     </h4>
-                    <span className="text-[10px] text-text-muted font-mono shrink-0">
+                    <span className="text-[10px] text-slate-400 font-mono shrink-0">
                       {chat.time}
                     </span>
                   </div>
-                  <p className="text-[11px] text-text-muted truncate mt-0.5">
+                  <p className="text-[11px] text-slate-500 truncate mt-0.5">
                     {chat.message}
                   </p>
                 </div>
@@ -358,17 +357,17 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
           {/* Glassmorphism Floating Bottom Bar inside Phone */}
           <div className="p-3 bg-slate-50 flex items-center justify-center">
             <div className="w-full bg-white/90 backdrop-blur-md border border-slate-200 rounded-full p-1.5 shadow-lg flex items-center justify-between px-3">
-              <button onClick={() => setActiveScreen('welcome')} className="p-2 text-text-muted hover:text-slate-900 transition-colors">
+              <button onClick={() => setActiveScreen('welcome')} className="p-2 text-slate-400 hover:text-slate-900 transition-colors">
                 <Home size={18} />
               </button>
-              <button onClick={() => { if (setTab) setTab('sell'); }} className="p-2 text-text-muted hover:text-slate-900 transition-colors">
+              <button onClick={() => { if (setTab) setTab('sell'); }} className="p-2 text-slate-400 hover:text-slate-900 transition-colors">
                 <Plus size={18} />
               </button>
-              <button onClick={() => setActiveScreen('messages')} className="px-3.5 py-1.5 rounded-full bg-bg-secondary text-[var(--color-text-header)] font-bold text-xs flex items-center gap-1.5 shadow-md">
+              <button onClick={() => setActiveScreen('messages')} className="px-3.5 py-1.5 rounded-full bg-slate-900 text-white font-bold text-xs flex items-center gap-1.5 shadow-md">
                 <MessageSquare size={14} />
                 <span>Messages</span>
               </button>
-              <button onClick={() => setActiveScreen('profile')} className="p-2 text-text-muted hover:text-slate-900 transition-colors">
+              <button onClick={() => setActiveScreen('profile')} className="p-2 text-slate-400 hover:text-slate-900 transition-colors">
                 <User size={18} />
               </button>
             </div>
@@ -381,7 +380,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
         {/* ======================================================= */}
         {/* PHONE 3: USER PROFILE & SHOWROOM HUB SCREEN */}
         {/* ======================================================= */}
-        <div className={`w-full max-w-[360px] bg-slate-50 text-slate-900 rounded-[44px] shadow-[0_25px_60px_rgba(0,0,0,0.18)] border-8 border-slate-900 dark:border-border-main overflow-hidden relative flex flex-col justify-between min-h-[720px] transition-all duration-300 ${
+        <div className={`w-full max-w-[360px] bg-slate-50 text-slate-900 rounded-[44px] shadow-[0_25px_60px_rgba(0,0,0,0.18)] border-8 border-slate-900 dark:border-slate-800 overflow-hidden relative flex flex-col justify-between min-h-[720px] transition-all duration-300 ${
           activeScreen === 'profile' ? 'ring-4 ring-orange-500 scale-[1.02]' : 'hidden md:flex opacity-90'
         }`}>
           {/* Status Bar */}
@@ -397,7 +396,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
           {/* Hero Banner with Overlapping Avatar */}
           <div className="relative w-full h-[140px] bg-slate-200">
             <img 
-              src={NO_IMAGE_SVG} 
+              src="https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=800&q=80" 
               alt="Porsche Banner"
               className="w-full h-full object-cover"
             />
@@ -411,11 +410,11 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
             {/* Overlapping Avatar */}
             <div className="absolute -bottom-10 left-6 relative">
               <img 
-                src={NO_IMAGE_SVG} 
+                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80" 
                 alt="Steven Clark Avatar"
                 className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-lg"
               />
-              <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-bg-secondary text-[var(--color-text-header)] font-mono text-[9px] font-bold uppercase tracking-wider shadow">
+              <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-slate-900 text-white font-mono text-[9px] font-bold uppercase tracking-wider shadow">
                 Pro
               </span>
             </div>
@@ -427,7 +426,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
               <h3 className="text-xl font-black text-slate-900 tracking-tight">
                 Muhammad Amjid
               </h3>
-              <p className="text-xs text-text-muted font-medium">
+              <p className="text-xs text-slate-500 font-medium">
                 Top-rated user since 2020
               </p>
             </div>
@@ -435,8 +434,8 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
               onClick={() => setIsFollowing(!isFollowing)}
               className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
                 isFollowing
-                  ? 'bg-[var(--color-accent-main)] text-[var(--color-text-header)] shadow-md'
-                  : 'bg-bg-secondary text-[var(--color-text-header)] hover:bg-black'
+                  ? 'bg-emerald-500 text-white shadow-md'
+                  : 'bg-slate-900 text-white hover:bg-black'
               }`}
             >
               <Heart size={12} className={isFollowing ? 'fill-white' : ''} />
@@ -448,15 +447,15 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
           <div className="px-6 py-2 grid grid-cols-3 gap-3">
             <div className="bg-white p-3 rounded-2xl border border-slate-200 text-center shadow-sm">
               <span className="block text-lg font-black text-slate-900">3</span>
-              <span className="text-[10px] text-text-muted font-bold uppercase">Listed</span>
+              <span className="text-[10px] text-slate-400 font-bold uppercase">Listed</span>
             </div>
             <div className="bg-white p-3 rounded-2xl border border-slate-200 text-center shadow-sm">
               <span className="block text-lg font-black text-slate-900">7</span>
-              <span className="text-[10px] text-text-muted font-bold uppercase">Sold</span>
+              <span className="text-[10px] text-slate-400 font-bold uppercase">Sold</span>
             </div>
             <div className="bg-white p-3 rounded-2xl border border-slate-200 text-center shadow-sm">
               <span className="block text-lg font-black text-slate-900">12</span>
-              <span className="text-[10px] text-text-muted font-bold uppercase">Saved</span>
+              <span className="text-[10px] text-slate-400 font-bold uppercase">Saved</span>
             </div>
           </div>
 
@@ -464,7 +463,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
           <div className="px-6 space-y-2 py-1">
             <button 
               onClick={() => { if (setTab) setTab('profile'); }}
-              className="w-full py-2.5 rounded-2xl bg-bg-secondary hover:bg-black text-[var(--color-text-header)] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md cursor-pointer transition-all active:scale-95"
+              className="w-full py-2.5 rounded-2xl bg-slate-900 hover:bg-black text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md cursor-pointer transition-all active:scale-95"
             >
               <Edit3 size={14} />
               <span>Edit Profile</span>
@@ -481,7 +480,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
 
           {/* Profile Settings Rows */}
           <div className="px-6 py-2 space-y-2 text-left">
-            <h4 className="text-xs font-bold text-text-muted uppercase tracking-wider">
+            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
               Profile Settings
             </h4>
             <div 
@@ -492,7 +491,7 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
                 <Heart size={16} className="text-rose-500" />
                 <span>Saved Cars</span>
               </div>
-              <div className="flex items-center gap-2 text-text-muted">
+              <div className="flex items-center gap-2 text-slate-400">
                 <span className="text-xs font-mono font-bold">12</span>
                 <ChevronRight size={14} />
               </div>
@@ -502,16 +501,16 @@ export default function MobileNativeExperience({ setTab, lang = 'en' }: MobileNa
           {/* Floating Glass Bottom Nav */}
           <div className="p-3 bg-slate-50 flex items-center justify-center">
             <div className="w-full bg-white/90 backdrop-blur-md border border-slate-200 rounded-full p-1.5 shadow-lg flex items-center justify-between px-3">
-              <button onClick={() => setActiveScreen('welcome')} className="p-2 text-text-muted hover:text-slate-900 transition-colors">
+              <button onClick={() => setActiveScreen('welcome')} className="p-2 text-slate-400 hover:text-slate-900 transition-colors">
                 <Home size={18} />
               </button>
-              <button onClick={() => { if (setTab) setTab('sell'); }} className="p-2 text-text-muted hover:text-slate-900 transition-colors">
+              <button onClick={() => { if (setTab) setTab('sell'); }} className="p-2 text-slate-400 hover:text-slate-900 transition-colors">
                 <Plus size={18} />
               </button>
-              <button onClick={() => setActiveScreen('messages')} className="p-2 text-text-muted hover:text-slate-900 transition-colors">
+              <button onClick={() => setActiveScreen('messages')} className="p-2 text-slate-400 hover:text-slate-900 transition-colors">
                 <MessageSquare size={18} />
               </button>
-              <button onClick={() => setActiveScreen('profile')} className="px-3.5 py-1.5 rounded-full bg-bg-secondary text-[var(--color-text-header)] font-bold text-xs flex items-center gap-1.5 shadow-md">
+              <button onClick={() => setActiveScreen('profile')} className="px-3.5 py-1.5 rounded-full bg-slate-900 text-white font-bold text-xs flex items-center gap-1.5 shadow-md">
                 <User size={14} />
                 <span>Profile</span>
               </button>

@@ -12,18 +12,13 @@ import {
   orderBy,
   serverTimestamp,
   limit,
-  startAfter,
-  arrayUnion,
-  arrayRemove
+  startAfter
 } from 'firebase/firestore';
 import { db, auth, handleFirestoreError, OperationType } from '../firebase';
-import { updateProfile } from 'firebase/auth';
-import { CarListing, Dealer, Review, Lead, SocialMedia, ServiceBooking, Conversation, DirectMessage, UserNotification, DetailedReview, ShowroomMember, DealerSubscription, NO_IMAGE_SVG } from '../types';
+import { CarListing, Dealer, Review, Lead, SocialMedia, ServiceBooking } from '../types';
 import { validateLead } from './leadValidator';
-
+import { INITIAL_DEALERS, INITIAL_LISTINGS, INITIAL_REVIEWS } from '../data';
 import { toast } from 'react-hot-toast';
-import { uploadBase64ToCloudinary } from './cloudinaryService';
-import { INITIAL_DEALERS, INITIAL_LISTINGS } from '../data';
 
 // Standard User Profiles
 export interface UserProfile {
@@ -53,7 +48,6 @@ export interface UserProfile {
   dealerId?: string;   // Associated dealer / showroom ID
 
   // Enterprise redesign fields
-  logoUrl?: string;
   profilePhoto?: string;
   photoURL?: string; // Compatibility alias
   coverImage?: string;
@@ -94,9 +88,143 @@ const DEALERS_COLLECTION = 'dealers';
 const LISTINGS_COLLECTION = 'listings';
 const USERS_COLLECTION = 'users';
 
-// Seed Database helper (Clean No-Op in Production)
-export async function seedDatabaseIfEmpty(): Promise<void> {
-  return Promise.resolve();
+// Seed Database helper
+export async function seedDatabaseIfEmpty() {
+  try {
+    const oldDealerIds = ['almas-car-valley', 'elite-prestige-motors', 'apex-luxury-wheels'];
+
+    // 1. Clean up old default demo dealers from Firestore database if they exist
+    for (const dId of oldDealerIds) {
+      try {
+        const docRef = doc(db, DEALERS_COLLECTION, dId);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          console.log(`[Database Cleanup] Deleting old demo dealer: ${dId}`);
+          await deleteDoc(docRef);
+        }
+      } catch (e) {
+        console.warn(`[Database Cleanup] Failed to delete old dealer ${dId}:`, e);
+      }
+    }
+
+    // 2. Migrate existing Firestore listings for those old dealers to auto-choice-peshawar
+    for (const dId of oldDealerIds) {
+      try {
+        const listingsQuery = query(collection(db, LISTINGS_COLLECTION), where('dealerId', '==', dId));
+        const listingsSnap = await getDocs(listingsQuery);
+        for (const docL of listingsSnap.docs) {
+          console.log(`[Database Migration] Migrating listing ${docL.id} from ${dId} to auto-choice-peshawar`);
+          await updateDoc(docL.ref, { dealerId: 'auto-choice-peshawar' });
+        }
+      } catch (e) {
+        console.warn(`[Database Migration] Failed to migrate listings for old dealer ${dId}:`, e);
+      }
+    }
+
+    // 3. Ensure Auto Choice name is updated in Firestore to "Auto Choice - The Right Choice"
+    try {
+      const acRef = doc(db, DEALERS_COLLECTION, 'auto-choice-peshawar');
+      const acSnap = await getDoc(acRef);
+      if (acSnap.exists()) {
+        const currentData = acSnap.data();
+        if (currentData && currentData.name !== 'Auto Choice - The Right Choice') {
+          console.log('[Database Sync] Updating Auto Choice name to "Auto Choice - The Right Choice"');
+          await updateDoc(acRef, { name: 'Auto Choice - The Right Choice' });
+        }
+      }
+    } catch (e) {
+      console.warn('[Database Sync] Failed to check/update Auto Choice name:', e);
+    }
+
+    // Check sentinel document to avoid 20+ parallel read queries. This is extremely fast (1 document read)
+    // and ensures that if Firestore is ever reset, it auto-re-seeds on the next visit.
+    const sentinelRef = doc(db, 'system', 'seeded');
+    const sentinelSnap = await getDoc(sentinelRef);
+    if (sentinelSnap.exists() && sentinelSnap.data()?.completed === true) {
+      console.log('Firestore backend reports database is already fully seeded.');
+      if (typeof window !== 'undefined') {
+        try { localStorage.setItem('bazar360_db_seeded', 'true'); } catch(e) {}
+      }
+      return;
+    }
+
+    console.log('Sentinel document missing. Synchronizing initial dealers & listings to Firestore in parallel...');
+    
+    // Concurrently verify and write dealers
+    const dealerPromises = INITIAL_DEALERS.map(async (d) => {
+      const docRef = doc(db, DEALERS_COLLECTION, d.id);
+      const docSnap = await getDoc(docRef);
+      if (!docSnap.exists()) {
+        await setDoc(docRef, {
+          id: d.id,
+          name: d.name,
+          avatarLetter: d.avatarLetter,
+          avatarUrl: d.avatarUrl || '',
+          subtitle: d.subtitle,
+          location: d.location,
+          rating: d.rating,
+          vehiclesCount: d.vehiclesCount,
+          followersCount: d.followersCount,
+          coverImage: d.coverImage,
+          description: d.description,
+          phone: d.phone,
+          whatsapp: d.whatsapp,
+          socials: d.socials || {},
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        });
+      }
+    });
+
+    // Concurrently verify and write listings
+    const listingPromises = INITIAL_LISTINGS.map(async (l) => {
+      const docRef = doc(db, LISTINGS_COLLECTION, l.id);
+      const docSnap = await getDoc(docRef);
+      if (!docSnap.exists()) {
+        await setDoc(docRef, {
+          ...l,
+          approved: true, // Default list seeds approved
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        });
+      }
+    });
+
+    // Concurrently verify and write reviews
+    const reviewPromises: Promise<void>[] = [];
+    for (const dId of Object.keys(INITIAL_REVIEWS)) {
+      const revs = INITIAL_REVIEWS[dId];
+      for (const r of revs) {
+        reviewPromises.push((async () => {
+          const docRef = doc(db, `${DEALERS_COLLECTION}/${dId}/reviews`, r.id);
+          const docSnap = await getDoc(docRef);
+          if (!docSnap.exists()) {
+            await setDoc(docRef, {
+              id: r.id,
+              author: r.author,
+              rating: r.rating,
+              comment: r.comment,
+              createdAt: new Date().toISOString()
+            });
+          }
+        })());
+      }
+    }
+
+    // Run ALL checks and writes concurrently
+    await Promise.all([...dealerPromises, ...listingPromises, ...reviewPromises]);
+
+    // Set the sentinel document to true
+    await setDoc(sentinelRef, { completed: true, timestamp: new Date().toISOString() });
+
+    if (typeof window !== 'undefined') {
+      try { localStorage.setItem('bazar360_db_seeded', 'true'); } catch(e) {}
+    }
+    console.log('BAZAR360 Seeding completed/verified.');
+  } catch (err) {
+    console.warn('Silent seeding warning:', err);
+    throw err; // rethrow so calling routine knows synchronization was bypassed/timed out
+  }
 }
 
 // Memory cache for dealers and listings to enable instantaneous showroom opening
@@ -109,204 +237,157 @@ export function dbInvalidateCache() {
 }
 
 // 1. Fetch Dealers
-export async function dbFetchDealers(forceRefresh = false): Promise<Dealer[]> {
-  if (!forceRefresh && cachedDealers && cachedDealers.length > 0) {
+export async function dbFetchDealers(): Promise<Dealer[]> {
+  if (cachedDealers && cachedDealers.length > 0) {
     return cachedDealers;
   }
-  
   try {
-    const snap = await getDocs(query(collection(db, DEALERS_COLLECTION), limit(100)));
+    const snap = await getDocs(collection(db, DEALERS_COLLECTION));
+    if (snap.empty) {
+      const fallback = INITIAL_DEALERS.map(d => d.id === 'auto-choice-peshawar' ? { ...d, name: 'Auto Choice', avatarUrl: '/auto_choice_logo_dark.jpg', logo: '/auto_choice_logo_dark.jpg', flagshipVerified: true } : d);
+      cachedDealers = fallback;
+      return fallback;
+    }
     
     const list: Dealer[] = [];
+    let autoChoiceMerged: Dealer | null = null;
 
-    if (!snap.empty) {
-      snap.forEach((doc) => {
-        const data = doc.data();
-        const docLogo = data.logoUrl || data.logo || data.avatarUrl;
-        const avatarUrl = docLogo
-          ? (docLogo.startsWith('.') ? docLogo.substring(1) : docLogo)
-          : '';
+    snap.forEach((doc) => {
+      const data = doc.data();
+      const rawAvatar = data.avatarUrl || '';
+      
+      const isAutoChoice = doc.id === 'auto-choice-peshawar' || doc.id === 'auto-choice' || (data.name && data.name.toLowerCase().includes('auto choice'));
+      
+      const avatarUrl = isAutoChoice
+        ? '/auto_choice_logo_dark.jpg'
+        : (rawAvatar.startsWith('.') ? rawAvatar.substring(1) : rawAvatar);
 
-        list.push({
-          ...data,
-          id: doc.id,
-          name: data.name || '',
-          avatarLetter: data.avatarLetter || data.name?.substring(0, 2).toUpperCase() || 'D',
-          avatarUrl,
-          logo: docLogo || '',
-          logoUrl: docLogo || '',
-          subtitle: data.subtitle || '',
-          location: data.location || '',
-          rating: typeof data.rating === 'number' ? data.rating : 0,
-          vehiclesCount: typeof data.vehiclesCount === 'number' ? data.vehiclesCount : 0,
-          followersCount: data.followersCount || '0',
-          coverImage: data.coverImage || '',
-          description: data.description || '',
-          phone: data.phone || '',
-          whatsapp: data.whatsapp || '',
-          socials: data.socials || {},
-          activityFeed: Array.isArray(data.activityFeed) ? data.activityFeed : []
-        });
-      });
-    }
+      const logo = isAutoChoice
+        ? '/auto_choice_logo_dark.jpg'
+        : (data.logo || '');
 
-    cachedDealers = list;
-    return cachedDealers;
-  } catch (err) {
-    console.warn('dbFetchDealers Error:', err);
-    return [];
-  }
-}
-
-export async function dbFetchDealerById(dealerId: string): Promise<Dealer | null> {
-  if (!dealerId) return null;
-  try {
-    const docRef = doc(db, DEALERS_COLLECTION, dealerId);
-    const snap = await getDoc(docRef);
-    if (snap.exists()) {
-      const data = snap.data();
-      const docLogo = data.logoUrl || data.logo || data.avatarUrl;
-      const avatarUrl = docLogo
-        ? (docLogo.startsWith('.') ? docLogo.substring(1) : docLogo)
-        : '';
-      return {
-        ...data,
-        id: snap.id,
+      const currentDealer: Dealer = {
+        id: doc.id,
         name: data.name || '',
         avatarLetter: data.avatarLetter || data.name?.substring(0, 2).toUpperCase() || 'D',
         avatarUrl,
-        logo: docLogo || '',
-        logoUrl: docLogo || '',
+        logo,
         subtitle: data.subtitle || '',
         location: data.location || '',
-        rating: typeof data.rating === 'number' ? data.rating : 0,
+        rating: typeof data.rating === 'number' ? data.rating : 4.9,
         vehiclesCount: typeof data.vehiclesCount === 'number' ? data.vehiclesCount : 0,
         followersCount: data.followersCount || '0',
-        coverImage: data.coverImage || '',
+        coverImage: data.coverImage || (INITIAL_DEALERS.find((d) => d.id === doc.id || (doc.id === 'auto-choice' && d.id === 'auto-choice-peshawar'))?.coverImage) || '/src/assets/images/bab_e_khyber_sunset_1783593379683.jpg',
         description: data.description || '',
         phone: data.phone || '',
         whatsapp: data.whatsapp || '',
         socials: data.socials || {},
-        activityFeed: Array.isArray(data.activityFeed) ? data.activityFeed : []
-      } as Dealer;
-    }
-    const dealers = await dbFetchDealers();
-    return dealers.find(d => d.id === dealerId) || null;
-  } catch (err) {
-    console.error('dbFetchDealerById Error:', err);
-    return null;
-  }
-}
+        activityFeed: Array.isArray(data.activityFeed) ? data.activityFeed : (INITIAL_DEALERS.find((d) => d.id === doc.id)?.activityFeed || [])
+      };
 
-export const ALLOWED_LISTING_IDS = new Set([
-  'listing-1784992620146',
-  '1784992620146',
-  'listing-1784821782501',
-  '1784821782501',
-  'listing-1784821585212',
-  '1784821585212'
-]);
-
-export function isAllowedListingId(id?: string): boolean {
-  if (!id || typeof id !== 'string') return false;
-  // Valid ID check: allow all legitimate vehicle IDs
-  return id.trim().length > 0;
-}
-
-/**
- * Standardized vehicle eligibility evaluation function shared across all UI views
- * (MarketplaceHero, SearchExplorerView, FeaturedVehicles, etc.) to guarantee 100% consistent
- * listing filtration and prevent display discrepancies.
- */
-export function isVehicleEligible(car?: CarListing | null): boolean {
-  if (!car || !car.id) return false;
-
-  // 1. Must be in the allowed ID whitelist or a newly user-created listing ID
-  if (!isAllowedListingId(car.id)) return false;
-
-  // 2. Must be approved (unless explicitly set to false)
-  if (car.approved === false) return false;
-
-  // 3. Must not be sold, paused, or archived
-  if (car.isSold || car.isPaused || car.isArchived) return false;
-
-  // 4. Filter out dummy, test, placeholder, or draft text
-  const titleLower = (car.title || '').toLowerCase();
-  const descLower = (car.description || '').toLowerCase();
-  const makeLower = (car.make || '').toLowerCase();
-
-  const isDummy = 
-    titleLower.includes('dummy') || titleLower.includes('test') || titleLower.includes('placeholder') || titleLower.includes('demo') || titleLower.includes('draft') || titleLower.includes('sample') ||
-    descLower.includes('dummy') || descLower.includes('test') || descLower.includes('placeholder') || descLower.includes('demo') || descLower.includes('draft') || descLower.includes('sample') ||
-    makeLower.includes('dummy') || makeLower.includes('test') || makeLower.includes('placeholder') || makeLower.includes('demo') ||
-    (car.tags && car.tags.some(t => {
-      const tl = (t || '').toLowerCase();
-      return tl.includes('dummy') || tl.includes('test') || tl.includes('placeholder') || tl.includes('demo') || tl.includes('draft');
-    }));
-
-  if (isDummy) return false;
-
-  // 5. Minimal required display fields check (must have title/make or image)
-  const hasImage = !!(car.imageUrl || (Array.isArray(car.images) && car.images.length > 0 && car.images[0]));
-  const hasTitleOrMake = !!(car.title || car.make || car.model);
-  if (!hasImage && !hasTitleOrMake) return false;
-
-  return true;
-}
-
-/**
- * Standardized helper to filter an array of vehicle listings using isVehicleEligible,
- * with optional sorting by creation timestamp (newest first).
- */
-export function getEligibleListings(listings?: CarListing[] | null, sortLatest: boolean = false): CarListing[] {
-  if (!Array.isArray(listings)) return [];
-  const eligible = listings.filter(isVehicleEligible);
-  if (sortLatest) {
-    return eligible.sort((a, b) => {
-      const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-      const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-      return timeB - timeA;
+      if (isAutoChoice) {
+        if (!autoChoiceMerged) {
+          autoChoiceMerged = {
+            ...currentDealer,
+            id: 'auto-choice-peshawar',
+            name: 'Auto Choice',
+            avatarUrl: '/auto_choice_logo_dark.jpg',
+            logo: '/auto_choice_logo_dark.jpg',
+            flagshipVerified: true
+          };
+        } else {
+          // Consolidate the data metrics gracefully
+          autoChoiceMerged.vehiclesCount = Math.max(autoChoiceMerged.vehiclesCount, currentDealer.vehiclesCount);
+          if (currentDealer.phone) autoChoiceMerged.phone = currentDealer.phone;
+          if (currentDealer.whatsapp) autoChoiceMerged.whatsapp = currentDealer.whatsapp;
+          if (currentDealer.location && currentDealer.location.includes('Ring Road')) {
+            autoChoiceMerged.location = currentDealer.location;
+          }
+          if (currentDealer.description && currentDealer.description.length > autoChoiceMerged.description.length) {
+            autoChoiceMerged.description = currentDealer.description;
+          }
+          if (currentDealer.activityFeed && currentDealer.activityFeed.length > 0) {
+            const existingIds = new Set(autoChoiceMerged.activityFeed.map(act => act.id));
+            currentDealer.activityFeed.forEach(act => {
+              if (!existingIds.has(act.id)) {
+                autoChoiceMerged!.activityFeed.push(act);
+              }
+            });
+          }
+        }
+      } else {
+        list.push(currentDealer);
+      }
     });
-  }
-  return eligible;
-}
 
-// 2. Fetch Listings (all approved, as well as unapproved if requestor has permission)
-export async function dbFetchListingById(idOrSlug: string): Promise<CarListing | null> {
-  if (!idOrSlug) return null;
-  try {
-    // 1. Direct document ID lookup
-    const docRef = doc(db, LISTINGS_COLLECTION, idOrSlug);
-    const snap = await getDoc(docRef);
-    if (snap.exists()) {
-      const mapped = mapListingDoc(snap.id, snap.data());
-      if (mapped && isVehicleEligible(mapped)) {
-        return mapped;
+    // Ensure Auto Choice is at the front of the list and verified
+    if (autoChoiceMerged) {
+      list.unshift(autoChoiceMerged);
+    } else {
+      const initialAC = INITIAL_DEALERS.find(d => d.id === 'auto-choice-peshawar');
+      if (initialAC) {
+        list.unshift({
+          ...initialAC,
+          name: 'Auto Choice',
+          avatarUrl: '/auto_choice_logo_dark.jpg',
+          logo: '/auto_choice_logo_dark.jpg',
+          flagshipVerified: true
+        });
       }
     }
 
-    // 2. Fallback: Search all listings in collection by slug, title-slug, or normalized title match
-    const allListings = await dbFetchListings();
-    const targetSlug = idOrSlug.toLowerCase().trim();
-    const targetNormalized = targetSlug.replace(/[^a-z0-9]/g, '');
+    // Merge any custom local dealers saved across sessions
+    try {
+      const localDealers: Dealer[] = JSON.parse(localStorage.getItem('bazar360_custom_dealers') || '[]');
+      if (Array.isArray(localDealers) && localDealers.length > 0) {
+        for (const ld of localDealers) {
+          const idx = list.findIndex(d => d.id === ld.id);
+          if (idx > -1) {
+            list[idx] = { ...list[idx], ...ld };
+          } else {
+            list.push(ld);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[LocalStorage] Error reading custom dealers:', e);
+    }
 
-    const matched = allListings.find(car => {
-      if (!car) return false;
-      if (car.id === idOrSlug) return true;
-      const carSlug = `${car.make || ''}-${car.model || ''}-${car.year || ''}`.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-      if (carSlug === targetSlug) return true;
-      const titleSlug = (car.title || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-      if (titleSlug === targetSlug) return true;
-      const titleNorm = (car.title || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-      if (titleNorm && targetNormalized && (titleNorm === targetNormalized || titleNorm.includes(targetNormalized))) return true;
-      return false;
-    });
+    cachedDealers = list;
+    return list;
+  } catch (err) {
+    console.error('dbFetchDealers Error:', err);
+    let fallback = INITIAL_DEALERS.map(d => d.id === 'auto-choice-peshawar' ? { ...d, name: 'Auto Choice', avatarUrl: '/auto_choice_logo_dark.jpg', logo: '/auto_choice_logo_dark.jpg', flagshipVerified: true } : d);
+    try {
+      const localDealers: Dealer[] = JSON.parse(localStorage.getItem('bazar360_custom_dealers') || '[]');
+      if (Array.isArray(localDealers) && localDealers.length > 0) {
+        for (const ld of localDealers) {
+          const idx = fallback.findIndex(d => d.id === ld.id);
+          if (idx > -1) {
+            fallback[idx] = { ...fallback[idx], ...ld };
+          } else {
+            fallback.push(ld);
+          }
+        }
+      }
+    } catch (e) {}
+    cachedDealers = fallback;
+    return fallback;
+  }
+}
 
-    if (matched && isVehicleEligible(matched)) return matched;
+// 2. Fetch Listings (all approved, as well as unapproved if requestor has permission)
+export async function dbFetchListingById(id: string): Promise<CarListing | null> {
+  try {
+    const docRef = doc(db, LISTINGS_COLLECTION, id);
+    const snap = await getDoc(docRef);
+    if (snap.exists()) {
+      return mapListingDoc(snap.id, snap.data());
+    }
   } catch (err) {
     console.error('dbFetchListingById Error:', err);
   }
-  return null;
+  return INITIAL_LISTINGS.find((l) => l.id === id) || null;
 }
 
 function cleanAndDeduplicateListings(listings: CarListing[]): CarListing[] {
@@ -314,83 +395,97 @@ function cleanAndDeduplicateListings(listings: CarListing[]): CarListing[] {
   const cleaned: CarListing[] = [];
 
   for (const car of listings) {
-    if (!car || !isVehicleEligible(car)) continue;
+    if (!car || !car.id) continue;
+    const titleLower = (car.title || '').toLowerCase();
+    const descLower = (car.description || '').toLowerCase();
+    
+    // Filter out obvious test dummy / spam listings
+    const isDummy = 
+      titleLower.includes('dummy test') || 
+      titleLower.includes('sample fake') ||
+      (car.tags && car.tags.some(t => {
+        const tl = t.toLowerCase();
+        return tl === 'dummy-test' || tl === 'fake-listing';
+      }));
 
-    // Deduplicate uniquely by item document ID so user-created posts are never dropped
-    if (car.id && seenKeys.has(car.id)) {
+    if (isDummy) {
       continue;
     }
-    if (car.id) {
-      seenKeys.add(car.id);
+
+    // Deduplicate by car.id first, or normalized title + price + year
+    const normTitle = titleLower.replace(/\s+/g, '');
+    const uniqueKey = car.id ? `id_${car.id}` : `${normTitle}_${car.price}_${car.year}_${car.dealerId || 'private'}`;
+    
+    if (seenKeys.has(uniqueKey)) {
+      continue;
     }
+    
+    seenKeys.add(uniqueKey);
     cleaned.push(car);
   }
 
   return cleaned;
 }
 
-export async function dbFetchListings(forceRefresh = false): Promise<CarListing[]> {
-  if (!forceRefresh && cachedListings && cachedListings.length > 0) {
+export async function dbFetchListings(): Promise<CarListing[]> {
+  let customLocal: CarListing[] = [];
+  try {
+    const raw = localStorage.getItem('bazar360_custom_listings');
+    if (raw) {
+      customLocal = JSON.parse(raw);
+    }
+  } catch (e) {
+    console.warn('[LocalStorage] Could not parse custom listings:', e);
+  }
+
+  if (cachedListings && cachedListings.length > 0) {
+    if (customLocal.length > 0) {
+      const existingIds = new Set(cachedListings.map(l => l.id));
+      for (const cl of customLocal) {
+        if (!existingIds.has(cl.id)) {
+          cachedListings.unshift(cl);
+          existingIds.add(cl.id);
+        }
+      }
+    }
     return cachedListings;
   }
   try {
-    const list: CarListing[] = [];
-    const snap = await getDocs(query(collection(db, LISTINGS_COLLECTION), limit(100)));
+    const snap = await getDocs(collection(db, LISTINGS_COLLECTION));
+    let list: CarListing[] = [];
     if (!snap.empty) {
       snap.forEach((doc) => {
         const data = doc.data();
         list.push(mapListingDoc(doc.id, data));
       });
+    } else {
+      list = [...INITIAL_LISTINGS];
     }
-
-    // Ensure all 3 allowed listing IDs are individually retrieved from Firestore if missing from batch
-    const mainTargetIds = ['listing-1784992620146', 'listing-1784821782501', 'listing-1784821585212'];
-    const fetchedIds = new Set(list.map(item => item.id));
-    
-    for (const targetId of mainTargetIds) {
-      if (!fetchedIds.has(targetId)) {
-        try {
-          const docRef = doc(db, LISTINGS_COLLECTION, targetId);
-          const docSnap = await getDoc(docRef);
-          if (docSnap.exists()) {
-            list.push(mapListingDoc(docSnap.id, docSnap.data()));
-          }
-        } catch (e) {
-          // Ignore individual fetch errors
+    if (customLocal.length > 0) {
+      const existingIds = new Set(list.map(l => l.id));
+      for (const cl of customLocal) {
+        if (!existingIds.has(cl.id)) {
+          list.unshift(cl);
+          existingIds.add(cl.id);
         }
       }
     }
-
-    const cleaned = cleanAndDeduplicateListings(list);
-    cachedListings = cleaned;
+    cachedListings = cleanAndDeduplicateListings(list);
     return cachedListings;
   } catch (err) {
-    console.warn('dbFetchListings Error:', err);
-    return [];
-  }
-}
-
-// 2b. Fetch Listings by specific showroom ID efficiently
-export async function dbFetchListingsByDealerId(dealerId: string): Promise<CarListing[]> {
-  try {
-    const q = query(
-      collection(db, LISTINGS_COLLECTION),
-      where('dealerId', '==', dealerId),
-      where('approved', '==', true),
-      limit(100)
-    );
-    const snap = await getDocs(q);
-    if (snap.empty) {
-      return [];
+    console.error('dbFetchListings Error:', err);
+    let fallback = [...INITIAL_LISTINGS];
+    if (customLocal.length > 0) {
+      const existingIds = new Set(fallback.map(l => l.id));
+      for (const cl of customLocal) {
+        if (!existingIds.has(cl.id)) {
+          fallback.unshift(cl);
+          existingIds.add(cl.id);
+        }
+      }
     }
-    const list: CarListing[] = [];
-    snap.forEach((doc) => {
-      list.push(mapListingDoc(doc.id, doc.data()));
-    });
-    return cleanAndDeduplicateListings(list);
-  } catch (err) {
-    console.error(`[dbFetchListingsByDealerId] Error fetching for ${dealerId}:`, err);
-    return [];
+    cachedListings = cleanAndDeduplicateListings(fallback);
+    return cachedListings;
   }
 }
 
@@ -404,9 +499,6 @@ export async function dbFetchListingsPaginated(lastDocSnap?: any, limitCount: nu
     
     const snap = await getDocs(q);
     if (snap.empty) {
-      if (!lastDocSnap) {
-        return { listings: [], lastVisible: null };
-      }
       return { listings: [], lastVisible: null };
     }
     
@@ -435,19 +527,9 @@ function mapListingDoc(id: string, data: any): CarListing {
 
   const resolvedDealerId = isExplicitIndividual 
     ? 'private' 
-    : ((data.dealerId === '' || (data.dealerId && data.dealerId.includes(''))) ? '' : (data.dealerId || 'private'));
+    : ((data.dealerId === 'auto-choice' || (data.dealerId && data.dealerId.includes('auto-choice'))) ? 'auto-choice-peshawar' : (data.dealerId || 'private'));
 
   const resolvedSellerType = isExplicitIndividual ? 'Individual' : (data.sellerType || (resolvedDealerId === 'private' ? 'Individual' : 'Showroom'));
-
-  // Preserve user-uploaded image URLs or fallback only if completely empty
-  let resolvedImageUrl = data.imageUrl || (Array.isArray(data.images) && data.images[0] ? data.images[0] : '');
-  if (!resolvedImageUrl || resolvedImageUrl === NO_IMAGE_SVG) {
-    resolvedImageUrl = NO_IMAGE_SVG;
-  }
-
-  const resolvedImages = Array.isArray(data.images) && data.images.length > 0 && data.images.some(img => img && img !== NO_IMAGE_SVG)
-    ? data.images.filter(Boolean)
-    : [resolvedImageUrl];
 
   return {
     id,
@@ -459,11 +541,10 @@ function mapListingDoc(id: string, data: any): CarListing {
     mileage: Number(data.mileage) || 0,
     fuelType: data.fuelType || 'Petrol',
     transmission: data.transmission || 'Automatic',
-    imageUrl: resolvedImageUrl,
-    verified: true,
-    featured: true,
-    approved: isAllowedListingId(id) ? true : (data.approved !== false),
-    isSold: isAllowedListingId(id) ? false : !!data.isSold,
+    imageUrl: data.imageUrl || '',
+    verified: !!data.verified,
+    featured: !!data.featured,
+    approved: data.approved !== false,
     dealerId: resolvedDealerId,
     sellerType: resolvedSellerType,
     sellerName: data.sellerName || data.createdBy || 'Individual Seller',
@@ -473,49 +554,30 @@ function mapListingDoc(id: string, data: any): CarListing {
     createdAt: data.createdAt || new Date().toISOString(),
     tags: Array.isArray(data.tags) ? data.tags : [],
     specs: data.specs || {
-      color: data.exteriorColor || '',
-      engineSize: data.engineCC ? `${data.engineCC} CC` : '',
-      horspower: '',
-      regionalSpecs: data.assemblyType || ''
+      color: data.exteriorColor || 'Standard',
+      engineSize: data.engineCC ? `${data.engineCC} CC` : '2000 CC',
+      horspower: '150 hp',
+      regionalSpecs: data.assemblyType || 'Local'
     },
     condition: data.condition || 'Used',
-    engineCC: Number(data.engineCC) || 0,
-    exteriorColor: data.exteriorColor || data.specs?.color || '',
-    bodyCondition: data.bodyCondition || '',
-    registrationCity: data.registrationCity || '',
-    documentType: data.documentType || '',
+    engineCC: Number(data.engineCC) || 2000,
+    exteriorColor: data.exteriorColor || data.specs?.color || 'Standard White',
+    bodyCondition: data.bodyCondition || 'Total Genuine',
+    registrationCity: data.registrationCity || 'Peshawar',
+    documentType: data.documentType || 'Smart Card',
     tokenTaxPaid: data.tokenTaxPaid !== false,
-    images: resolvedImages,
-    assemblyType: data.assemblyType || '',
+    images: Array.isArray(data.images) ? data.images : (data.imageUrl ? [data.imageUrl] : []),
+    assemblyType: data.assemblyType || 'Local',
     dentPaintDescription: data.dentPaintDescription || '',
-    tokenTaxStatus: data.tokenTaxStatus || '',
-    ownerId: data.ownerId || data.createdBy || undefined,
-    sellerEmail: data.sellerEmail || data.ownerDetails?.email || undefined,
-    ownerDetails: data.ownerDetails || (data.ownerId || data.createdBy ? {
-      uid: data.ownerId || data.createdBy,
-      displayName: data.sellerName || 'Seller',
-      phone: data.sellerPhone || '',
-      role: data.sellerType === 'Showroom' ? 'Showroom Owner' : 'Individual User',
-      associatedShowroomId: resolvedDealerId !== 'private' ? resolvedDealerId : null
-    } : undefined),
-    cloudinaryFolderPath: data.cloudinaryFolderPath || undefined,
-    mediaMetadata: Array.isArray(data.mediaMetadata) ? data.mediaMetadata : undefined
+    tokenTaxStatus: data.tokenTaxStatus || 'Paid'
   };
 }
 
-// Helper to recursively remove undefined fields and sanitize raw base64 data strings from Firestore payloads to satisfy 1MB doc limits
+// Helper to recursively remove undefined fields from Firestore payloads to satisfy JS SDK rules
 function cleanPayload<T>(obj: T): T {
   if (obj === null || obj === undefined) return obj;
-  if (typeof obj === 'string') {
-    // Prevent huge base64 data URLs (> 5KB) from corrupting Firestore documents
-    if (obj.startsWith('data:') && obj.length > 5000) {
-      console.warn('[cleanPayload] Stripped raw base64 data URL from payload to protect Firestore 1MB document limit.');
-      return '' as any;
-    }
-    return obj;
-  }
   if (Array.isArray(obj)) {
-    return obj.map(item => cleanPayload(item)).filter(item => item !== undefined) as any;
+    return obj.map(item => cleanPayload(item)) as any;
   }
   if (typeof obj === 'object') {
     const cleaned: any = {};
@@ -553,63 +615,17 @@ export async function dbSaveUserProfile(profile: UserProfile): Promise<void> {
     const userDocRef = doc(db, USERS_COLLECTION, profile.uid);
     const profileDocRef = doc(db, 'profiles', profile.uid);
     const timeStr = new Date().toISOString();
-
-    // Preserve immutable createdAt date from existing document or Auth metadata
-    let finalCreatedAt = profile.createdAt;
-    if (!finalCreatedAt) {
-      const existingUserDoc = await getDoc(userDocRef);
-      if (existingUserDoc.exists() && existingUserDoc.data().createdAt) {
-        finalCreatedAt = existingUserDoc.data().createdAt;
-      } else if (auth.currentUser.metadata?.creationTime) {
-        finalCreatedAt = new Date(auth.currentUser.metadata.creationTime).toISOString();
-      } else {
-        finalCreatedAt = timeStr;
-      }
-    }
-
-    // Automatically offload base64 data URLs to Cloudinary
-    let photoURL = profile.photoURL || profile.profilePhoto || '';
-    if (photoURL.startsWith('data:')) {
-      photoURL = await uploadBase64ToCloudinary(photoURL, 'bazar360_profiles');
-    }
-
-    let logoUrl = profile.logoUrl || photoURL || '';
-    if (logoUrl.startsWith('data:')) {
-      logoUrl = await uploadBase64ToCloudinary(logoUrl, 'bazar360_logos');
-    }
-
+    
     const payload = cleanPayload({
       ...profile,
-      photoURL,
-      profilePhoto: photoURL,
-      logoUrl,
-      createdAt: finalCreatedAt,
       updatedAt: timeStr
     });
 
-    // Save to /users with merge: true
-    await setDoc(userDocRef, payload, { merge: true });
+    // Save to /users
+    await setDoc(userDocRef, payload);
 
-    // Save to /profiles (split-collection personal details) with merge: true
-    await setDoc(profileDocRef, payload, { merge: true });
-
-    // Sync Auth profile
-    if (auth.currentUser && auth.currentUser.uid === profile.uid) {
-      updateProfile(auth.currentUser, {
-        displayName: profile.displayName || auth.currentUser.displayName || undefined,
-        photoURL: photoURL || auth.currentUser.photoURL || undefined
-      }).catch(e => console.warn('Auth profile sync skipped:', e));
-    }
-
-    // Sync localStorage
-    try {
-      localStorage.setItem('bazar360_user', JSON.stringify(payload));
-    } catch (e) {}
-
-    // Dispatch global custom event to trigger reactive cache invalidation in all contexts/components
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('bazar360_profile_updated', { detail: payload }));
-    }
+    // Save to /profiles (split-collection personal details)
+    await setDoc(profileDocRef, payload);
 
     console.log('User profile saved successfully to Firestore /users and /profiles:', profile.uid);
     toast.success('User profile saved successfully!', { id: `profile-saved-${profile.uid}` });
@@ -681,101 +697,66 @@ export async function updateSocialLinks(userId: string, links: SocialMedia): Pro
 export async function dbFetchUserProfile(uid: string): Promise<UserProfile | null> {
   try {
     const userDocRef = doc(db, USERS_COLLECTION, uid);
-    const profileDocRef = doc(db, 'profiles', uid);
-
-    const [snap, profileSnap] = await Promise.all([
-      getDoc(userDocRef).catch(() => null),
-      getDoc(profileDocRef).catch(() => null)
-    ]);
-
-    const uData = (snap && snap.exists()) ? snap.data() : {};
-    const pData = (profileSnap && profileSnap.exists()) ? profileSnap.data() : {};
-
-    if (Object.keys(uData).length > 0 || Object.keys(pData).length > 0) {
-      const merged = { ...pData, ...uData } as UserProfile;
-      merged.uid = uid;
-
-      const photo = merged.photoURL || merged.profilePhoto || (merged as any).avatar || '';
-      merged.photoURL = photo;
-      merged.profilePhoto = photo;
-
-      if (!merged.createdAt) {
-        if (auth.currentUser && auth.currentUser.uid === uid && auth.currentUser.metadata?.creationTime) {
-          merged.createdAt = new Date(auth.currentUser.metadata.creationTime).toISOString();
-        }
-      }
-
-      // Update local storage cache with fetched profile
-      try {
-        localStorage.setItem('bazar360_user', JSON.stringify(merged));
-      } catch (e) {}
-
-      return merged;
+    const snap = await getDoc(userDocRef);
+    if (snap.exists()) {
+      return snap.data() as UserProfile;
     }
+    return null;
   } catch (err) {
-    console.warn(`Could not fetch profile for user ${uid} from Firestore, attempting local cache...`, err);
+    console.warn(`Could not fetch profile for user ${uid}, returning null`, err);
+    return null;
   }
-
-  // Fallback to local storage cache if Firestore document is missing or network unavailable
-  try {
-    const stored = localStorage.getItem('bazar360_user');
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      if (parsed && (parsed.uid === uid || !parsed.uid)) {
-        return parsed as UserProfile;
-      }
-    }
-  } catch (e) {}
-
-  return null;
 }
 
 // 5. Create Dealership Programmatically
 export async function dbRegisterDealership(dealer: Omit<Dealer, 'activityFeed'>): Promise<void> {
+  const prepared = cleanPayload({
+    ...dealer,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  });
+
+  // Sync to memory cache
+  if (cachedDealers) {
+    const idx = cachedDealers.findIndex(d => d.id === dealer.id);
+    if (idx > -1) {
+      cachedDealers[idx] = { ...cachedDealers[idx], ...(prepared as any) };
+    } else {
+      cachedDealers.push(prepared as any);
+    }
+  }
+
+  // Persist to localStorage
   try {
-    let logoUrl = dealer.logoUrl || dealer.logo || '';
-    let logo = dealer.logo || dealer.logoUrl || '';
+    const localDealers = JSON.parse(localStorage.getItem('bazar360_custom_dealers') || '[]');
+    const filtered = localDealers.filter((d: any) => d.id !== dealer.id);
+    localStorage.setItem('bazar360_custom_dealers', JSON.stringify([...filtered, prepared]));
+  } catch (e) {
+    console.warn('[LocalStorage] Error saving dealer:', e);
+  }
 
-    // Automatically offload base64 data URLs to Cloudinary
-    if (logoUrl.startsWith('data:')) {
-      logoUrl = await uploadBase64ToCloudinary(logoUrl, 'bazar360_logos');
-      logo = logoUrl;
-    }
-
-    const payload = cleanPayload({
-      ...dealer,
-      logoUrl,
-      logo,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    });
-
-    await setDoc(doc(db, DEALERS_COLLECTION, dealer.id), payload);
-
-    // If an ownerUid was specified, assign showroom ownership link to that user profile
-    if (dealer.ownerUid) {
-      const userRef = doc(db, USERS_COLLECTION, dealer.ownerUid);
-      const profileRef = doc(db, 'profiles', dealer.ownerUid);
-      const ownerUpdate = {
-        associatedShowroomId: dealer.id,
-        dealerId: dealer.id,
-        role: 'Showroom Owner',
-        updatedAt: new Date().toISOString()
-      };
-      await setDoc(userRef, ownerUpdate, { merge: true }).catch(e => console.warn('Could not update user doc for ownerUid:', e));
-      await setDoc(profileRef, ownerUpdate, { merge: true }).catch(e => console.warn('Could not update profile doc for ownerUid:', e));
-    }
-
+  try {
+    await setDoc(doc(db, DEALERS_COLLECTION, dealer.id), prepared, { merge: true });
     console.log('Showroom saved successfully:', dealer.id);
     toast.success('Showroom profile registered!', { id: `dealer-reg-${dealer.id}` });
   } catch (err) {
-    toast.error('Failed to register showroom.');
+    console.warn('Firestore offline notice, showroom cached locally:', err);
+    toast.success('Showroom saved locally!', { id: `dealer-reg-local-${dealer.id}` });
     handleFirestoreError(err, OperationType.WRITE, `${DEALERS_COLLECTION}/${dealer.id}`);
   }
 }
 
 // 5b. Delete Dealership Programmatically
 export async function dbDeleteDealership(dealerId: string): Promise<void> {
+  if (cachedDealers) {
+    cachedDealers = cachedDealers.filter(d => d.id !== dealerId);
+  }
+  try {
+    const localDealers = JSON.parse(localStorage.getItem('bazar360_custom_dealers') || '[]');
+    const filtered = localDealers.filter((d: any) => d.id !== dealerId);
+    localStorage.setItem('bazar360_custom_dealers', JSON.stringify(filtered));
+  } catch (e) {}
+
   try {
     await deleteDoc(doc(db, DEALERS_COLLECTION, dealerId));
     console.log('Showroom deleted successfully:', dealerId);
@@ -788,130 +769,36 @@ export async function dbDeleteDealership(dealerId: string): Promise<void> {
 
 // 5c. Update Dealership Programmatically
 export async function dbUpdateDealer(dealerId: string, data: Partial<Dealer>): Promise<void> {
-  console.log(`[dbUpdateDealer] Initiating update for dealer: ${dealerId}`, { keys: Object.keys(data) });
+  const prepared = cleanPayload({
+    ...data,
+    updatedAt: new Date().toISOString()
+  });
+
+  // Sync to memory cache
+  if (cachedDealers) {
+    cachedDealers = cachedDealers.map(d => d.id === dealerId ? { ...d, ...prepared } : d);
+  }
+
+  // Persist to localStorage
+  try {
+    const localDealers = JSON.parse(localStorage.getItem('bazar360_custom_dealers') || '[]');
+    const existing = localDealers.find((d: any) => d.id === dealerId) || {};
+    const updated = { ...existing, id: dealerId, ...prepared };
+    const filtered = localDealers.filter((d: any) => d.id !== dealerId);
+    localStorage.setItem('bazar360_custom_dealers', JSON.stringify([...filtered, updated]));
+  } catch (e) {
+    console.warn('[LocalStorage] Error updating dealer:', e);
+  }
+
   try {
     const ref = doc(db, DEALERS_COLLECTION, dealerId);
-
-    // Strip createdAt to keep creation date strictly immutable
-    const { createdAt, ...updatableData } = data as any;
-
-    let logoUrl = updatableData.logoUrl || updatableData.logo;
-    if (logoUrl && logoUrl.startsWith('data:')) {
-      logoUrl = await uploadBase64ToCloudinary(logoUrl, 'bazar360_logos');
-      updatableData.logoUrl = logoUrl;
-      updatableData.logo = logoUrl;
-      updatableData.avatarUrl = logoUrl;
-    } else if (logoUrl) {
-      updatableData.logoUrl = logoUrl;
-      updatableData.logo = logoUrl;
-      updatableData.avatarUrl = logoUrl;
-    }
-
-    let coverImage = updatableData.coverImage || updatableData.bannerImage;
-    if (coverImage && coverImage.startsWith('data:')) {
-      coverImage = await uploadBase64ToCloudinary(coverImage, 'bazar360_covers');
-      updatableData.coverImage = coverImage;
-    }
-
-    const cleaned = cleanPayload({
-      ...updatableData,
-      updatedAt: new Date().toISOString()
-    });
-    console.log(`[dbUpdateDealer] Payload cleaned successfully. Writing to Firestore path: ${DEALERS_COLLECTION}/${dealerId}`);
-
-    await setDoc(ref, cleaned, { merge: true });
-
-    if (cachedDealers) {
-      cachedDealers = cachedDealers.map(d => d.id === dealerId ? { ...d, ...updatableData } : d);
-    }
-    console.log('[dbUpdateDealer] Showroom updated successfully in Firestore & cache:', dealerId);
+    await setDoc(ref, prepared, { merge: true });
+    console.log('Showroom updated successfully:', dealerId);
     toast.success('Showroom details updated!', { id: `dealer-upd-${dealerId}` });
-  } catch (err: any) {
-    console.error(`[dbUpdateDealer] ERROR updating showroom ${dealerId}:`, err);
-    toast.error(err?.message || 'Failed to update showroom.');
+  } catch (err) {
+    console.warn('Firestore offline notice, showroom updated in local cache:', err);
+    toast.success('Showroom updated in local cache!', { id: `dealer-upd-local-${dealerId}` });
     handleFirestoreError(err, OperationType.UPDATE, `${DEALERS_COLLECTION}/${dealerId}`);
-    throw err;
-  }
-}
-
-// 5d. Save / Append Showroom Media to Gallery using arrayUnion (prevents overwriting)
-export async function dbSaveShowroomMedia(dealerId: string, url: string): Promise<void> {
-  console.log(`[dbSaveShowroomMedia] Appending media URL to showroom ${dealerId}:`, url);
-  if (!url || typeof url !== 'string') {
-    throw new Error('Invalid media URL provided.');
-  }
-  if (url.startsWith('data:image') || url.startsWith('data:')) {
-    const errorMsg = 'Base64 image data cannot be stored in database. Please upload an image file using the Cloudinary upload button';
-    toast.error(errorMsg);
-    throw new Error(errorMsg);
-  }
-  try {
-    const ref = doc(db, DEALERS_COLLECTION, dealerId);
-    
-    // We update both 'gallery' and 'media' fields to support maximum compatibility
-    await updateDoc(ref, {
-      gallery: arrayUnion(url),
-      media: arrayUnion(url),
-      updatedAt: new Date().toISOString()
-    });
-
-    if (cachedDealers) {
-      cachedDealers = cachedDealers.map(d => {
-        if (d.id === dealerId) {
-          const currentGallery = Array.isArray(d.gallery) ? d.gallery : [];
-          const currentMedia = Array.isArray(d.media) ? d.media : [];
-          return {
-            ...d,
-            gallery: currentGallery.includes(url) ? currentGallery : [...currentGallery, url],
-            media: currentMedia.includes(url) ? currentMedia : [...currentMedia, url]
-          };
-        }
-        return d;
-      });
-    }
-
-    console.log('[dbSaveShowroomMedia] Media added successfully via arrayUnion for dealer:', dealerId);
-  } catch (err: any) {
-    console.error(`[dbSaveShowroomMedia] ERROR appending media to dealer ${dealerId}:`, err);
-    toast.error(err?.message || 'Failed to save showroom media to database.');
-    handleFirestoreError(err, OperationType.UPDATE, `${DEALERS_COLLECTION}/${dealerId}`);
-    throw err;
-  }
-}
-
-// 5e. Remove Showroom Media from Gallery using arrayRemove
-export async function dbRemoveShowroomMedia(dealerId: string, url: string): Promise<void> {
-  console.log(`[dbRemoveShowroomMedia] Removing media URL from showroom ${dealerId}:`, url);
-  try {
-    const ref = doc(db, DEALERS_COLLECTION, dealerId);
-    
-    await updateDoc(ref, {
-      gallery: arrayRemove(url),
-      media: arrayRemove(url),
-      updatedAt: new Date().toISOString()
-    });
-
-    if (cachedDealers) {
-      cachedDealers = cachedDealers.map(d => {
-        if (d.id === dealerId) {
-          const currentGallery = Array.isArray(d.gallery) ? d.gallery : [];
-          const currentMedia = Array.isArray(d.media) ? d.media : [];
-          return {
-            ...d,
-            gallery: currentGallery.filter(item => item !== url),
-            media: currentMedia.filter(item => item !== url)
-          };
-        }
-        return d;
-      });
-    }
-
-    console.log('[dbRemoveShowroomMedia] Media removed successfully via arrayRemove for dealer:', dealerId);
-  } catch (err: any) {
-    console.error(`[dbRemoveShowroomMedia] ERROR removing media from dealer ${dealerId}:`, err);
-    toast.error(err?.message || 'Failed to remove showroom media from database.');
-    handleFirestoreError(err, OperationType.UPDATE, `${DEALERS_COLLECTION}/${dealerId}`);
-    throw err;
   }
 }
 
@@ -921,58 +808,15 @@ export async function dbSaveListing(listing: CarListing): Promise<void> {
   if (listing.price < 0) throw new Error('Price cannot be negative');
   if (listing.year < 1980) throw new Error('Model year must be 1980 or later');
 
-  // Process images: if any image is base64, automatically offload to Cloudinary
-  let processedImages: string[] = Array.isArray(listing.images) ? [...listing.images] : [];
-  let processedImageUrl = listing.imageUrl || (processedImages[0] || '');
-
-  if (processedImageUrl && processedImageUrl.startsWith('data:')) {
-    try {
-      processedImageUrl = await uploadBase64ToCloudinary(processedImageUrl, 'bazar360_listings');
-    } catch (e) {
-      console.warn('[dbSaveListing] Base64 primary image upload failed:', e);
-    }
-  }
-
-  if (processedImages.length > 0) {
-    const updatedImages: string[] = [];
-    for (const img of processedImages) {
-      if (img && img.startsWith('data:')) {
-        try {
-          const uploadedUrl = await uploadBase64ToCloudinary(img, 'bazar360_listings');
-          updatedImages.push(uploadedUrl);
-        } catch (e) {
-          console.warn('[dbSaveListing] Base64 image upload failed:', e);
-          if (processedImageUrl && !processedImageUrl.startsWith('data:')) {
-            updatedImages.push(processedImageUrl);
-          }
-        }
-      } else if (img) {
-        updatedImages.push(img);
-      }
-    }
-    processedImages = updatedImages;
-  }
-
-  if (processedImages.length === 0 && processedImageUrl) {
-    processedImages = [processedImageUrl];
-  }
-
-  const updatedListing: CarListing = {
-    ...listing,
-    imageUrl: processedImageUrl || processedImages[0] || NO_IMAGE_SVG,
-    primaryImage: processedImageUrl || processedImages[0] || NO_IMAGE_SVG,
-    images: processedImages.length > 0 ? processedImages : [processedImageUrl || NO_IMAGE_SVG]
-  };
-
   const prepared = cleanPayload({
-    ...updatedListing,
-    createdAt: updatedListing.createdAt || new Date().toISOString(),
+    ...listing,
+    createdAt: listing.createdAt || new Date().toISOString(),
     updatedAt: new Date().toISOString()
   });
 
   // Always update in-memory cache and localStorage immediately so the user's post is never lost
   if (cachedListings) {
-    const idx = cachedListings.findIndex(l => l.id === updatedListing.id);
+    const idx = cachedListings.findIndex(l => l.id === listing.id);
     if (idx > -1) {
       cachedListings[idx] = { ...cachedListings[idx], ...prepared };
     } else {
@@ -981,20 +825,20 @@ export async function dbSaveListing(listing: CarListing): Promise<void> {
   }
   try {
     const localCustom = JSON.parse(localStorage.getItem('bazar360_custom_listings') || '[]');
-    const filtered = localCustom.filter((l: any) => l.id !== updatedListing.id);
+    const filtered = localCustom.filter((l: any) => l.id !== listing.id);
     localStorage.setItem('bazar360_custom_listings', JSON.stringify([prepared, ...filtered]));
   } catch (e) {
     console.warn('[LocalStorage] Could not sync local custom listings:', e);
   }
 
   try {
-    await setDoc(doc(db, LISTINGS_COLLECTION, updatedListing.id), prepared);
-    console.log('Listing saved to database successfully:', updatedListing.id);
-    toast.success('Vehicle advertisement saved to database!', { id: `listing-save-${updatedListing.id}` });
+    await setDoc(doc(db, LISTINGS_COLLECTION, listing.id), prepared);
+    console.log('Listing saved to database successfully:', listing.id);
+    toast.success('Vehicle advertisement saved to database!', { id: `listing-save-${listing.id}` });
   } catch (err: any) {
     console.warn('[Firestore] Remote sync failed, listing saved locally in fallback cache:', err);
-    toast.success('Vehicle post saved locally!', { id: `listing-save-local-${updatedListing.id}` });
-    handleFirestoreError(err, OperationType.WRITE, `${LISTINGS_COLLECTION}/${updatedListing.id}`);
+    toast.success('Vehicle post saved locally!', { id: `listing-save-local-${listing.id}` });
+    handleFirestoreError(err, OperationType.WRITE, `${LISTINGS_COLLECTION}/${listing.id}`);
   }
 }
 
@@ -1042,58 +886,15 @@ export async function dbUpdateProfile(uid: string, data: Partial<UserProfile>): 
   try {
     const userDocRef = doc(db, USERS_COLLECTION, uid);
     const profileDocRef = doc(db, 'profiles', uid);
-
-    // Strip createdAt to ensure account creation date is strictly immutable
-    const { createdAt, ...updatableData } = data as any;
-
-    let photoURL = updatableData.photoURL || updatableData.profilePhoto;
-    if (photoURL && photoURL.startsWith('data:')) {
-      photoURL = await uploadBase64ToCloudinary(photoURL, 'bazar360_profiles');
-      updatableData.photoURL = photoURL;
-      updatableData.profilePhoto = photoURL;
-    } else if (photoURL) {
-      updatableData.photoURL = photoURL;
-      updatableData.profilePhoto = photoURL;
-    }
-
     const payload = cleanPayload({
-      ...updatableData,
+      ...data,
       updatedAt: new Date().toISOString()
     });
 
-    // Use setDoc with merge: true so it creates or updates the document seamlessly
-    await setDoc(userDocRef, payload, { merge: true }).catch(e => console.warn('Could not set/merge users document:', e));
-    await setDoc(profileDocRef, payload, { merge: true }).catch(e => console.warn('Could not set/merge profiles document:', e));
-
-    // Synchronize Firebase Auth profile if matching currentUser
-    if (auth.currentUser && auth.currentUser.uid === uid) {
-      const authUpdates: { displayName?: string; photoURL?: string } = {};
-      if (updatableData.displayName) authUpdates.displayName = updatableData.displayName;
-      if (updatableData.photoURL) authUpdates.photoURL = updatableData.photoURL;
-      if (Object.keys(authUpdates).length > 0) {
-        updateProfile(auth.currentUser, authUpdates).catch(e => console.warn('Auth profile update skipped:', e));
-      }
-    }
-
-    // Synchronize to local storage cache immediately
-    let updated = { ...payload, uid };
-    try {
-      const stored = localStorage.getItem('bazar360_user');
-      let currentObj = stored ? JSON.parse(stored) : {};
-      if (!currentObj || typeof currentObj !== 'object') currentObj = {};
-      updated = { ...currentObj, ...payload, uid };
-      localStorage.setItem('bazar360_user', JSON.stringify(updated));
-    } catch (e) {
-      console.warn('Local storage sync error:', e);
-    }
-
-    // Dispatch global custom event to trigger reactive cache invalidation in all contexts/components
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('bazar360_profile_updated', { detail: updated }));
-    }
-
-    console.log('User profile updated in Firestore & localStorage:', uid);
-    toast.success('Profile updated successfully!', { id: `profile-update-${uid}` });
+    await updateDoc(userDocRef, payload).catch(e => console.warn('Could not update users document:', e));
+    await updateDoc(profileDocRef, payload).catch(e => console.warn('Could not update profiles document:', e));
+    console.log('User profile updated in Firestore:', uid);
+    toast.success('Profile updated!', { id: `profile-update-${uid}` });
   } catch (err) {
     toast.error('Failed to update profile.');
     handleFirestoreError(err, OperationType.UPDATE, `${USERS_COLLECTION}/${uid}`);
@@ -1168,18 +969,26 @@ export async function dbSaveLead(lead: Lead): Promise<void> {
 
 export async function dbFetchLeads(): Promise<Lead[]> {
   try {
-    const q = query(collection(db, 'leads'), orderBy('createdAt', 'desc'), limit(100));
-    const snap = await getDocs(q);
-    if (!snap.empty) {
-      return snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Lead));
-    }
-    return [];
+    const snap = await getDocs(collection(db, 'leads'));
+    const list: Lead[] = [];
+    snap.forEach((doc) => {
+      const data = doc.data();
+      list.push({
+        id: doc.id,
+        type: data.type || 'General Inquiry',
+        title: data.title || 'Inquiry',
+        userName: data.userName || 'Anonymous Visitor',
+        userPhone: data.userPhone || '',
+        userEmail: data.userEmail || '',
+        city: data.city || '',
+        details: data.details || '',
+        metadata: data.metadata || {},
+        createdAt: data.createdAt || new Date().toISOString()
+      });
+    });
+    return list;
   } catch (err) {
-    console.warn('[CRM] dbFetchLeads offline or rule fallback:', err);
-    try {
-      const saved = localStorage.getItem('bazar360_leads');
-      if (saved) return JSON.parse(saved);
-    } catch {}
+    console.error('dbFetchLeads Error:', err);
     return [];
   }
 }
@@ -1238,8 +1047,14 @@ export async function dbAddComment(listingId: string, comment: ListingComment): 
     });
     console.log('Comment added to listing:', listingId);
   } catch (err) {
-    console.error('Error adding comment to listing:', err);
-    handleFirestoreError(err, OperationType.WRITE, `listings/${listingId}/comments`);
+    console.warn('Silent comment save fallback:', err);
+    // If we're offline, save to local storage fallback
+    try {
+      const stored = localStorage.getItem(`bazar360_comments_${listingId}`);
+      const comments = stored ? JSON.parse(stored) : [];
+      comments.push(comment);
+      localStorage.setItem(`bazar360_comments_${listingId}`, JSON.stringify(comments));
+    } catch (e) {}
   }
 }
 
@@ -1388,7 +1203,14 @@ export async function dbTrackLeadAction(action: Omit<TrackedLeadAction, 'id' | '
     
     console.log(`Lead Activity logged successfully to Firebase. Score updated: ${newScore}`);
   } catch (err) {
-    console.warn('Lead action logging warning:', err);
+    console.warn('Silent lead action save fallback (local storage):', err);
+    // LocalStorage fallback so the app continues operating perfectly offline
+    try {
+      const cached = localStorage.getItem('bazar360_offline_actions');
+      const list = cached ? JSON.parse(cached) : [];
+      list.push({ ...action, id: `offline-${Date.now()}`, createdAt: new Date().toISOString() });
+      localStorage.setItem('bazar360_offline_actions', JSON.stringify(list));
+    } catch (e) {}
   }
 }
 
@@ -1574,58 +1396,106 @@ export async function dbFetchFavorites(userId: string): Promise<any[]> {
 }
 
 export async function dbSaveMessage(msg: any): Promise<void> {
+  const preparedMsg = {
+    ...msg,
+    timestamp: msg.timestamp || new Date().toISOString(),
+    activeFlag: true,
+    status: 'Delivered'
+  };
+
+  // Local storage backup per chatId
+  if (msg.chatId) {
+    try {
+      const key = `bazar360_chat_msgs_${msg.chatId}`;
+      const localMsgs = JSON.parse(localStorage.getItem(key) || '[]');
+      const filtered = localMsgs.filter((m: any) => m.id !== msg.id);
+      localStorage.setItem(key, JSON.stringify([...filtered, preparedMsg]));
+    } catch (e) {}
+  }
+
   try {
     const ref = doc(db, 'messages', msg.id);
-    await setDoc(ref, {
-      ...msg,
-      timestamp: msg.timestamp || new Date().toISOString(),
-      activeFlag: true,
-      status: 'Delivered'
-    });
+    await setDoc(ref, preparedMsg);
   } catch (err) {
-    console.warn('message save bypassed:', err);
+    console.warn('message save bypassed to local cache:', err);
   }
 }
 
 export async function dbFetchMessages(chatId: string): Promise<any[]> {
+  let localList: any[] = [];
+  try {
+    localList = JSON.parse(localStorage.getItem(`bazar360_chat_msgs_${chatId}`) || '[]');
+  } catch (e) {}
+
   try {
     const q = query(collection(db, 'messages'), where('chatId', '==', chatId), orderBy('timestamp', 'asc'));
     const snap = await getDocs(q);
-    const list: any[] = [];
+    const remoteList: any[] = [];
     snap.forEach((d) => {
-      list.push(d.data());
+      remoteList.push(d.data());
     });
-    return list;
+    
+    // Merge remote and local without duplicates
+    const seenIds = new Set(remoteList.map((m: any) => m.id));
+    for (const loc of localList) {
+      if (!seenIds.has(loc.id)) {
+        remoteList.push(loc);
+        seenIds.add(loc.id);
+      }
+    }
+    return remoteList.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
   } catch (err) {
-    return [];
+    return localList;
   }
 }
 
 export async function dbSaveChat(chat: any): Promise<void> {
+  const preparedChat = {
+    ...chat,
+    lastMessageAt: chat.lastMessageAt || new Date().toISOString(),
+    activeFlag: true,
+    status: 'Active'
+  };
+
+  try {
+    const localChats = JSON.parse(localStorage.getItem('bazar360_chats') || '[]');
+    const filtered = localChats.filter((c: any) => c.id !== chat.id);
+    localStorage.setItem('bazar360_chats', JSON.stringify([preparedChat, ...filtered]));
+  } catch (e) {}
+
   try {
     const ref = doc(db, 'chats', chat.id);
-    await setDoc(ref, {
-      ...chat,
-      lastMessageAt: chat.lastMessageAt || new Date().toISOString(),
-      activeFlag: true,
-      status: 'Active'
-    });
+    await setDoc(ref, preparedChat);
   } catch (err) {
-    console.warn('chat save bypassed:', err);
+    console.warn('chat save bypassed to local cache:', err);
   }
 }
 
 export async function dbFetchChats(userId: string): Promise<any[]> {
+  let localChats: any[] = [];
+  try {
+    const all = JSON.parse(localStorage.getItem('bazar360_chats') || '[]');
+    localChats = all.filter((c: any) => c.participantIds?.includes(userId));
+  } catch (e) {}
+
   try {
     const q = query(collection(db, 'chats'), where('participantIds', 'array-contains', userId));
     const snap = await getDocs(q);
-    const list: any[] = [];
+    const remoteList: any[] = [];
     snap.forEach((d) => {
-      list.push(d.data());
+      remoteList.push(d.data());
     });
-    return list;
+    
+    const seenIds = new Set(remoteList.map((c: any) => c.id));
+    for (const loc of localChats) {
+      if (!seenIds.has(loc.id)) {
+        remoteList.push(loc);
+        seenIds.add(loc.id);
+      }
+    }
+    return remoteList;
   } catch (err) {
-    return [];
+    return localChats;
   }
 }
 
@@ -1640,6 +1510,20 @@ export async function dbSaveNotification(notification: any): Promise<void> {
     });
   } catch (err) {
     console.warn('notification save bypassed:', err);
+  }
+}
+
+export async function dbFetchNotifications(userId: string): Promise<any[]> {
+  try {
+    const q = query(collection(db, 'notifications'), where('userId', '==', userId));
+    const snap = await getDocs(q);
+    const list: any[] = [];
+    snap.forEach((d) => {
+      list.push(d.data());
+    });
+    return list;
+  } catch (err) {
+    return [];
   }
 }
 
@@ -2032,7 +1916,7 @@ export async function dbClaimListingsByPhone(phoneNumber: string, userId: string
     const formattedPhone = phoneNumber.trim();
     
     // Fetch all listings
-    const snap = await getDocs(query(collection(db, 'listings'), limit(100)));
+    const snap = await getDocs(collection(db, 'listings'));
     let claimedCount = 0;
     
     for (const listingDoc of snap.docs) {
@@ -2070,7 +1954,7 @@ export async function dbClaimListingsByPhone(phoneNumber: string, userId: string
         await updateDoc(ref, {
           assignedSalesRepId: userId,
           createdBy: userId,
-          dealerId: userRole === 'Dealer' ? '' : 'private',
+          dealerId: userRole === 'Dealer' ? 'auto-choice-peshawar' : 'private',
           updatedAt: new Date().toISOString()
         });
         claimedCount++;
@@ -2086,18 +1970,25 @@ export async function dbClaimListingsByPhone(phoneNumber: string, userId: string
 
 // Submits a customer inquiry as a new lead, linking the customer to the showroom owner
 export async function dbSubmitLead(leadData: Omit<Lead, 'id' | 'createdAt'>): Promise<string> {
+  const validatedData = validateLead(leadData);
+  const leadId = `lead-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+  const newLead: Lead = {
+    ...(validatedData as any),
+    id: leadId,
+    createdAt: new Date().toISOString()
+  };
+
+  // Always persist locally first so leads are never lost
   try {
-    // Validate input
-    const validatedData = validateLead(leadData);
-    
+    const localLeads = JSON.parse(localStorage.getItem('bazar360_leads') || '[]');
+    localStorage.setItem('bazar360_leads', JSON.stringify([newLead, ...localLeads]));
+  } catch (e) {
+    console.warn('[LocalStorage] Failed to save lead locally:', e);
+  }
+
+  try {
     const leadsColl = collection(db, 'leads');
-    const docRef = doc(leadsColl); // Generate id
-    const newLead: Lead = {
-      ...(validatedData as any), // Cast back to Lead as we validated structure
-      id: docRef.id,
-      createdAt: new Date().toISOString()
-    };
-    
+    const docRef = doc(leadsColl, leadId);
     await setDoc(docRef, newLead);
 
     // Automatically trigger a transactional notification for the showroom owner
@@ -2116,15 +2007,21 @@ export async function dbSubmitLead(leadData: Omit<Lead, 'id' | 'createdAt'>): Pr
       console.warn('[CRM] Failed to create real-time notification document:', notifErr);
     }
 
-    return docRef.id;
+    return leadId;
   } catch (err) {
-    console.error('[CRM] dbSubmitLead error:', err);
-    throw err;
+    console.warn('[CRM] Firestore lead remote sync notice, lead preserved in local CRM store:', err);
+    return leadId;
   }
 }
 
 // Fetches leads for a specific showroom owner
 export async function dbFetchLeadsForOwner(showroomOwnerId: string): Promise<Lead[]> {
+  let localForOwner: Lead[] = [];
+  try {
+    const localLeads: Lead[] = JSON.parse(localStorage.getItem('bazar360_leads') || '[]');
+    localForOwner = localLeads.filter(l => l.showroomOwnerId === showroomOwnerId);
+  } catch (e) {}
+
   try {
     const q = query(
       collection(db, 'leads'),
@@ -2132,11 +2029,20 @@ export async function dbFetchLeadsForOwner(showroomOwnerId: string): Promise<Lea
       orderBy('createdAt', 'desc')
     );
     const snap = await getDocs(q);
-    return snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Lead));
+    const remoteList = snap.docs.map(doc => doc.data() as Lead);
+    
+    // Merge remote and local without duplicates
+    const seenIds = new Set(remoteList.map(l => l.id));
+    for (const loc of localForOwner) {
+      if (!seenIds.has(loc.id)) {
+        remoteList.unshift(loc);
+        seenIds.add(loc.id);
+      }
+    }
+    return remoteList;
   } catch (err) {
-    console.error('[CRM] dbFetchLeadsForOwner error:', err);
-    // Fallback to local storage or empty list
-    return [];
+    console.error('[CRM] dbFetchLeadsForOwner error, fallback to local CRM cache:', err);
+    return localForOwner;
   }
 }
 
@@ -2157,7 +2063,7 @@ export async function dbUpdateLeadStatus(leadId: string, status: Lead['status'])
 export interface ShowroomAnalyticsEvent {
   id: string;
   dealerId: string;
-  actionType: 'view' | 'whatsapp' | 'call' | 'lead' | 'favorite';
+  actionType: 'view' | 'whatsapp' | 'call' | 'lead';
   vehicleId: string;
   vehicleTitle: string;
   timestamp: string;
@@ -2168,7 +2074,7 @@ export interface ShowroomAnalyticsEvent {
 // Track customer engagement events securely in Firestore
 export async function dbTrackShowroomEvent(
   dealerId: string, 
-  actionType: 'view' | 'whatsapp' | 'call' | 'lead' | 'favorite',
+  actionType: 'view' | 'whatsapp' | 'call' | 'lead',
   vehicleId?: string,
   vehicleTitle?: string
 ): Promise<void> {
@@ -2198,136 +2104,6 @@ export async function dbTrackShowroomEvent(
   } catch (err) {
     console.warn('[Analytics] Silent event track bypass:', err);
   }
-}
-
-// Dealer Inventory Subscription Services
-export async function dbToggleDealerSubscription(dealerId: string, dealerName: string, subscriberId: string, subscriberEmail?: string): Promise<boolean> {
-  const subDocId = `sub-${dealerId}-${subscriberId}`;
-  const subRef = doc(db, 'dealer_subscriptions', subDocId);
-
-  let isSubscribed = false;
-
-  try {
-    const existingSnap = await getDoc(subRef);
-    if (existingSnap.exists() && existingSnap.data()?.active) {
-      // Unsubscribe
-      await updateDoc(subRef, { active: false, updatedAt: new Date().toISOString() });
-      isSubscribed = false;
-    } else {
-      // Subscribe
-      await setDoc(subRef, {
-        id: subDocId,
-        dealerId,
-        dealerName: dealerName || 'Showroom',
-        subscriberId,
-        subscriberEmail: subscriberEmail || '',
-        createdAt: new Date().toISOString(),
-        active: true
-      }, { merge: true });
-      isSubscribed = true;
-    }
-
-    // Sync localStorage for instant offline state
-    try {
-      const currentSubs = JSON.parse(localStorage.getItem('bazar360_subscribed_dealers') || '[]');
-      if (isSubscribed) {
-        if (!currentSubs.includes(dealerId)) currentSubs.push(dealerId);
-      } else {
-        const filtered = currentSubs.filter((id: string) => id !== dealerId);
-        localStorage.setItem('bazar360_subscribed_dealers', JSON.stringify(filtered));
-        return false;
-      }
-      localStorage.setItem('bazar360_subscribed_dealers', JSON.stringify(currentSubs));
-    } catch {}
-
-    return isSubscribed;
-  } catch (err) {
-    console.warn('[Subscriptions] Firestore subscription error, using local state:', err);
-    try {
-      const currentSubs = JSON.parse(localStorage.getItem('bazar360_subscribed_dealers') || '[]');
-      const idx = currentSubs.indexOf(dealerId);
-      if (idx > -1) {
-        currentSubs.splice(idx, 1);
-        isSubscribed = false;
-      } else {
-        currentSubs.push(dealerId);
-        isSubscribed = true;
-      }
-      localStorage.setItem('bazar360_subscribed_dealers', JSON.stringify(currentSubs));
-    } catch {}
-    return isSubscribed;
-  }
-}
-
-export async function dbFetchDealerSubscriptionStatus(dealerId: string, subscriberId: string): Promise<boolean> {
-  try {
-    const subDocId = `sub-${dealerId}-${subscriberId}`;
-    const snap = await getDoc(doc(db, 'dealer_subscriptions', subDocId));
-    if (snap.exists()) {
-      return !!snap.data()?.active;
-    }
-    const currentSubs = JSON.parse(localStorage.getItem('bazar360_subscribed_dealers') || '[]');
-    return currentSubs.includes(dealerId);
-  } catch {
-    try {
-      const currentSubs = JSON.parse(localStorage.getItem('bazar360_subscribed_dealers') || '[]');
-      return currentSubs.includes(dealerId);
-    } catch {
-      return false;
-    }
-  }
-}
-
-// Showroom Staff & Team Management Services
-export async function dbSaveTeamMember(dealerId: string, member: ShowroomMember): Promise<ShowroomMember[]> {
-  const dealerRef = doc(db, 'dealers', dealerId);
-  const dealerSnap = await getDoc(dealerRef);
-  let team: ShowroomMember[] = [];
-
-  if (dealerSnap.exists()) {
-    team = dealerSnap.data()?.teamMembers || [];
-  }
-
-  const existingIdx = team.findIndex(m => m.id === member.id);
-  if (existingIdx > -1) {
-    team[existingIdx] = member;
-  } else {
-    team.push(member);
-  }
-
-  await updateDoc(dealerRef, {
-    teamMembers: team,
-    updatedAt: new Date().toISOString()
-  });
-
-  if (cachedDealers) {
-    cachedDealers = cachedDealers.map(d => d.id === dealerId ? { ...d, teamMembers: team } : d);
-  }
-
-  return team;
-}
-
-export async function dbDeleteTeamMember(dealerId: string, memberId: string): Promise<ShowroomMember[]> {
-  const dealerRef = doc(db, 'dealers', dealerId);
-  const dealerSnap = await getDoc(dealerRef);
-  let team: ShowroomMember[] = [];
-
-  if (dealerSnap.exists()) {
-    team = dealerSnap.data()?.teamMembers || [];
-  }
-
-  team = team.filter(m => m.id !== memberId);
-
-  await updateDoc(dealerRef, {
-    teamMembers: team,
-    updatedAt: new Date().toISOString()
-  });
-
-  if (cachedDealers) {
-    cachedDealers = cachedDealers.map(d => d.id === dealerId ? { ...d, teamMembers: team } : d);
-  }
-
-  return team;
 }
 
 // Silent auto-save service booking protocol & CRM lead generator
@@ -2417,557 +2193,6 @@ export async function dbFetchServiceBookings(userPhoneOrUid?: string): Promise<S
     }
   }
 }
-
-export async function dbAddCrmInternalNote(recordId: string, notes: any[], collectionName = 'service_bookings'): Promise<void> {
-  try {
-    const ref = doc(db, collectionName, recordId);
-    await updateDoc(ref, {
-      internalNotes: notes,
-      updatedAt: new Date().toISOString()
-    });
-
-    // Also record audit log
-    const auditId = `audit-note-${Date.now()}`;
-    await setDoc(doc(db, 'auditLogs', auditId), {
-      id: auditId,
-      bookingId: recordId,
-      action: 'Internal Note Added',
-      details: `Staff added an internal CRM note to record ${recordId}`,
-      timestamp: new Date().toISOString(),
-      activeFlag: true,
-      status: 'Logged'
-    });
-  } catch (err) {
-    console.warn('[CRM] dbAddCrmInternalNote Firestore update bypassed, updating localStorage cache:', err);
-    try {
-      const cacheKey = collectionName === 'service_bookings' ? 'bazar360_service_bookings' : 'bazar360_leads';
-      const items = JSON.parse(localStorage.getItem(cacheKey) || '[]');
-      const updated = items.map((i: any) => i.id === recordId ? { ...i, internalNotes: notes } : i);
-      localStorage.setItem(cacheKey, JSON.stringify(updated));
-    } catch {}
-  }
-}
-
-export async function dbUpdateServiceBookingStatus(bookingId: string, status: ServiceBooking['status']): Promise<void> {
-  try {
-    const ref = doc(db, 'service_bookings', bookingId);
-    await updateDoc(ref, {
-      status,
-      updatedAt: new Date().toISOString()
-    });
-
-    // Log status change to auditLogs
-    const auditId = `audit-status-${Date.now()}`;
-    await setDoc(doc(db, 'auditLogs', auditId), {
-      id: auditId,
-      bookingId,
-      action: 'Status Updated',
-      details: `Service booking ${bookingId} status changed to ${status}`,
-      status,
-      timestamp: new Date().toISOString(),
-      activeFlag: true
-    });
-  } catch (err) {
-    console.warn('[ServiceBooking] Status update Firestore bypassed, updating localStorage:', err);
-    try {
-      const items = JSON.parse(localStorage.getItem('bazar360_service_bookings') || '[]');
-      const updated = items.map((i: any) => i.id === bookingId ? { ...i, status } : i);
-      localStorage.setItem('bazar360_service_bookings', JSON.stringify(updated));
-    } catch {}
-  }
-}
-
-// ==========================================
-// ENTERPRISE MESSAGING & CONVERSATION ENGINE
-// ==========================================
-
-export async function dbCreateOrGetConversation(params: {
-  senderUid: string;
-  senderName: string;
-  senderAvatar?: string;
-  senderRole?: string;
-  recipientUid: string;
-  recipientName: string;
-  recipientAvatar?: string;
-  recipientRole?: string;
-  relatedListing?: { id: string; title: string; image: string; price: number };
-  relatedShowroomId?: string;
-  relatedServiceId?: string;
-  relatedLeadId?: string;
-  initialMessage?: string;
-}): Promise<string> {
-  const {
-    senderUid, senderName, senderAvatar, senderRole = 'Buyer',
-    recipientUid, recipientName, recipientAvatar, recipientRole = 'Seller',
-    relatedListing, relatedShowroomId, relatedServiceId, relatedLeadId,
-    initialMessage
-  } = params;
-
-  try {
-    // 1. Check existing conversations for matching participants
-    const q = query(
-      collection(db, 'conversations'),
-      where('participants', 'array-contains', senderUid)
-    );
-    const snap = await getDocs(q);
-    let existingConv: Conversation | null = null;
-
-    snap.forEach((docSnap) => {
-      const data = docSnap.data() as Conversation;
-      if (data.participants && data.participants.includes(recipientUid)) {
-        if (relatedListing?.id ? data.relatedListingId === relatedListing.id : true) {
-          existingConv = { ...data, id: docSnap.id };
-        }
-      }
-    });
-
-    if (existingConv) {
-      const convId = (existingConv as Conversation).id;
-      if (initialMessage) {
-        await dbSendMessage({
-          conversationId: convId,
-          senderId: senderUid,
-          senderName,
-          senderAvatar,
-          recipientId: recipientUid,
-          message: initialMessage,
-          type: relatedListing ? 'listing_inquiry' : 'text',
-          metadata: relatedListing ? {
-            listingId: relatedListing.id,
-            listingTitle: relatedListing.title,
-            listingImage: relatedListing.image,
-            listingPrice: relatedListing.price
-          } : undefined
-        });
-      }
-      return convId;
-    }
-
-    // 2. Create brand new conversation
-    const convId = `conv-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-    const now = new Date().toISOString();
-
-    const newConversation: Conversation = {
-      id: convId,
-      participants: [senderUid, recipientUid],
-      participantDetails: {
-        [senderUid]: { name: senderName, avatar: senderAvatar || '', role: senderRole },
-        [recipientUid]: { name: recipientName, avatar: recipientAvatar || '', role: recipientRole }
-      },
-      relatedListingId: relatedListing?.id,
-      relatedListingTitle: relatedListing?.title,
-      relatedListingImage: relatedListing?.image,
-      relatedListingPrice: relatedListing?.price,
-      relatedShowroomId,
-      relatedServiceId,
-      relatedLeadId,
-      lastMessage: initialMessage || 'Conversation started',
-      lastMessageTime: now,
-      lastMessageSenderId: senderUid,
-      unreadCount: {
-        [senderUid]: 0,
-        [recipientUid]: initialMessage ? 1 : 0
-      },
-      status: 'Active',
-      createdAt: now,
-      updatedAt: now
-    };
-
-    await setDoc(doc(db, 'conversations', convId), newConversation);
-
-    // Offline cache update
-    try {
-      const cached = JSON.parse(localStorage.getItem('bazar360_conversations') || '[]');
-      cached.unshift(newConversation);
-      localStorage.setItem('bazar360_conversations', JSON.stringify(cached.slice(0, 50)));
-    } catch {}
-
-    if (initialMessage) {
-      await dbSendMessage({
-        conversationId: convId,
-        senderId: senderUid,
-        senderName,
-        senderAvatar,
-        recipientId: recipientUid,
-        message: initialMessage,
-        type: relatedListing ? 'listing_inquiry' : 'text',
-        metadata: relatedListing ? {
-          listingId: relatedListing.id,
-          listingTitle: relatedListing.title,
-          listingImage: relatedListing.image,
-          listingPrice: relatedListing.price
-        } : undefined
-      });
-    }
-
-    return convId;
-  } catch (err) {
-    console.warn('[Messaging] Firestore create conversation bypass, using local store:', err);
-    const fallbackId = `conv-${Date.now()}`;
-    const now = new Date().toISOString();
-    const fallbackConv: Conversation = {
-      id: fallbackId,
-      participants: [senderUid, recipientUid],
-      participantDetails: {
-        [senderUid]: { name: senderName, avatar: senderAvatar, role: senderRole },
-        [recipientUid]: { name: recipientName, avatar: recipientAvatar, role: recipientRole }
-      },
-      relatedListingId: relatedListing?.id,
-      relatedListingTitle: relatedListing?.title,
-      relatedListingImage: relatedListing?.image,
-      relatedListingPrice: relatedListing?.price,
-      lastMessage: initialMessage || 'Conversation started',
-      lastMessageTime: now,
-      lastMessageSenderId: senderUid,
-      unreadCount: { [senderUid]: 0, [recipientUid]: 1 },
-      status: 'Active',
-      createdAt: now,
-      updatedAt: now
-    };
-
-    try {
-      const cached = JSON.parse(localStorage.getItem('bazar360_conversations') || '[]');
-      cached.unshift(fallbackConv);
-      localStorage.setItem('bazar360_conversations', JSON.stringify(cached));
-    } catch {}
-
-    return fallbackId;
-  }
-}
-
-export async function dbFetchUserConversations(userUidOrPhone: string): Promise<Conversation[]> {
-  try {
-    const q = query(
-      collection(db, 'conversations'),
-      where('participants', 'array-contains', userUidOrPhone)
-    );
-    const snap = await getDocs(q);
-    const list: Conversation[] = [];
-    snap.forEach((docSnap) => {
-      list.push({ ...docSnap.data() as Conversation, id: docSnap.id });
-    });
-
-    // Merge local cache
-    let localConvs: Conversation[] = [];
-    try {
-      localConvs = JSON.parse(localStorage.getItem('bazar360_conversations') || '[]');
-    } catch {}
-
-    const combined = [...list];
-    localConvs.forEach(lc => {
-      if (lc.participants?.includes(userUidOrPhone) && !combined.some(c => c.id === lc.id)) {
-        combined.push(lc);
-      }
-    });
-
-    return combined.sort((a, b) => new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime());
-  } catch (err) {
-    console.warn('[Messaging] Fetching conversations fallback to local cache:', err);
-    try {
-      const localConvs: Conversation[] = JSON.parse(localStorage.getItem('bazar360_conversations') || '[]');
-      return localConvs.filter(c => c.participants?.includes(userUidOrPhone));
-    } catch {
-      return [];
-    }
-  }
-}
-
-export async function dbFetchConversationMessages(conversationId: string): Promise<DirectMessage[]> {
-  try {
-    const messagesColl = collection(db, `conversations/${conversationId}/messages`);
-    const q = query(messagesColl, orderBy('createdAt', 'asc'));
-    const snap = await getDocs(q);
-    const list: DirectMessage[] = [];
-    snap.forEach((docSnap) => {
-      list.push({ ...docSnap.data() as DirectMessage, id: docSnap.id });
-    });
-
-    // Offline cache merge
-    let localMsgs: DirectMessage[] = [];
-    try {
-      localMsgs = JSON.parse(localStorage.getItem(`bazar360_msgs_${conversationId}`) || '[]');
-    } catch {}
-
-    const combined = [...list];
-    localMsgs.forEach(lm => {
-      if (!combined.some(m => m.id === lm.id)) {
-        combined.push(lm);
-      }
-    });
-
-    return combined.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-  } catch (err) {
-    console.warn('[Messaging] Fetching messages fallback to local cache:', err);
-    try {
-      return JSON.parse(localStorage.getItem(`bazar360_msgs_${conversationId}`) || '[]');
-    } catch {
-      return [];
-    }
-  }
-}
-
-export async function dbSendMessage(params: {
-  conversationId: string;
-  senderId: string;
-  senderName: string;
-  senderAvatar?: string;
-  recipientId: string;
-  message: string;
-  attachments?: Array<{ url: string; name: string; type: 'image' | 'document' | 'pdf' }>;
-  type?: DirectMessage['type'];
-  metadata?: DirectMessage['metadata'];
-}): Promise<string> {
-  const {
-    conversationId, senderId, senderName, senderAvatar, recipientId, message,
-    attachments, type = 'text', metadata
-  } = params;
-
-  const msgId = `msg-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
-  const now = new Date().toISOString();
-
-  const newMsg: DirectMessage = {
-    id: msgId,
-    conversationId,
-    senderId,
-    senderName,
-    senderAvatar,
-    recipientId,
-    message,
-    attachments,
-    type,
-    metadata,
-    read: false,
-    delivered: true,
-    createdAt: now
-  };
-
-  try {
-    // 1. Add message doc
-    const msgRef = doc(db, `conversations/${conversationId}/messages`, msgId);
-    await setDoc(msgRef, newMsg);
-
-    // 2. Update parent conversation metadata
-    const convRef = doc(db, 'conversations', conversationId);
-    const convSnap = await getDoc(convRef);
-    let currentUnread = 1;
-    if (convSnap.exists()) {
-      const data = convSnap.data() as Conversation;
-      currentUnread = (data.unreadCount?.[recipientId] || 0) + 1;
-    }
-
-    await updateDoc(convRef, {
-      lastMessage: message,
-      lastMessageTime: now,
-      lastMessageSenderId: senderId,
-      [`unreadCount.${recipientId}`]: currentUnread,
-      updatedAt: now
-    });
-
-    // 3. Trigger notification document
-    await dbCreateNotification({
-      userId: recipientId,
-      title: `📩 New Message from ${senderName}`,
-      body: message.length > 80 ? message.substring(0, 80) + '...' : message,
-      type: 'messages',
-      link: `conversation:${conversationId}`,
-      metadata: { conversationId, senderId }
-    });
-
-    // 4. Update local cache
-    try {
-      const localMsgs = JSON.parse(localStorage.getItem(`bazar360_msgs_${conversationId}`) || '[]');
-      localMsgs.push(newMsg);
-      localStorage.setItem(`bazar360_msgs_${conversationId}`, JSON.stringify(localMsgs));
-    } catch {}
-
-    return msgId;
-  } catch (err) {
-    console.warn('[Messaging] Send message Firestore bypass, saving locally:', err);
-    try {
-      const localMsgs = JSON.parse(localStorage.getItem(`bazar360_msgs_${conversationId}`) || '[]');
-      localMsgs.push(newMsg);
-      localStorage.setItem(`bazar360_msgs_${conversationId}`, JSON.stringify(localMsgs));
-    } catch {}
-    return msgId;
-  }
-}
-
-export async function dbMarkConversationRead(conversationId: string, userId: string): Promise<void> {
-  try {
-    const convRef = doc(db, 'conversations', conversationId);
-    await updateDoc(convRef, {
-      [`unreadCount.${userId}`]: 0,
-      updatedAt: new Date().toISOString()
-    });
-  } catch (err) {
-    console.warn('[Messaging] dbMarkConversationRead error:', err);
-  }
-}
-
-// ==========================================
-// UNIFIED NOTIFICATION CENTER SERVICES
-// ==========================================
-
-export async function dbCreateNotification(data: Omit<UserNotification, 'id' | 'createdAt' | 'read'>): Promise<string> {
-  const notifId = `notif-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
-  const now = new Date().toISOString();
-  const notif: UserNotification = {
-    ...data,
-    id: notifId,
-    read: false,
-    createdAt: now
-  };
-
-  try {
-    await setDoc(doc(db, 'notifications', notifId), notif);
-
-    // Save offline cache
-    try {
-      const localNotifs = JSON.parse(localStorage.getItem(`bazar360_notifs_${data.userId}`) || '[]');
-      localNotifs.unshift(notif);
-      localStorage.setItem(`bazar360_notifs_${data.userId}`, JSON.stringify(localNotifs.slice(0, 50)));
-    } catch {}
-
-    return notifId;
-  } catch (err) {
-    console.warn('[Notifications] Firestore create notification error, using local cache:', err);
-    try {
-      const localNotifs = JSON.parse(localStorage.getItem(`bazar360_notifs_${data.userId}`) || '[]');
-      localNotifs.unshift(notif);
-      localStorage.setItem(`bazar360_notifs_${data.userId}`, JSON.stringify(localNotifs.slice(0, 50)));
-    } catch {}
-    return notifId;
-  }
-}
-
-export async function dbFetchNotifications(userId: string): Promise<UserNotification[]> {
-  try {
-    const q = query(
-      collection(db, 'notifications'),
-      where('userId', '==', userId),
-      orderBy('createdAt', 'desc'),
-      limit(50)
-    );
-    const snap = await getDocs(q);
-    const list: UserNotification[] = [];
-    snap.forEach((docSnap) => {
-      list.push({ ...docSnap.data() as UserNotification, id: docSnap.id });
-    });
-
-    // Merge offline cache
-    let localNotifs: UserNotification[] = [];
-    try {
-      localNotifs = JSON.parse(localStorage.getItem(`bazar360_notifs_${userId}`) || '[]');
-    } catch {}
-
-    const combined = [...list];
-    localNotifs.forEach(ln => {
-      if (!combined.some(n => n.id === ln.id)) {
-        combined.push(ln);
-      }
-    });
-
-    return combined.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  } catch (err) {
-    console.warn('[Notifications] Fetching notifications fallback to local cache:', err);
-    try {
-      return JSON.parse(localStorage.getItem(`bazar360_notifs_${userId}`) || '[]');
-    } catch {
-      return [];
-    }
-  }
-}
-
-export async function dbMarkNotificationRead(notifId: string, userId?: string): Promise<void> {
-  try {
-    const ref = doc(db, 'notifications', notifId);
-    await updateDoc(ref, { read: true });
-
-    if (userId) {
-      try {
-        const localNotifs: UserNotification[] = JSON.parse(localStorage.getItem(`bazar360_notifs_${userId}`) || '[]');
-        const updated = localNotifs.map(n => n.id === notifId ? { ...n, read: true } : n);
-        localStorage.setItem(`bazar360_notifs_${userId}`, JSON.stringify(updated));
-      } catch {}
-    }
-  } catch (err) {
-    console.warn('[Notifications] dbMarkNotificationRead error:', err);
-  }
-}
-
-export async function dbMarkAllNotificationsRead(userId: string): Promise<void> {
-  try {
-    const notifs = await dbFetchNotifications(userId);
-    const unread = notifs.filter(n => !n.read);
-    const updatePromises = unread.map(n => updateDoc(doc(db, 'notifications', n.id), { read: true }));
-    await Promise.all(updatePromises);
-
-    try {
-      const localNotifs: UserNotification[] = JSON.parse(localStorage.getItem(`bazar360_notifs_${userId}`) || '[]');
-      const updated = localNotifs.map(n => ({ ...n, read: true }));
-      localStorage.setItem(`bazar360_notifs_${userId}`, JSON.stringify(updated));
-    } catch {}
-  } catch (err) {
-    console.warn('[Notifications] dbMarkAllNotificationsRead error:', err);
-  }
-}
-
-// ==========================================
-// SHOWROOM REVIEWS & BUSINESS RESPONSES
-// ==========================================
-
-export async function dbAddDealerReview(dealerId: string, review: Omit<DetailedReview, 'id' | 'date'>): Promise<string> {
-  const revId = `rev-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
-  const now = new Date().toISOString();
-  const newReview: DetailedReview = {
-    ...review,
-    id: revId,
-    date: now
-  };
-
-  try {
-    const revRef = doc(db, `dealers/${dealerId}/reviews`, revId);
-    await setDoc(revRef, newReview);
-
-    // Update dealer average rating
-    try {
-      const dealerSnap = await getDoc(doc(db, 'dealers', dealerId));
-      if (dealerSnap.exists()) {
-        const dData = dealerSnap.data() as Dealer;
-        const currentRating = dData.rating || 4.8;
-        const newRating = Number(((currentRating + review.rating) / 2).toFixed(1));
-        await updateDoc(doc(db, 'dealers', dealerId), { rating: newRating });
-      }
-    } catch {}
-
-    return revId;
-  } catch (err) {
-    console.warn('[Reviews] dbAddDealerReview Firestore error, saving locally:', err);
-    try {
-      const localRevs = JSON.parse(localStorage.getItem(`bazar360_reviews_${dealerId}`) || '[]');
-      localRevs.unshift(newReview);
-      localStorage.setItem(`bazar360_reviews_${dealerId}`, JSON.stringify(localRevs));
-    } catch {}
-    return revId;
-  }
-}
-
-export async function dbReplyToReview(dealerId: string, reviewId: string, replyText: string, authorName: string): Promise<void> {
-  const replyObj = {
-    text: replyText,
-    date: new Date().toISOString(),
-    author: authorName
-  };
-
-  try {
-    const revRef = doc(db, `dealers/${dealerId}/reviews`, reviewId);
-    await updateDoc(revRef, { reply: replyObj });
-  } catch (err) {
-    console.warn('[Reviews] dbReplyToReview error:', err);
-  }
-}
-
-
 
 
 

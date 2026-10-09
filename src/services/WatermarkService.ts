@@ -27,7 +27,7 @@ export const applyWatermark = async (imageFile: File): Promise<string> => {
 
         // Calculate watermark scale based on image width
         // Ensure watermark size is proportional
-        const baseSize = Math.max(14, Math.floor(canvas.width * 0.022));
+        const baseSize = Math.max(16, Math.floor(canvas.width * 0.025));
         ctx.font = `bold ${baseSize}px "Inter", "Space Grotesk", sans-serif`;
         
         const watermarkText = 'Bazar360.online';
@@ -35,20 +35,34 @@ export const applyWatermark = async (imageFile: File): Promise<string> => {
         const textWidth = textMetrics.width;
         
         // Positioning details: bottom right with standard margin
-        const padding = baseSize * 1.2;
+        const padding = baseSize * 0.8;
         const x = canvas.width - textWidth - padding;
         const y = canvas.height - padding;
 
-        // Draw a clean, elegant semi-transparent text stamp with subtle drop-shadow for legibility on all backgrounds
+        // Draw a premium glassmorphic background capsule for the watermark text
+        const badgeWidth = textWidth + padding;
+        const badgeHeight = baseSize * 1.8;
+        const badgeX = x - padding / 2;
+        const badgeY = y - baseSize * 1.2;
+
         ctx.save();
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.45)'; // Sleek semi-transparent white
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';      // Dark shadow for high contrast
-        ctx.shadowBlur = 4;
-        ctx.shadowOffsetX = 1;
-        ctx.shadowOffsetY = 1;
+        // Soft dark backdrop shadow
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+        ctx.shadowBlur = 15;
         
-        ctx.fillText(watermarkText, x, y);
+        // Draw rounded rectangle
+        ctx.beginPath();
+        const radius = badgeHeight / 2;
+        ctx.roundRect ? ctx.roundRect(badgeX, badgeY, badgeWidth, badgeHeight, radius) : ctx.rect(badgeX, badgeY, badgeWidth, badgeHeight);
+        ctx.fill();
         ctx.restore();
+
+        // Draw watermark text (High contrast Golden / Orange aesthetic)
+        ctx.fillStyle = '#FFFFFF';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+        ctx.shadowBlur = 4;
+        ctx.fillText(watermarkText, x, y);
 
         // Convert canvas to Data URL (High quality JPEG)
         resolve(canvas.toDataURL('image/jpeg', 0.88));

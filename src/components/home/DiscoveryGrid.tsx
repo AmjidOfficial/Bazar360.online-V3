@@ -22,20 +22,20 @@ export function DiscoveryGrid({ lang, setTab, setSelectedCategory, setSearchQuer
 
   // Flat and clean line-art category items
   const categories = [
-    { name: 'Sedans', icon: <Car className="w-5 h-5 text-slate-700 dark:text-text-muted" />, count: '240+ listings', query: 'Sedan' },
-    { name: 'SUVs & Jeeps', icon: <Compass className="w-5 h-5 text-slate-700 dark:text-text-muted" />, count: '180+ listings', query: 'SUV' },
-    { name: 'Hatchbacks', icon: <Layers className="w-5 h-5 text-slate-700 dark:text-text-muted" />, count: '110+ listings', query: 'Hatchback' },
-    { name: 'EVs & Hybrids', icon: <Car className="w-5 h-5 text-slate-700 dark:text-text-muted" />, count: '65+ listings', query: 'Hybrid' },
-    { name: 'Luxury Stock', icon: <Car className="w-5 h-5 text-slate-700 dark:text-text-muted" />, count: '40+ listings', query: 'Mercedes' },
-    { name: 'Pickup Trucks', icon: <Layers className="w-5 h-5 text-slate-700 dark:text-text-muted" />, count: '30+ listings', query: 'Pickup' },
+    { name: 'Sedans', icon: <Car className="w-5 h-5 text-slate-700 dark:text-slate-300" />, count: '240+ listings', query: 'Sedan' },
+    { name: 'SUVs & Jeeps', icon: <Compass className="w-5 h-5 text-slate-700 dark:text-slate-300" />, count: '180+ listings', query: 'SUV' },
+    { name: 'Hatchbacks', icon: <Layers className="w-5 h-5 text-slate-700 dark:text-slate-300" />, count: '110+ listings', query: 'Hatchback' },
+    { name: 'EVs & Hybrids', icon: <Car className="w-5 h-5 text-slate-700 dark:text-slate-300" />, count: '65+ listings', query: 'Hybrid' },
+    { name: 'Luxury Stock', icon: <Car className="w-5 h-5 text-slate-700 dark:text-slate-300" />, count: '40+ listings', query: 'Mercedes' },
+    { name: 'Pickup Trucks', icon: <Layers className="w-5 h-5 text-slate-700 dark:text-slate-300" />, count: '30+ listings', query: 'Pickup' },
   ];
 
   // Flat price bracket items
   const budgets = [
-    { label: 'Under 30 Lakh', count: 'Rs. 30 Lakh Max', query: '30 Lakh' },
-    { label: '30 - 50 Lakh', count: 'Rs. 30 - 50 Lakh', query: '50 Lakh' },
-    { label: '50 Lakh - 1 Crore', count: 'Rs. 50 Lakh - 1 Crore', query: '1 Crore' },
-    { label: '1 - 2 Crore', count: 'Rs. 1 - 2 Crore', query: '2 Crore' },
+    { label: 'Under 30 Lakh', count: 'Rs. 3.0M Max', query: '30 Lakh' },
+    { label: '30 - 50 Lakh', count: 'Rs. 3.0M - 5.0M', query: '50 Lakh' },
+    { label: '50 Lakh - 1 Crore', count: 'Rs. 5.0M - 10.0M', query: '1 Crore' },
+    { label: '1 - 2 Crore', count: 'Rs. 10.0M - 20.0M', query: '2 Crore' },
     { label: 'Above 2 Crore', count: 'Premium Stock', query: 'Above 2 Crore' }
   ];
 
@@ -66,16 +66,16 @@ export function DiscoveryGrid({ lang, setTab, setSelectedCategory, setSearchQuer
   };
 
   return (
-    <section className="py-12 bg-slate-50 dark:bg-bg-primary border-y border-slate-200 dark:border-border-main" id="clean-room-discovery">
+    <section className="py-12 bg-slate-50 dark:bg-slate-950 border-y border-slate-200 dark:border-slate-800" id="clean-room-discovery">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 text-left">
           <div className="space-y-1.5">
-            <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-[var(--color-text-header)] uppercase tracking-tight">
+            <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white uppercase tracking-tight">
               {isUrdu ? 'گاڑیوں کو ڈائریکٹری سے تلاش کریں' : 'Browse Classifieds'}
             </h2>
-            <p className="text-text-muted dark:text-text-muted text-xs font-medium max-w-xl">
+            <p className="text-slate-500 dark:text-slate-400 text-xs font-medium max-w-xl">
               {isUrdu 
                 ? 'اپنی پسندیدہ قسم، بجٹ، یا شہر کے لحاظ سے فلٹر کر کے جلدی تلاش کریں۔'
                 : 'Instantly query current dealer inventory by make, pre-sorted budget segments, or location.'}
@@ -154,7 +154,7 @@ export function DiscoveryGrid({ lang, setTab, setSelectedCategory, setSearchQuer
                     <CircleDollarSign className="w-6 h-6 text-[var(--color-text-main)]" />
                   </div>
                   <h3 className="font-bold text-xs text-[var(--color-text-main)] uppercase tracking-tight mb-1">{bud.label}</h3>
-                  <p className="text-[10px] font-mono text-text-muted dark:text-text-muted font-semibold">{bud.count}</p>
+                  <p className="text-[10px] font-mono text-slate-400 dark:text-slate-500 font-semibold">{bud.count}</p>
                 </div>
               ))}
             </div>

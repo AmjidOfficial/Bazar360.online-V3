@@ -346,6 +346,37 @@ service cloud.firestore {
       allow read, write: if true;
     }
 
+    match /visitor_logs/{logId} {
+      allow read, write: if true;
+    }
+
+    match /search_logs/{logId} {
+      allow read, write: if true;
+    }
+
+    match /activity_logs/{logId} {
+      allow read, write: if true;
+    }
+
+    match /seo_pages/{pageId} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+
+    match /entity_graph/{nodeId} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+
+    match /ratings/{ratingId} {
+      allow read: if true;
+      allow write: if isSignedIn() || true;
+    }
+
+    match /admin_actions/{actionId} {
+      allow read, write: if isSignedIn();
+    }
+
     match /recentViews/{viewId} {
       allow read, write: if true;
     }

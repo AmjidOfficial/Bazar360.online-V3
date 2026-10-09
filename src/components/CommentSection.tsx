@@ -99,14 +99,14 @@ export default function CommentSection({
         return 'bg-red-500/15 text-red-400 border border-red-500/30';
       case 'Showroom Owner':
       case 'Dealer':
-        return 'bg-[var(--color-accent-main)]/15 text-[var(--color-accent-main)] border border-[var(--color-accent-main)]/30';
+        return 'bg-[#38BDF8]/15 text-[#38BDF8] border border-[#38BDF8]/30';
       case 'Sales Rep':
       case 'Sales Representative':
-        return 'bg-[var(--color-accent-main)]/15 text-[var(--color-accent-main)] border border-[var(--color-accent-main)]/30';
+        return 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30';
       case 'Private Seller':
         return 'bg-amber-500/15 text-amber-400 border border-amber-500/30';
       default:
-        return 'bg-slate-700/40 text-text-muted border border-slate-600/30';
+        return 'bg-slate-700/40 text-slate-300 border border-slate-600/30';
     }
   };
 
@@ -129,8 +129,8 @@ export default function CommentSection({
   };
 
   return (
-    <div className="border-t border-white/5 bg-[var(--color-bg-secondary)]/40 p-4 space-y-4" id={`comment-section-${postId}`}>
-      <div className="flex items-center justify-between text-xs text-text-muted">
+    <div className="border-t border-white/5 bg-[#121824]/40 p-4 space-y-4" id={`comment-section-${postId}`}>
+      <div className="flex items-center justify-between text-xs text-slate-400">
         <span className="font-mono uppercase font-semibold">Comments ({commentsCount || comments.length})</span>
       </div>
 
@@ -143,12 +143,12 @@ export default function CommentSection({
       {/* Comment List */}
       <div className="space-y-3 max-h-[300px] overflow-y-auto no-scrollbar scroll-smooth" id={`comment-list-${postId}`}>
         {loading && comments.length === 0 ? (
-          <div className="flex justify-center items-center py-6 text-text-muted space-x-2">
+          <div className="flex justify-center items-center py-6 text-slate-400 space-x-2">
             <Loader2 size={16} className="animate-spin text-[#FF6B00]" />
             <span className="text-xs font-mono">Retrieving comments...</span>
           </div>
         ) : comments.length === 0 ? (
-          <div className="text-center py-6 text-text-muted text-xs flex flex-col items-center justify-center space-y-1">
+          <div className="text-center py-6 text-slate-500 text-xs flex flex-col items-center justify-center space-y-1">
             <MessageSquare size={18} className="opacity-40" />
             <span>No comments yet. Be the first to express your thoughts!</span>
           </div>
@@ -156,11 +156,11 @@ export default function CommentSection({
           comments.map((comment) => (
             <div
               key={comment.id}
-              className="flex items-start gap-2.5 p-2.5 rounded-2xl bg-bg-secondary/40 border border-white/5 hover:border-white/10 duration-100"
+              className="flex items-start gap-2.5 p-2.5 rounded-2xl bg-slate-900/40 border border-white/5 hover:border-white/10 duration-100"
               id={`comment-item-${comment.id}`}
             >
               {/* Avatar */}
-              <div className="w-8 h-8 rounded-full overflow-hidden bg-bg-tertiary shrink-0 border border-white/10 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-800 shrink-0 border border-white/10 flex items-center justify-center">
                 {comment.userAvatar ? (
                   <img
                     src={comment.userAvatar}
@@ -169,7 +169,7 @@ export default function CommentSection({
                     referrerPolicy="no-referrer"
                   />
                 ) : (
-                  <span className="text-xs font-mono font-black text-text-muted">
+                  <span className="text-xs font-mono font-black text-slate-300">
                     {comment.userName.charAt(0).toUpperCase()}
                   </span>
                 )}
@@ -178,17 +178,17 @@ export default function CommentSection({
               {/* Text content */}
               <div className="flex-1 space-y-1">
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="text-xs font-bold text-[var(--color-text-header)] leading-none">
+                  <span className="text-xs font-bold text-white leading-none">
                     {comment.userName}
                   </span>
                   <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono font-black uppercase tracking-wider scale-90 ${getRoleBadgeColor(comment.userRole)}`}>
                     {comment.userRole}
                   </span>
-                  <span className="text-[10px] text-text-muted font-mono">
+                  <span className="text-[10px] text-slate-500 font-mono">
                     • {formatTime(comment.createdAt)}
                   </span>
                 </div>
-                <p className="text-xs text-text-muted leading-relaxed font-sans text-left break-words">
+                <p className="text-xs text-slate-300 leading-relaxed font-sans text-left break-words">
                   {comment.text}
                 </p>
               </div>
@@ -207,7 +207,7 @@ export default function CommentSection({
               value={newCommentText}
               onChange={(e) => setNewCommentText(e.target.value)}
               placeholder="Write a supportive comment..."
-              className="w-full bg-bg-secondary border border-white/5 rounded-2xl py-2 pl-4 pr-10 text-xs text-[var(--color-text-header)] placeholder-slate-500 focus:outline-none focus:border-[#FF6B00] duration-150"
+              className="w-full bg-slate-900 border border-white/5 rounded-2xl py-2 pl-4 pr-10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#FF6B00] duration-150"
               disabled={submitting}
             />
           </div>
@@ -222,7 +222,7 @@ export default function CommentSection({
           </button>
         </form>
       ) : (
-        <div className="text-center p-3.5 bg-bg-secondary/50 rounded-2xl border border-white/5 text-[11px] text-text-muted">
+        <div className="text-center p-3.5 bg-slate-900/50 rounded-2xl border border-white/5 text-[11px] text-slate-400">
           Please <span className="text-[#FF6B00] font-bold">Sign In</span> to leave comments and engage in BAZAR360 discussions.
         </div>
       )}

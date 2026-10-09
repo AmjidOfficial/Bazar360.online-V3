@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { CarListing, Dealer } from '../types.ts';
 import { getOptimizedUrl } from '../lib/cloudinaryService';
-import { CENTRAL_FAQS } from '../data/faqs';
 
 /**
  * Next.js-compatible metadata function to dynamically generate OpenGraph and Twitter cards
@@ -15,7 +14,7 @@ export async function generateMetadata({ vehicle, dealer }: { vehicle?: CarListi
   const categoryKeyword = vehicle.fuelType === 'Hybrid' ? 'Hybrid Car' : vehicle.fuelType === 'Electric' ? 'Electric Car' : 'Car';
   const intentPhrase = `Buy ${vehicle.condition} ${categoryKeyword} in ${city}`;
 
-  const finalTitle = `${intentPhrase} | ${vehicle.make} ${vehicle.model} ${vehicle.year} - Bazar360`;
+  const finalTitle = `${intentPhrase} | ${vehicle.make} ${vehicle.model} ${vehicle.year} - Auto Choice`;
   const finalDesc = `Looking to ${intentPhrase}? Browse ${vehicle.title} (${vehicle.year}) in pristine condition for sale. Features: ${vehicle.fuelType}, ${vehicle.transmission} transmission, ${vehicle.mileage} km. Direct WhatsApp connect with zero showroom commission.`;
   
   const baseImage = vehicle.imageUrl || (vehicle.images && vehicle.images[0]) || 'https://bazar360.online/favicon.png';
@@ -29,7 +28,7 @@ export async function generateMetadata({ vehicle, dealer }: { vehicle?: CarListi
       title: finalTitle,
       description: finalDesc,
       url: `https://bazar360.online/vehicle/${vehicle.id}`,
-      siteName: 'Bazar360',
+      siteName: 'Auto Choice',
       images: [
         {
           url: ogImage,
@@ -175,19 +174,37 @@ export const SEO: React.FC<SEOProps> = ({ type, vehicle, dealer, dealers, listin
       ]
     });
 
-    // 2. FAQ Schema (Entity & LSI Keyword Rich - Dynamic from Central Source)
+    // 2. FAQ Schema (Entity & LSI Keyword Rich)
     schemas.push({
       "@context": "https://schema.org",
       "@type": "FAQPage",
       "@id": "https://bazar360.online/#faq",
-      "mainEntity": CENTRAL_FAQS.map(faq => ({
-        "@type": "Question",
-        "name": faq.questionEn,
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": faq.answerEn
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How do I purchase verified cars in Peshawar via Bazar360?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Browse our certified partner showrooms on Bazar360, check official inspection PDFs, request high-definition media portfolios, and initiate WhatsApp bargains directly with the showroom owner without intermediate commission fees."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the dynamic bargain engine on Bazar360?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The dynamic bargain system allows registered buyers and sellers to negotiate vehicle prices in real-time in Pakistani Rupees (PKR) or United States Dollars (USD) mode, establishing formal leads on the marketplace."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How can dealerships register on Bazar360?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Dealers can register via our Multi-Role Registration Portal, customize their theme branding (Cosmic Slate, Emerald Velvet, Golden Crown, Arctic Bone), generate physical QR code hang-tags, and upload complete stock lists."
+          }
         }
-      }))
+      ]
     });
 
     // 3. Breadcrumb Schema (Paths mapping)
@@ -369,7 +386,7 @@ export const SEO: React.FC<SEOProps> = ({ type, vehicle, dealer, dealers, listin
       meta.setAttribute('content', contentVal);
     };
 
-    let finalTitle = 'Bazar360 - Peshawar\'s Premier Automotive Showroom Partner';
+    let finalTitle = 'Auto Choice - Peshawar\'s Premier Automotive Showroom Partner';
     let finalDesc = 'Find pre-owned cars, verified vehicle listings, and certified hybrid vehicle inventories on Bazar360 Pakistan. Direct dealer WhatsApp connect with zero commission.';
     let finalImage = 'https://bazar360.online/favicon.png';
     let finalUrl = 'https://bazar360.online';
@@ -383,10 +400,9 @@ export const SEO: React.FC<SEOProps> = ({ type, vehicle, dealer, dealers, listin
       const categoryKeyword = vehicle.fuelType === 'Hybrid' ? 'Hybrid Car' : vehicle.fuelType === 'Electric' ? 'Electric Car' : 'Car';
       const intentPhrase = `Buy ${vehicle.condition} ${categoryKeyword} in ${city}`;
       
-      finalTitle = `${intentPhrase} | ${vehicle.make} ${vehicle.model} ${vehicle.year} - Bazar360`;
+      finalTitle = `${intentPhrase} | ${vehicle.make} ${vehicle.model} ${vehicle.year} - Auto Choice`;
       finalDesc = `Looking to ${intentPhrase}? Browse ${vehicle.title} (${vehicle.year}) in pristine condition for sale. Features: ${vehicle.fuelType}, ${vehicle.transmission} transmission, ${vehicle.mileage} km. Direct WhatsApp connect with zero showroom commission.`;
-      const rawVehImg = vehicle.imageUrl || (vehicle.images && vehicle.images[0]) || '';
-      finalImage = rawVehImg.startsWith('http') ? rawVehImg : `https://bazar360.online/${rawVehImg.replace(/^\//, '')}`;
+      finalImage = vehicle.imageUrl || (vehicle.images && vehicle.images[0]) || 'https://bazar360.online/favicon.png';
       finalUrl = `https://bazar360.online/vehicle/${vehicle.id}`;
 
       document.title = finalTitle;
@@ -402,10 +418,9 @@ export const SEO: React.FC<SEOProps> = ({ type, vehicle, dealer, dealers, listin
       // High-intent localized showroom keyword
       const intentPhrase = `Buy Used Cars in ${city} from ${dealer.name}`;
       
-      finalTitle = `${dealer.name} - Verified Showroom | Bazar360 Online`;
+      finalTitle = `${intentPhrase} | Verified Showroom Hub - Auto Choice`;
       finalDesc = `Looking to ${intentPhrase}? Explore their collection of verified pre-owned cars, hybrid vehicle inventories, and premium vehicles. Direct dealer connection and instant WhatsApp bargains on Bazar360.`;
-      const rawLogoImg = dealer.logoUrl || dealer.logo || dealer.avatarUrl || dealer.coverImage || '';
-      finalImage = rawLogoImg.startsWith('http') ? rawLogoImg : `https://bazar360.online/${rawLogoImg.replace(/^\//, '')}`;
+      finalImage = dealer.coverImage || dealer.avatarUrl || 'https://bazar360.online/favicon.png';
       finalUrl = `https://bazar360.online/dealers/${dealer.id}`;
 
       document.title = finalTitle;
@@ -421,10 +436,9 @@ export const SEO: React.FC<SEOProps> = ({ type, vehicle, dealer, dealers, listin
       const categoryKeyword = vehicle.fuelType === 'Hybrid' ? 'Hybrid Car' : 'Car';
       const intentPhrase = `Buy ${vehicle.condition} ${categoryKeyword} in ${city} at ${dealer.name}`;
       
-      finalTitle = `${intentPhrase} | ${vehicle.title} - Bazar360`;
+      finalTitle = `${intentPhrase} | ${vehicle.title} - Auto Choice`;
       finalDesc = `Get the best deal to ${intentPhrase}! Available for PKR ${vehicle.price.toLocaleString()} on Bazar360. Check specifications, verify documents, and initiate WhatsApp negotiations directly.`;
-      const rawBothImg = vehicle.imageUrl || (vehicle.images && vehicle.images[0]) || dealer.logoUrl || dealer.logo || '';
-      finalImage = rawBothImg.startsWith('http') ? rawBothImg : `https://bazar360.online/${rawBothImg.replace(/^\//, '')}`;
+      finalImage = vehicle.imageUrl || (vehicle.images && vehicle.images[0]) || dealer.coverImage || 'https://bazar360.online/favicon.png';
       finalUrl = `https://bazar360.online/dealers/${dealer.id}/listings/${vehicle.id}`;
 
       document.title = finalTitle;
@@ -449,7 +463,7 @@ export const SEO: React.FC<SEOProps> = ({ type, vehicle, dealer, dealers, listin
     setMetaTag('property', 'og:image:type', 'image/jpeg', 'seo-og-image-type');
     setMetaTag('property', 'og:url', finalUrl, 'seo-og-url');
     setMetaTag('property', 'og:type', 'website', 'seo-og-type');
-    setMetaTag('property', 'og:site_name', 'Bazar360', 'seo-og-site');
+    setMetaTag('property', 'og:site_name', 'Auto Choice', 'seo-og-site');
     setMetaTag('property', 'og:locale', 'en_US', 'seo-og-locale');
  
     // Inject Twitter Card Meta Tags

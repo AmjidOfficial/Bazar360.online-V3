@@ -88,6 +88,7 @@ export default function ContactDrawer({ isOpen, onClose, lang, initialMessage }:
       userPhone: phone,
       userEmail: 'support-desk@bazar360.online',
       details: message,
+      status: 'New',
       metadata: {
         source: 'Contact Drawer 24/7',
         device: typeof window !== 'undefined' ? window.navigator.userAgent : 'Unknown'

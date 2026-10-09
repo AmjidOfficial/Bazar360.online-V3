@@ -97,24 +97,24 @@ export default function SocialFeedView({
               Live Feed
             </span>
             <span className="flex h-2 w-2 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--color-accent-main)] opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--color-accent-main)]"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
-            <span className="text-[10px] text-text-muted font-mono uppercase tracking-wider">
+            <span className="text-[10px] text-slate-400 font-mono uppercase tracking-wider">
               {posts.length} Posts Active
             </span>
           </div>
 
-          <h1 className="text-xl md:text-3xl font-black text-[var(--color-text-header)] tracking-tight font-display">
+          <h1 className="text-xl md:text-3xl font-black text-white tracking-tight font-display">
             BAZAR360 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FE805D] to-orange-500">COMMUNITY</span> HUB
           </h1>
-          <p className="text-xs md:text-sm text-text-muted leading-relaxed font-sans">
+          <p className="text-xs md:text-sm text-slate-400 leading-relaxed font-sans">
             Connect directly with verified automotive dealerships, elite showroom owners, and thousands of petrolheads across Pakistan. Discuss, announce, and engage instantly.
           </p>
         </div>
 
         {/* Quick info circle */}
-        <div className="hidden lg:flex items-center justify-center w-20 h-20 rounded-full border border-white/5 bg-bg-secondary/40 shrink-0">
+        <div className="hidden lg:flex items-center justify-center w-20 h-20 rounded-full border border-white/5 bg-slate-900/40 shrink-0">
           <Compass size={32} className="text-[#FF6B00] animate-spin-slow" />
         </div>
       </div>
@@ -133,10 +133,10 @@ export default function SocialFeedView({
           className="bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-transparent border border-orange-500/20 rounded-3xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4"
         >
           <div className="space-y-1 text-center sm:text-left">
-            <h4 className="text-xs md:text-sm font-black uppercase text-[var(--color-text-header)] tracking-wider">
+            <h4 className="text-xs md:text-sm font-black uppercase text-white tracking-wider">
               Join the Bazar360 Community Discussion
             </h4>
-            <p className="text-[11px] text-text-muted">
+            <p className="text-[11px] text-slate-400">
               Sign in to share vehicle updates, announce dealership inventory, leave comments, and love posts.
             </p>
           </div>
@@ -158,26 +158,26 @@ export default function SocialFeedView({
       >
         {/* Search input field */}
         <div className="relative w-full sm:w-64">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
           <input
             id="community-search-input"
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search posts or users..."
-            className="w-full bg-bg-secondary border border-white/5 rounded-xl pl-9 pr-4 py-2 text-xs text-[var(--color-text-header)] placeholder-slate-500 focus:outline-none focus:border-[#FF6B00] duration-150"
+            className="w-full bg-slate-900 border border-white/5 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#FF6B00] duration-150"
           />
         </div>
 
         {/* Segmented Filter Buttons */}
-        <div className="flex bg-bg-primary/40 p-1 rounded-xl border border-white/5 w-full sm:w-auto" id="community-filter-segments">
+        <div className="flex bg-slate-950/40 p-1 rounded-xl border border-white/5 w-full sm:w-auto" id="community-filter-segments">
           <button
             id="filter-all-btn"
             onClick={() => setActiveFilter('ALL')}
             className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-mono font-black uppercase tracking-wider transition-all duration-150 cursor-pointer ${
               activeFilter === 'ALL'
-                ? 'bg-bg-tertiary text-[var(--color-text-header)] font-bold'
-                : 'text-text-muted hover:text-[var(--color-text-header)]'
+                ? 'bg-slate-800 text-white font-bold'
+                : 'text-slate-400 hover:text-white'
             }`}
             title="Show all posts"
           >
@@ -190,8 +190,8 @@ export default function SocialFeedView({
             onClick={() => setActiveFilter('SHOWROOMS')}
             className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-mono font-black uppercase tracking-wider transition-all duration-150 cursor-pointer ${
               activeFilter === 'SHOWROOMS'
-                ? 'bg-[var(--color-accent-main)]/10 text-[var(--color-accent-main)] border border-[var(--color-accent-main)]/20 font-bold'
-                : 'text-text-muted hover:text-[var(--color-text-header)]'
+                ? 'bg-[#38BDF8]/10 text-[#38BDF8] border border-[#38BDF8]/20 font-bold'
+                : 'text-slate-400 hover:text-white'
             }`}
             title="Show showrooms floor announcements"
           >
@@ -206,7 +206,7 @@ export default function SocialFeedView({
               className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-mono font-black uppercase tracking-wider transition-all duration-150 cursor-pointer ${
                 activeFilter === 'MINE'
                   ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20 font-bold'
-                  : 'text-text-muted hover:text-[var(--color-text-header)]'
+                  : 'text-slate-400 hover:text-white'
               }`}
               title="Show my posts only"
             >
@@ -225,17 +225,17 @@ export default function SocialFeedView({
             {[1, 2, 3].map((n) => (
               <div key={n} className="bg-[var(--color-bg-secondary)] border border-white/5 rounded-3xl p-5 space-y-4 animate-pulse">
                 <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 bg-bg-tertiary rounded-full" />
+                  <div className="w-11 h-11 bg-slate-800 rounded-full" />
                   <div className="space-y-2 flex-1">
-                    <div className="h-3.5 bg-bg-tertiary rounded w-1/4" />
-                    <div className="h-2.5 bg-bg-tertiary rounded w-1/6" />
+                    <div className="h-3.5 bg-slate-800 rounded w-1/4" />
+                    <div className="h-2.5 bg-slate-800 rounded w-1/6" />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <div className="h-3 bg-bg-tertiary rounded w-full" />
-                  <div className="h-3 bg-bg-tertiary rounded w-5/6" />
+                  <div className="h-3 bg-slate-800 rounded w-full" />
+                  <div className="h-3 bg-slate-800 rounded w-5/6" />
                 </div>
-                <div className="h-44 bg-bg-tertiary rounded-2xl w-full" />
+                <div className="h-44 bg-slate-800 rounded-2xl w-full" />
               </div>
             ))}
           </div>
@@ -245,16 +245,16 @@ export default function SocialFeedView({
             <button
               id="retry-feed-btn"
               onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-red-500 hover:bg-red-600 text-[var(--color-text-header)] font-mono text-[10px] font-black uppercase tracking-wider rounded-xl cursor-pointer"
+              className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-mono text-[10px] font-black uppercase tracking-wider rounded-xl cursor-pointer"
             >
               Retry Server Handshake
             </button>
           </div>
         ) : filteredPosts.length === 0 ? (
-          <div className="text-center p-12 bg-bg-secondary/30 rounded-3xl border border-white/5 space-y-2 flex flex-col items-center justify-center" id="community-empty-state">
+          <div className="text-center p-12 bg-slate-900/30 rounded-3xl border border-white/5 space-y-2 flex flex-col items-center justify-center" id="community-empty-state">
             <MessageSquare size={32} className="text-slate-600" />
-            <h4 className="text-sm font-black text-text-muted uppercase tracking-wider">No community posts match your criteria</h4>
-            <p className="text-xs text-text-muted font-sans max-w-sm">
+            <h4 className="text-sm font-black text-slate-300 uppercase tracking-wider">No community posts match your criteria</h4>
+            <p className="text-xs text-slate-500 font-sans max-w-sm">
               Be the first to create a post! Or change your filter segment / search term to view other announcements.
             </p>
           </div>

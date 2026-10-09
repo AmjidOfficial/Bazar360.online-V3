@@ -50,13 +50,13 @@ export default function VehicleCarousel({ images, title }: VehicleCarouselProps)
         <>
           <button
             onClick={(e) => { e.stopPropagation(); prev(); }}
-            className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 text-[var(--color-text-header)] opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
+            className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
           >
             <ChevronLeft size={20} />
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); next(); }}
-            className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 text-[var(--color-text-header)] opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
+            className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
           >
             <ChevronRight size={20} />
           </button>
@@ -65,7 +65,7 @@ export default function VehicleCarousel({ images, title }: VehicleCarouselProps)
       
       <button
         onClick={(e) => { e.stopPropagation(); setIsLightboxOpen(true); }}
-        className="absolute bottom-4 right-4 p-2 rounded-full bg-black/50 text-[var(--color-text-header)] opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
+        className="absolute bottom-4 right-4 p-2 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
       >
         <Maximize2 size={16} />
       </button>
@@ -82,7 +82,7 @@ export default function VehicleCarousel({ images, title }: VehicleCarouselProps)
           >
             <button
               onClick={() => setIsLightboxOpen(false)}
-              className="absolute top-4 right-4 p-2 text-[var(--color-text-header)] hover:text-gray-300"
+              className="absolute top-4 right-4 p-2 text-white hover:text-gray-300"
             >
               <X size={32} />
             </button>

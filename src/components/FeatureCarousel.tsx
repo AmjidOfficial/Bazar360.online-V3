@@ -45,16 +45,28 @@ export default function FeatureCarousel({ lang }: FeatureCarouselProps) {
           return (
             <div
               key={feat.id}
-              className="flex items-start gap-4 p-5 rounded-3xl w-[260px] sm:w-auto transition-all duration-300 border bg-white border-slate-100 shadow-[0_8px_30px_rgb(241,245,249,0.5)] hover:border-orange-500/30 hover:translate-y-[-2px]"
+              className={`flex items-start gap-4 p-5 rounded-3xl w-[260px] sm:w-auto transition-all duration-300 border ${
+                theme === 'dark'
+                  ? 'bg-gradient-to-br from-white/[0.03] to-white/[0.01] backdrop-blur-md border-white/5 shadow-[rgba(0,0,0,0.2)_0px_8px_30px]'
+                  : 'bg-white border-slate-100 shadow-[0_8px_30px_rgb(241,245,249,0.5)]'
+              } hover:border-orange-500/30 hover:translate-y-[-2px]`}
             >
-              <div className="p-3 rounded-2xl bg-slate-50 text-slate-800">
+              <div className={`p-3 rounded-2xl ${
+                theme === 'dark' 
+                  ? 'bg-white/[0.04] text-white' 
+                  : 'bg-slate-50 text-slate-800'
+              }`}>
                 <Icon size={20} className="stroke-[1.5]" />
               </div>
               <div className="space-y-1">
-                <h4 className="text-xs font-bold font-mono tracking-wide uppercase text-slate-900">
+                <h4 className={`text-xs font-bold font-mono tracking-wide uppercase ${
+                  theme === 'dark' ? 'text-white' : 'text-slate-900'
+                }`}>
                   {feat.title}
                 </h4>
-                <p className="text-[10px] font-sans text-slate-500">
+                <p className={`text-[10px] font-sans ${
+                  theme === 'dark' ? 'text-gray-400' : 'text-slate-500'
+                }`}>
                   {feat.desc}
                 </p>
               </div>

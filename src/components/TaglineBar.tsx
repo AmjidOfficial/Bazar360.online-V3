@@ -25,10 +25,10 @@ const TAGLINE_CATEGORIES = [
     category: "Focused on Convenience & Speed",
     tagline: "Browse, Tap, Buy - Instant WhatsApp Dealer Connection.",
     sub: "Zero Friction Showroom Directory & Post Ads in 60 Seconds.",
-    color: "bg-[var(--color-accent-main)]/5 dark:bg-[var(--color-accent-main)]/10",
-    borderColor: "border-[var(--color-accent-main)]/30",
-    badgeColor: "bg-[var(--color-accent-main)]/10 text-[var(--color-accent-main)] border-[var(--color-accent-main)]/25",
-    icon: <Zap size={16} className="text-[var(--color-accent-main)] animate-bounce" />
+    color: "bg-emerald-500/5 dark:bg-emerald-500/10",
+    borderColor: "border-emerald-500/30",
+    badgeColor: "bg-emerald-500/10 text-emerald-500 border-emerald-500/25",
+    icon: <Zap size={16} className="text-emerald-500 animate-bounce" />
   },
   {
     category: "Short & Impactful",
@@ -66,7 +66,7 @@ export default function TaglineBar({ lang }: { lang: 'en' | 'ur' }) {
         
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-start gap-4">
-            <div className={`p-2.5 bg-white dark:bg-bg-primary/80 border ${item.borderColor} rounded-xl shrink-0 mt-0.5 shadow-sm`}>
+            <div className={`p-2.5 bg-white dark:bg-slate-950/80 border ${item.borderColor} rounded-xl shrink-0 mt-0.5 shadow-sm`}>
               {item.icon}
             </div>
             

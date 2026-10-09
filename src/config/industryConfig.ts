@@ -7,7 +7,7 @@ import { IndustryConfig } from '../types';
  */
 export const BAZAR360_INDUSTRY_CONFIG: IndustryConfig = {
   activeIndustry: 'Automotive', // 'Automotive' | 'Footwear' | 'Apparel'
-  industryName: 'Bazar360',
+  industryName: 'Auto Choice',
   slogan: 'To buy and Sell New and Used Cars, Jeeps and SUVs',
   heroBadge: '★ ENTERPRISE AUTOMOTIVE PLATFORM',
 };

@@ -140,10 +140,10 @@ export default function SocialFeedCard({
         return 'bg-red-500/15 text-red-500 border border-red-500/35';
       case 'Showroom Owner':
       case 'Dealer':
-        return 'bg-[var(--color-accent-main)]/15 text-[var(--color-accent-main)] border border-[var(--color-accent-main)]/35';
+        return 'bg-[#38BDF8]/15 text-[#38BDF8] border border-[#38BDF8]/35';
       case 'Sales Rep':
       case 'Sales Representative':
-        return 'bg-[var(--color-accent-main)]/15 text-[var(--color-accent-main)] border border-[var(--color-accent-main)]/35';
+        return 'bg-emerald-500/15 text-emerald-500 border border-emerald-500/35';
       case 'Private Seller':
         return 'bg-amber-500/15 text-amber-500 border border-amber-500/35';
       default:
@@ -250,15 +250,15 @@ export default function SocialFeedCard({
           <div
             id={`showroom-link-${post.id}`}
             onClick={() => onSelectShowroom && onSelectShowroom(post.showroomId!)}
-            className="flex items-center justify-between p-3 rounded-2xl bg-[var(--color-accent-main)]/5 hover:bg-[var(--color-accent-main)]/10 border border-[var(--color-accent-main)]/20 cursor-pointer group transition-all"
+            className="flex items-center justify-between p-3 rounded-2xl bg-[#38BDF8]/5 hover:bg-[#38BDF8]/10 border border-[#38BDF8]/20 cursor-pointer group transition-all"
           >
-            <div className="flex items-center gap-2 text-[var(--color-accent-main)]">
+            <div className="flex items-center gap-2 text-[#38BDF8]">
               <Store size={14} className="animate-pulse" />
               <span className="text-[10px] font-mono font-black uppercase tracking-wider">
                 Official Dealership Showcase Announcement
               </span>
             </div>
-            <div className="flex items-center gap-0.5 text-xs text-[var(--color-accent-main)] font-bold group-hover:translate-x-0.5 duration-150">
+            <div className="flex items-center gap-0.5 text-xs text-[#38BDF8] font-bold group-hover:translate-x-0.5 duration-150">
               <span className="text-[10px] font-mono font-black">View Showroom</span>
               <ArrowUpRight size={12} />
             </div>
@@ -270,7 +270,7 @@ export default function SocialFeedCard({
           <div className="space-y-2 w-full">
             {/* If there is only one file, render it full size, otherwise render a multi-media grid */}
             {post.mediaUrls.length === 1 ? (
-              <div className="relative rounded-2xl overflow-hidden border border-[var(--color-border-main)] bg-black/5 dark:bg-bg-secondary aspect-video shrink-0 shadow-inner group/media">
+              <div className="relative rounded-2xl overflow-hidden border border-[var(--color-border-main)] bg-black/5 dark:bg-slate-900 aspect-video shrink-0 shadow-inner group/media">
                 {post.mediaUrls[0].match(/\.(mp4|webm|ogg|mov)$/i) || post.type === 'VIDEO' ? (
                   <video src={post.mediaUrls[0]} controls playsInline preload="metadata" className="w-full h-full object-cover" />
                 ) : (
@@ -282,7 +282,7 @@ export default function SocialFeedCard({
                 {post.mediaUrls.map((url: string, index: number) => {
                   const isVideo = url.match(/\.(mp4|webm|ogg|mov)$/i);
                   return (
-                    <div key={url} className="relative rounded-xl overflow-hidden border border-[var(--color-border-main)] bg-black/5 dark:bg-bg-secondary aspect-video shrink-0 shadow-inner group/media">
+                    <div key={url} className="relative rounded-xl overflow-hidden border border-[var(--color-border-main)] bg-black/5 dark:bg-slate-900 aspect-video shrink-0 shadow-inner group/media">
                       {isVideo ? (
                         <video src={url} controls playsInline preload="metadata" className="w-full h-full object-cover" />
                       ) : (
@@ -295,7 +295,7 @@ export default function SocialFeedCard({
             )}
           </div>
         ) : post.mediaUrl ? (
-          <div className="relative rounded-2xl overflow-hidden border border-[var(--color-border-main)] bg-black/5 dark:bg-bg-secondary aspect-video shrink-0 shadow-inner group/media" id={`social-media-${post.id}`}>
+          <div className="relative rounded-2xl overflow-hidden border border-[var(--color-border-main)] bg-black/5 dark:bg-slate-900 aspect-video shrink-0 shadow-inner group/media" id={`social-media-${post.id}`}>
             {post.type === 'VIDEO' || post.mediaUrl.match(/\.(mp4|webm|ogg|mov)$/i) ? (
               <video
                 src={post.mediaUrl}
@@ -319,7 +319,7 @@ export default function SocialFeedCard({
       </div>
 
       {/* CARD INTERACTION ACTIONS BAR */}
-      <div className="px-5 py-3.5 border-t border-[var(--color-border-main)] bg-black/5 dark:bg-black/5 dark:bg-bg-secondary/20 flex items-center justify-between gap-2 text-[var(--color-text-muted)] font-mono text-[11px]" id={`social-actions-${post.id}`}>
+      <div className="px-5 py-3.5 border-t border-[var(--color-border-main)] bg-black/5 dark:bg-black/5 dark:bg-slate-900/20 flex items-center justify-between gap-2 text-[var(--color-text-muted)] font-mono text-[11px]" id={`social-actions-${post.id}`}>
         <div className="flex items-center gap-4">
           {/* A. Love/Like Button */}
           <button
@@ -341,7 +341,7 @@ export default function SocialFeedCard({
             id={`comment-toggle-btn-${post.id}`}
             onClick={() => setShowComments(!showComments)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl hover:text-sky-400 hover:bg-white/5 border border-transparent hover:border-[var(--color-border-main)] transition-all cursor-pointer select-none ${
-              showComments ? 'text-[var(--color-accent-main)] bg-[var(--color-accent-main)]/10 border-[var(--color-accent-main)]/20 font-bold' : ''
+              showComments ? 'text-[#38BDF8] bg-[#38BDF8]/10 border-[#38BDF8]/20 font-bold' : ''
             }`}
             title="Toggle comments drawer"
           >

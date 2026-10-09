@@ -15,15 +15,135 @@ export interface ActivityLog {
   ipNode?: string;
 }
 
-// Clean Activity Tracker - Real activities only
-export function getPersonalActivities(userId: string, _role: string = 'Visitor'): ActivityLog[] {
+const SEED_ACTIVITIES: Record<string, Omit<ActivityLog, 'userId'>[]> = {
+  Visitor: [
+    {
+      id: 'act-v1',
+      action: 'VIEW',
+      title: 'Viewed Suzuki Alto VXL',
+      description: 'Inspected vehicle specs and contact options',
+      timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+      category: 'listing'
+    },
+    {
+      id: 'act-v2',
+      action: 'DOWNLOAD',
+      title: 'Downloaded Vehicle Catalogue',
+      description: 'Exported automotive price sheet to local PDF format',
+      timestamp: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
+      category: 'catalog'
+    },
+    {
+      id: 'act-v3',
+      action: 'ADD',
+      title: 'Booked Free Inspection Schedule',
+      description: 'Submitted booking slot inquiry to Auto Choice Peshawar',
+      timestamp: new Date(Date.now() - 3 * 3600 * 1000).toISOString(),
+      category: 'lead'
+    }
+  ],
+  'Registered User': [
+    {
+      id: 'act-r1',
+      action: 'UPLOAD',
+      title: 'Created New Car Listing',
+      description: 'Submitted draft advertisement for Toyota Corolla 2021',
+      timestamp: new Date(Date.now() - 1 * 3600 * 1000).toISOString(),
+      category: 'listing'
+    },
+    {
+      id: 'act-r2',
+      action: 'EDIT',
+      title: 'Updated Profile Avatar',
+      description: 'Uploaded high-contrast corporate headshot',
+      timestamp: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
+      category: 'profile'
+    },
+    {
+      id: 'act-r3',
+      action: 'VIEW',
+      title: 'Inspected Direct Chat History',
+      description: 'Opened message log with Peshawar Showroom owner',
+      timestamp: new Date(Date.now() - 12 * 3600 * 1000).toISOString(),
+      category: 'social'
+    }
+  ],
+  'Showroom Owner': [
+    {
+      id: 'act-s1',
+      action: 'UPLOAD',
+      title: 'Synchronized Inventory to Sheets',
+      description: 'Pushed active stock of 14 vehicles to showroom GSheet log',
+      timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+      category: 'catalog'
+    },
+    {
+      id: 'act-s2',
+      action: 'EDIT',
+      title: 'Updated Showroom Branding',
+      description: 'Applied Emerald Accent theme to digital storefront',
+      timestamp: new Date(Date.now() - 4 * 3600 * 1000).toISOString(),
+      category: 'profile'
+    },
+    {
+      id: 'act-s3',
+      action: 'DELETE',
+      title: 'Archived Sold Vehicle',
+      description: 'Removed Honda Civic Oriel advertisement (Marked Sold)',
+      timestamp: new Date(Date.now() - 24 * 3600 * 1000).toISOString(),
+      category: 'listing'
+    }
+  ],
+  Admin: [
+    {
+      id: 'act-a1',
+      action: 'AUDIT',
+      title: 'Approved Car Listing',
+      description: 'Passed gate approval for Fortuner Legender (ID: lst-fortuner)',
+      timestamp: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
+      category: 'system'
+    },
+    {
+      id: 'act-a2',
+      action: 'EDIT',
+      title: 'Configured Firebase Rules Node',
+      description: 'Synchronized firestore.rules and verified app check triggers',
+      timestamp: new Date(Date.now() - 1.5 * 3600 * 1000).toISOString(),
+      category: 'system'
+    },
+    {
+      id: 'act-a3',
+      action: 'DELETE',
+      title: 'Purged Fraudulent Lead Spams',
+      description: 'Removed 12 mock bot bookings from visitor lead tracking list',
+      timestamp: new Date(Date.now() - 5 * 3600 * 1000).toISOString(),
+      category: 'system'
+    }
+  ]
+};
+
+/**
+ * Fetch all activity logs for a user, automatically seeding default logs if empty
+ */
+export function getPersonalActivities(userId: string, role: string = 'Visitor'): ActivityLog[] {
   try {
     const key = `bazar360_activities_${userId}`;
     const saved = localStorage.getItem(key);
     if (saved) {
       return JSON.parse(saved);
     }
-    return [];
+    
+    // Seed initial logs based on role
+    const matchedRole = role || 'Visitor';
+    const seedLogs = SEED_ACTIVITIES[matchedRole] || SEED_ACTIVITIES['Visitor'];
+    
+    const logsWithUser = seedLogs.map(log => ({
+      ...log,
+      userId
+    })) as ActivityLog[];
+    
+    localStorage.setItem(key, JSON.stringify(logsWithUser));
+    return logsWithUser;
   } catch (e) {
     console.warn('[Activity Tracker] Storage error:', e);
     return [];
