@@ -50,7 +50,7 @@ export default function LeadCaptureForm({ vehicleId, vehicleTitle, showroomOwner
         createdAt: new Date().toISOString()
       });
       
-      console.log('Inquiry submitted successfully!');
+      toast.success('Inquiry submitted successfully! The verified showroom partner will contact you shortly.');
       reset();
     } catch (err) {
       toast.error('Failed to submit inquiry.');

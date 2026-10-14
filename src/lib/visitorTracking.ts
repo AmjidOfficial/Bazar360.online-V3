@@ -267,3 +267,29 @@ export async function logVisitorAction(
     console.warn('[VisitorTracking] Log failed:', err);
   }
 }
+
+export async function trackSearchQuery(query: string): Promise<void> {
+  if (!query || !query.trim()) return;
+  try {
+    const visitorId = typeof localStorage !== 'undefined' ? localStorage.getItem('bazar360_visitor_id') || '' : '';
+    if (visitorId) {
+      await logVisitorAction(visitorId, 'SEARCH', { query: query.trim() });
+    }
+  } catch (e) {
+    console.warn('[VisitorTracking] trackSearchQuery bypass:', e);
+  }
+}
+
+export async function trackVehicleView(vehicleId: string, title?: string): Promise<void> {
+  if (!vehicleId) return;
+  try {
+    const visitorId = typeof localStorage !== 'undefined' ? localStorage.getItem('bazar360_visitor_id') || '' : '';
+    if (visitorId) {
+      await logVisitorAction(visitorId, 'VEHICLE_VIEW', { vehicleId, title: title || 'Vehicle' });
+    }
+  } catch (e) {
+    console.warn('[VisitorTracking] trackVehicleView bypass:', e);
+  }
+}
+
+

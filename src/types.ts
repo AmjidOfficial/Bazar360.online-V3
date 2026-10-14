@@ -93,6 +93,9 @@ export interface CarListing {
   isSold?: boolean;
   isPaused?: boolean;
   isArchived?: boolean;
+  isVerified?: boolean;
+  city?: string;
+  inspectionScore?: number;
   status?: 'Available' | 'Reserved' | 'Sold';
 
   cloudinaryPublicId?: string;

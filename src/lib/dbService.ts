@@ -427,7 +427,26 @@ function cleanAndDeduplicateListings(listings: CarListing[]): CarListing[] {
   return cleaned;
 }
 
-export async function dbFetchListings(): Promise<CarListing[]> {
+export function isAllowedListingId(id?: string): boolean {
+  if (!id) return false;
+  const lower = id.toLowerCase();
+  return !lower.includes('dummy') && !lower.includes('fake') && !lower.includes('test-sample');
+}
+
+export function isVehicleEligible(car?: CarListing | null): boolean {
+  if (!car || !car.id) return false;
+  if (!isAllowedListingId(car.id)) return false;
+  const titleLower = (car.title || '').toLowerCase();
+  if (titleLower.includes('dummy test') || titleLower.includes('sample fake')) return false;
+  return true;
+}
+
+export function getEligibleListings(listings?: CarListing[] | null): CarListing[] {
+  if (!listings || !Array.isArray(listings)) return [];
+  return cleanAndDeduplicateListings(listings.filter(c => isVehicleEligible(c)));
+}
+
+export async function dbFetchListings(forceRefresh: boolean = false): Promise<CarListing[]> {
   let customLocal: CarListing[] = [];
   try {
     const raw = localStorage.getItem('bazar360_custom_listings');
@@ -438,7 +457,7 @@ export async function dbFetchListings(): Promise<CarListing[]> {
     console.warn('[LocalStorage] Could not parse custom listings:', e);
   }
 
-  if (cachedListings && cachedListings.length > 0) {
+  if (!forceRefresh && cachedListings && cachedListings.length > 0) {
     if (customLocal.length > 0) {
       const existingIds = new Set(cachedListings.map(l => l.id));
       for (const cl of customLocal) {
@@ -983,6 +1002,7 @@ export async function dbFetchLeads(): Promise<Lead[]> {
         city: data.city || '',
         details: data.details || '',
         metadata: data.metadata || {},
+        status: data.status || 'new',
         createdAt: data.createdAt || new Date().toISOString()
       });
     });

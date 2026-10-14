@@ -57,3 +57,6 @@ export const INITIAL_DEALERS: Dealer[] = [
 
 // Pure Production Array: No mock / dummy vehicles. Only actual live inventory from Firestore & Cloudinary.
 export const INITIAL_LISTINGS: CarListing[] = [];
+
+export const INITIAL_REVIEWS: Record<string, import('./types').ReviewItem[]> = {};
+

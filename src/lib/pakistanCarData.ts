@@ -43,3 +43,20 @@ export const CAR_MODELS: Record<string, string[]> = {
   'BAIC': ['BJ40 Plus', 'Senova X25', 'D20'],
   'FAW': ['V2', 'X-PV', 'Carrier']
 };
+
+export function getMakesForType(vehicleType?: string): string[] {
+  // Return available brands in Pakistan
+  return PAKISTAN_BRANDS;
+}
+
+export function getModelsForMake(vehicleType?: string, make?: string): string[] {
+  if (!make || make === 'All') return [];
+  return CAR_MODELS[make] || [];
+}
+
+export function getVariantsForModel(model?: string): string[] {
+  if (!model || model === 'All') return [];
+  // Return common trim variants
+  return ['Base', 'Standard', 'GLi', 'XLi', 'Grande', 'Altis', 'VTi', 'Oriel', 'RS', 'Turbo', 'Pro', 'Max', 'Executive', 'Legender'];
+}
+

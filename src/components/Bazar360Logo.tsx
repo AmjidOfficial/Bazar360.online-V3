@@ -6,6 +6,8 @@ export interface Bazar360LogoProps {
   theme?: 'dark' | 'light' | 'auto';
   className?: string;
   showTagline?: boolean;
+  showText?: boolean;
+  themeMode?: 'dark' | 'light' | 'auto';
   size?: 'sm' | 'md' | 'lg' | 'xl';
   onClick?: () => void;
 }
@@ -96,6 +98,8 @@ export default function Bazar360Logo({
   theme = 'dark',
   className = '',
   showTagline = true,
+  showText = true,
+  themeMode,
   size = 'md',
   onClick,
 }: Bazar360LogoProps) {
@@ -127,7 +131,8 @@ export default function Bazar360Logo({
     },
   }[size];
 
-  const isDark = theme === 'dark' || theme === 'auto';
+  const activeTheme = themeMode || theme;
+  const isDark = activeTheme === 'dark' || activeTheme === 'auto';
   const textColor = isDark ? 'text-white' : 'text-[#0B132B]';
 
   // 1. Icon Only Variant (Emblem 3D Infinity Loop)
@@ -242,3 +247,53 @@ export default function Bazar360Logo({
     </div>
   );
 }
+
+export { Bazar360Logo };
+
+export interface AutoChoiceLogoProps {
+  className?: string;
+  showText?: boolean;
+  themeMode?: 'dark' | 'light' | 'auto';
+  onClick?: () => void;
+}
+
+export function AutoChoiceLogo({
+  className = '',
+  showText = true,
+  themeMode = 'dark',
+  onClick,
+}: AutoChoiceLogoProps) {
+  const isDark = themeMode === 'dark' || themeMode === 'auto';
+
+  return (
+    <div
+      onClick={onClick}
+      className={`inline-flex items-center gap-2.5 select-none ${onClick ? 'cursor-pointer' : ''} ${className}`}
+    >
+      <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden border border-sky-400/30 bg-slate-900 shadow-md flex items-center justify-center shrink-0">
+        <img
+          src="/auto_choice_logo_1781509565476.jpg"
+          alt="Auto Choice Logo"
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            const target = e.currentTarget;
+            target.src = '/auto_choice_official_logo.jpg';
+          }}
+        />
+      </div>
+
+      {showText && (
+        <div className="flex flex-col text-left leading-tight">
+          <div className="flex items-center gap-1.5 font-black text-base sm:text-lg tracking-tight">
+            <span className={isDark ? 'text-white' : 'text-slate-900'}>AUTO</span>
+            <span className="text-sky-400">CHOICE</span>
+          </div>
+          <span className="text-[9px] font-mono font-bold tracking-widest uppercase text-sky-400/90">
+            The Right Choice
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+

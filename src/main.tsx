@@ -39,9 +39,7 @@ if (rootElement) {
     <StrictMode>
       <ErrorBoundary>
         <HelmetProvider>
-          <AuthProvider>
-            <App />
-          </AuthProvider>
+          <App />
         </HelmetProvider>
       </ErrorBoundary>
     </StrictMode>

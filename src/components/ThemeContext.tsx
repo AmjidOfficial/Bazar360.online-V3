@@ -3,12 +3,13 @@
 
 import React, { createContext, useContext, useEffect } from 'react';
 
-export type ThemeType = 'dark';
+export type ThemeType = 'dark' | 'light';
 export type ThemeClassType = string;
 
 interface ThemeContextType {
   theme: ThemeType;
   currentTheme: ThemeType;
+  resolvedTheme: ThemeType;
   isDark: boolean;
   setTheme: (theme: ThemeType) => void;
   toggleTheme: () => void;
@@ -17,6 +18,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType>({
   theme: 'dark',
   currentTheme: 'dark',
+  resolvedTheme: 'dark',
   isDark: true,
   setTheme: () => {},
   toggleTheme: () => {},
@@ -32,7 +34,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <ThemeContext.Provider value={{ theme: 'dark', currentTheme: 'dark', isDark: true, setTheme: () => {}, toggleTheme: () => {} }}>
+    <ThemeContext.Provider value={{ theme: 'dark', currentTheme: 'dark', resolvedTheme: 'dark', isDark: true, setTheme: () => {}, toggleTheme: () => {} }}>
       {children}
     </ThemeContext.Provider>
   );
